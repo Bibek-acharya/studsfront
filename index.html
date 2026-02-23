@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudSphere - Future Bridge</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons for About Page -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        jakarta: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            800: '#1e40af',
+                            900: '#0f172a',
+                        }
+                    },
+                    animation: {
+                        'marquee': 'scroll-left 40s linear infinite',
+                        'marquee-reverse': 'scroll-right 40s linear infinite',
+                        'shimmer': 'shimmer 1.5s infinite',
+                        'float': 'float 4s ease-in-out infinite',
+                        'fadeInUp': 'fadeInUp 0.8s ease-out forwards',
+                        'scroll': 'scroll 40s linear infinite',
+                    },
+                    keyframes: {
+                        'scroll-left': {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        },
+                        'scroll-right': {
+                            '0%': { transform: 'translateX(-50%)' },
+                            '100%': { transform: 'translateX(0)' },
+                        },
+                        'scroll': {
+                            '0%': { transform: 'translateX(0)' },
+                            '100%': { transform: 'translateX(-50%)' },
+                        },
+                        shimmer: {
+                            '100%': { transform: 'translateX(100%)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-12px)' },
+                        },
+                        fadeInUp: {
+                            'from': { opacity: '0', transform: 'translateY(20px)' },
+                            'to': { opacity: '1', transform: 'translateY(0)' }
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0f172a;
+            scroll-behavior: smooth;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        @keyframes leg-swing-left {
+            0% { transform: rotate(-20deg); }
+            100% { transform: rotate(20deg); }
+        }
+        @keyframes leg-swing-right {
+            0% { transform: rotate(20deg); }
+            100% { transform: rotate(-20deg); }
+        }
+        @keyframes arm-swing-left {
+            0% { transform: rotate(15deg); }
+            100% { transform: rotate(-15deg); }
+        }
+        @keyframes arm-swing-right {
+             0% { transform: rotate(-15deg); }
+            100% { transform: rotate(15deg); }
+        }
+        .leg-left {
+            animation: leg-swing-left 0.8s infinite alternate ease-in-out;
+            transform-origin: 0px -35px; 
+        }
+        .leg-right {
+            animation: leg-swing-right 0.8s infinite alternate ease-in-out;
+            transform-origin: 0px -35px;
+        }
+        .arm-left {
+            animation: arm-swing-left 0.8s infinite alternate ease-in-out;
+            transform-origin: 0px -55px; 
+        }
+        .arm-right {
+            animation: arm-swing-right 0.8s infinite alternate ease-in-out;
+            transform-origin: 0px -55px; 
+        }
+        
+        /* About Page Specific Styles */
+        .image-notch-mask {
+            mask: radial-gradient(circle 48px at calc(100% - 32px) calc(100% - 32px), transparent 99%, #000 100%);
+            -webkit-mask: radial-gradient(circle 48px at calc(100% - 32px) calc(100% - 32px), transparent 99%, #000 100%);
+        }
+        .bg-primary-blue { background-color: #0A61EF; }
+        .bg-mission-transparent { background-color: rgba(22, 163, 74, 0.95); }
+        .bg-pastel-blue { background-color: #E0F2FE; color: #0284c7; }
+        .bg-pastel-pink { background-color: #FCE7F3; color: #db2777; }
+        .bg-pastel-yellow { background-color: #FEF9C3; color: #ca8a04; }
+
+        /* Job Portal Pause on Hover */
+        .hover\:pause:hover {
+            animation-play-state: paused;
+        }
+    </style>
+<script type="importmap">
+{
+  "imports": {
+    "react/": "https://esm.sh/react@^19.2.4/",
+    "react": "https://esm.sh/react@^19.2.4",
+    "react-dom/": "https://esm.sh/react-dom@^19.2.4/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body>
+    <div id="root"></div>
+<script type="module" src="/index.tsx"></script>
+</body>
+</html>

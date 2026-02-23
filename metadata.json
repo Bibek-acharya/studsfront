@@ -1,0 +1,7 @@
+{
+  "name": "StudSphere - Future Bridge",
+  "description": "A comprehensive education and career platform connecting students to their professional futures through AI-powered tools and university databases.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
