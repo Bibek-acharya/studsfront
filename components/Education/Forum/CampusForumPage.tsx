@@ -1,4 +1,7 @@
 import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiService, ForumPost } from "../../../services/api";
+import { useAuth } from "../../../services/AuthContext";
 import ForumHero from "./ForumHero";
 import ForumSidebar from "./ForumSidebar";
 import PostCard from "./PostCard";
@@ -10,9 +13,50 @@ interface CampusForumPageProps {
 
 const CampusForumPage: React.FC<CampusForumPageProps> = ({ onNavigate }) => {
   const [activeCommunity, setActiveCommunity] = useState("Home Feed");
+  const [postTitle, setPostTitle] = useState("");
+  const [postContent, setPostContent] = useState("");
+  const { user } = useAuth();
+  const queryClient = useQueryClient();
+
+  const { data: posts, isLoading, error } = useQuery<ForumPost[]>({
+    queryKey: ["forumPosts", activeCommunity],
+    queryFn: () =>
+      apiService.getForumPosts(
+        activeCommunity === "Home Feed" ? "" : activeCommunity,
+        apiService.getToken() || undefined,
+      ),
+  });
+
+  const createPostMutation = useMutation({
+    mutationFn: (data: { category: string; title: string; content: string }) => {
+      const token = apiService.getToken();
+      if (!token) throw new Error("Not authenticated");
+      return apiService.createForumPost(token, data);
+    },
+    onSuccess: () => {
+      setPostTitle("");
+      setPostContent("");
+      queryClient.invalidateQueries({ queryKey: ["forumPosts"] });
+    },
+  });
+
+  const handleCreatePost = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!postTitle.trim()) return;
+    if (!user) {
+      onNavigate("login");
+      return;
+    }
+
+    createPostMutation.mutate({
+      category: activeCommunity === "Home Feed" ? "General" : activeCommunity,
+      title: postTitle,
+      content: postContent || "No content provided.",
+    });
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-jakarta selection:bg-primary-600 selection:text-white">
+    <div className="min-h-screen bg-slate-50 font-sans selection:bg-primary-600 selection:text-white">
       <ForumHero />
 
       <div className="w-full px-4 lg:px-12 py-6">
@@ -27,101 +71,94 @@ const CampusForumPage: React.FC<CampusForumPageProps> = ({ onNavigate }) => {
 
           {/* Center Feed */}
           <main className="col-span-1 lg:col-span-7 space-y-6">
-            {/* Post Input Component - Matches Screenshot 3 */}
+            {/* Post Input Component */}
             <div className="bg-white rounded-[2rem] shadow-sm p-6 border border-slate-100 transition-all hover:shadow-lg mb-6">
-              <div className="flex gap-6 mb-6">
-                <img
-                  src="https://api.dicebear.com/7.x/notionists/svg?seed=Jagdish"
-                  alt="User"
-                  className="w-16 h-16 rounded-full bg-slate-50 border border-slate-100 shadow-inner"
-                />
-                <div className="flex-1 relative">
-                  <input
-                    type="text"
-                    placeholder="Ask a questions here........"
-                    className="w-full bg-slate-50 hover:bg-slate-100 text-slate-500 py-4 px-8 rounded-xl text-lg border-0 outline-none transition-all font-medium"
+              <form onSubmit={handleCreatePost}>
+                <div className="flex gap-6 mb-6">
+                  <img
+                    src={user ? `https://api.dicebear.com/7.x/notionists/svg?seed=${user.email}` : "https://api.dicebear.com/7.x/notionists/svg?seed=Guest"}
+                    alt="User"
+                    className="w-16 h-16 rounded-full bg-slate-50 border border-slate-100 shadow-inner"
                   />
+                  <div className="flex-1 space-y-4">
+                    <input
+                      type="text"
+                      value={postTitle}
+                      onChange={(e) => setPostTitle(e.target.value)}
+                      placeholder="Post title..."
+                      className="w-full bg-slate-50 hover:bg-slate-100 text-slate-900 py-3 px-6 rounded-xl text-lg border-0 outline-none transition-all font-bold"
+                    />
+                    <textarea
+                      value={postContent}
+                      onChange={(e) => setPostContent(e.target.value)}
+                      placeholder="What's on your mind?"
+                      className="w-full bg-slate-50 hover:bg-slate-100 text-slate-700 py-4 px-6 rounded-xl text-base border-0 outline-none transition-all font-medium min-h-[120px] resize-none"
+                    />
+                  </div>
                 </div>
-              </div>
-              <div className="flex items-center gap-10">
-                <button className="flex items-center gap-3 text-[#2563EB] font-black text-sm uppercase tracking-widest hover:opacity-80 transition-all">
-                  <i className="fa-solid fa-link text-xl"></i>
-                  Link
-                </button>
-                <button className="flex items-center gap-3 text-[#2563EB] font-black text-sm uppercase tracking-widest hover:opacity-80 transition-all">
-                  <i className="fa-solid fa-bars-staggered text-xl"></i>
-                  Latest
-                </button>
-              </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-10">
+                    <button type="button" className="flex items-center gap-3 text-[#2563EB] font-black text-sm uppercase tracking-widest hover:opacity-80 transition-all">
+                      <i className="fa-solid fa-link text-xl"></i>
+                      Link
+                    </button>
+                    <button type="button" className="flex items-center gap-3 text-[#2563EB] font-black text-sm uppercase tracking-widest hover:opacity-80 transition-all">
+                      <i className="fa-solid fa-bars-staggered text-xl"></i>
+                      Latest
+                    </button>
+                  </div>
+                  {postTitle.trim() && (
+                    <button
+                      type="submit"
+                      disabled={createPostMutation.isPending}
+                      className="bg-[#2563EB] text-white px-6 py-2 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-blue-700 transition-all disabled:opacity-50"
+                    >
+                      {createPostMutation.isPending ? "Posting..." : "Post"}
+                    </button>
+                  )}
+                </div>
+              </form>
             </div>
 
             {/* Main Discussions */}
             <div className="space-y-8">
-              <PostCard
-                author="Jagdish Dhami"
-                category="Scholarship"
-                time="2 hrs ago"
-                title="Best resources for studying Data Structure in C for TU?"
-                content="I'm struggling with linked lists and trees in Data Structure (BIM 4th Sem, TU). Can anyone recommend the best Nepali authors or online courses that explain these topics clearly based on the TU syllabus?"
-                upvotes={45}
-                answers={12}
-                avatar="https://api.dicebear.com/7.x/notionists/svg?seed=Jagdish"
-              />
+              {isLoading && (
+                <div className="flex justify-center py-20">
+                  <i className="fa-solid fa-spinner animate-spin text-4xl text-blue-500"></i>
+                </div>
+              )}
 
-              <PostCard
-                author="Jagdish Dhami"
-                category="Academics"
-                time="2 hrs ago"
-                title="Best resources for studying Data Structure in C for TU?"
-                content="I'm struggling with linked lists and trees in Data Structure (BIM 4th Sem, TU). Can anyone recommend the best Nepali authors or online courses that explain these topics clearly based on the TU syllabus?"
-                upvotes={45}
-                answers={12}
-                avatar="https://api.dicebear.com/7.x/notionists/svg?seed=Jagdish"
-              />
+              {error && (
+                <div className="bg-red-50 text-red-600 p-8 rounded-2xl text-center font-bold">
+                  Failed to load posts. Please try again.
+                </div>
+              )}
 
-              {/* Poll Card placeholder from Screenshot 3 */}
-              <div className="bg-white rounded-[2rem] shadow-sm p-8 border border-slate-100">
-                <div className="flex items-center gap-4 mb-6">
-                  <img
-                    src="https://api.dicebear.com/7.x/notionists/svg?seed=Jagdish"
-                    alt="User"
-                    className="w-14 h-14 rounded-full"
-                  />
-                  <div>
-                    <h4 className="font-black text-slate-900">Jagdish Dhami</h4>
-                    <div className="flex items-center gap-2">
-                      <span className="bg-slate-100 px-3 py-1 rounded text-[10px] font-black uppercase text-slate-500">
-                        Academics
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-400">
-                        • 2 hrs ago
-                      </span>
-                    </div>
-                  </div>
+              {posts?.map((post) => (
+                <PostCard
+                  key={post.id}
+                  id={post.id}
+                  author={`${post.user.first_name} ${post.user.last_name}`}
+                  category={post.category}
+                  time={new Date(post.created_at).toLocaleDateString()}
+                  title={post.title}
+                  content={post.content}
+                  upvotes={post.upvotes}
+                  answers={post.comment_count}
+                  isLiked={post.is_liked}
+                  isDisliked={post.is_disliked}
+                  isSaved={post.is_saved}
+                  downvotes={post.downvotes}
+                  userId={post.user_id}
+                  avatar={`https://api.dicebear.com/7.x/notionists/svg?seed=${post.user.email}`}
+                />
+              ))}
+
+              {!isLoading && posts?.length === 0 && (
+                <div className="bg-white p-12 rounded-3xl text-center border border-dashed border-slate-200">
+                  <p className="text-slate-400 font-bold uppercase tracking-widest">No discussions found in this category.</p>
                 </div>
-                <h3 className="text-xl font-black text-slate-900 mb-6">
-                  Best resources for studying Data Structure in C for TU?
-                </h3>
-                <div className="space-y-4 mb-8">
-                  <div className="w-full p-4 bg-slate-50 rounded-xl font-black text-slate-700 border border-slate-100">
-                    Jagdish
-                  </div>
-                  <div className="w-full p-4 bg-slate-50 rounded-xl font-black text-slate-700 border border-slate-100">
-                    Jagdish
-                  </div>
-                </div>
-                <div className="flex items-center justify-between pt-6 border-t border-slate-50">
-                  <div className="flex items-center gap-2 text-slate-400 font-bold text-sm">
-                    <span>0 Votes</span>
-                    <span>•</span>
-                    <span>1 day left</span>
-                  </div>
-                  <div className="flex gap-6 text-slate-400">
-                    <i className="fa-regular fa-heart text-xl hover:text-rose-500 cursor-pointer"></i>
-                    <i className="fa-solid fa-share-nodes text-xl hover:text-blue-500 cursor-pointer"></i>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </main>
 
@@ -136,3 +173,4 @@ const CampusForumPage: React.FC<CampusForumPageProps> = ({ onNavigate }) => {
 };
 
 export default CampusForumPage;
+

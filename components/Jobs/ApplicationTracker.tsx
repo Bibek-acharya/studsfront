@@ -77,7 +77,7 @@ const ApplicationTracker: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-4 md:px-8 font-jakarta relative">
+    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-4 md:px-8 font-sans relative">
       {/* Simulation Toggle */}
       <div className="max-w-5xl mx-auto mb-6 flex justify-end">
         <button

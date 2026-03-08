@@ -132,7 +132,7 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-24 font-jakarta pb-20">
+    <div className="bg-slate-50 min-h-screen pt-24 font-sans pb-20">
       {/* HERO SECTION: CAROUSEL */}
       <div className="max-w-7xl mx-auto px-4 md:px-8 mb-12">
         <h2 className="text-3xl font-black text-slate-900 mb-6 tracking-tight">
@@ -166,11 +166,10 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
               <button
                 key={cat.label}
                 onClick={() => setActiveCategory(cat.label)}
-                className={`flex-none w-56 h-28 rounded-xl border p-6 text-left transition-all duration-500 relative overflow-hidden group/cat ${
-                  activeCategory === cat.label
+                className={`flex-none w-56 h-28 rounded-xl border p-6 text-left transition-all duration-500 relative overflow-hidden group/cat ${activeCategory === cat.label
                     ? "bg-white border-primary-600 shadow-2xl shadow-primary-500/20 ring-4 ring-primary-50"
                     : "bg-white border-slate-100 shadow-sm hover:shadow-xl hover:border-primary-200"
-                }`}
+                  }`}
               >
                 {activeCategory === cat.label && (
                   <div className="absolute top-4 right-4 text-primary-600 animate-fadeIn">
@@ -180,13 +179,12 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
                 <h3 className="text-lg font-black text-slate-900 mb-1 leading-tight group-hover/cat:text-primary-600 transition-colors">
                   {cat.label}
                 </h3>
-                <p className={`font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-colors ${
-                  activeCategory === cat.label ? "text-primary-600" : "text-slate-400 group-hover/cat:text-primary-600"
-                }`}>
+                <p className={`font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-colors ${activeCategory === cat.label ? "text-primary-600" : "text-slate-400 group-hover/cat:text-primary-600"
+                  }`}>
                   {cat.count} Companies{" "}
                   <i className="fa-solid fa-arrow-right text-[10px]"></i>
                 </p>
-                
+
                 {/* Decorative background element for active card */}
                 {activeCategory === cat.label && (
                   <div className="absolute -bottom-6 -right-6 w-16 h-16 bg-primary-50 rounded-full blur-2xl opacity-50"></div>
@@ -283,7 +281,7 @@ const CompaniesPage: React.FC<CompaniesPageProps> = ({ onNavigate }) => {
               <div className="md:col-span-2 bg-gradient-to-br from-primary-600 to-indigo-800 rounded-2xl p-10 text-white relative overflow-hidden shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-8 my-4 group/promo animate-fadeInUp animate-delay-300">
                 <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-[100px] -mr-40 -mt-40 transition-transform duration-1000 group-hover/promo:scale-150"></div>
                 <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary-400/20 rounded-full blur-[80px] -ml-32 -mb-32 transition-transform duration-1000 group-hover/promo:scale-125"></div>
-                
+
                 <div className="relative z-10 text-center sm:text-left">
                   <h4 className="text-2xl font-black mb-3 tracking-tight">
                     Create your job profile for free!
@@ -371,7 +369,7 @@ const FilterSection: React.FC<{ title: string; children: React.ReactNode }> = ({
   children,
 }) => (
   <div className="space-y-5">
-    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] font-jakarta pl-1">
+    <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] font-sans pl-1">
       {title}
     </h4>
     <div className="space-y-4">{children}</div>
@@ -405,11 +403,10 @@ const PageBtn: React.FC<{
 }> = ({ label, icon, active, disabled }) => (
   <button
     disabled={disabled}
-    className={`w-14 h-14 rounded-xl flex items-center justify-center font-black text-xs uppercase tracking-widest transition-all border-2 ${
-      active
+    className={`w-14 h-14 rounded-xl flex items-center justify-center font-black text-xs uppercase tracking-widest transition-all border-2 ${active
         ? "bg-primary-600 text-white border-primary-600 shadow-2xl shadow-primary-500/30"
         : "bg-white text-slate-400 border-slate-100 hover:border-primary-200 hover:text-primary-600 disabled:opacity-30 disabled:cursor-not-allowed shadow-xl shadow-slate-200/20 active:scale-95"
-    }`}
+      }`}
   >
     {icon ? <i className={`fa-solid ${icon}`}></i> : label}
   </button>

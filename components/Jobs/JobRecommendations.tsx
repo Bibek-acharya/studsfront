@@ -123,16 +123,16 @@ const JobRecommendations: React.FC<JobRecommendationsProps> = ({
   const filteredJobs = isEmptyState
     ? []
     : jobData.filter((job) => {
-        if (activeTab === "profile")
-          return job.category === "profile" || job.id % 2 === 0;
-        if (activeTab === "top_candidate")
-          return (
-            job.category === "top_candidate" || (job.rating && job.rating > 4.0)
-          );
-        if (activeTab === "might_like") return true;
-        if (activeTab === "saved") return job.id === 1;
-        return true;
-      });
+      if (activeTab === "profile")
+        return job.category === "profile" || job.id % 2 === 0;
+      if (activeTab === "top_candidate")
+        return (
+          job.category === "top_candidate" || (job.rating && job.rating > 4.0)
+        );
+      if (activeTab === "might_like") return true;
+      if (activeTab === "saved") return job.id === 1;
+      return true;
+    });
 
   const toggleSelection = (id: number) => {
     const newSet = new Set(selectedJobs);
@@ -176,7 +176,7 @@ const JobRecommendations: React.FC<JobRecommendationsProps> = ({
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-24 font-jakarta relative">
+    <div className="bg-slate-50 min-h-screen pt-24 font-sans relative">
       {/* Demo Control */}
       <div className="absolute top-4 right-4 z-20 flex items-center gap-3 bg-white px-4 py-2 rounded-full shadow-sm border border-slate-200">
         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">

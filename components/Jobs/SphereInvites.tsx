@@ -37,7 +37,7 @@ const SphereInvites: React.FC = () => {
   ];
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-24 font-jakarta">
+    <div className="bg-slate-50 min-h-screen pt-24 font-sans">
       {/* Simulation Toggle */}
       <div className="fixed top-24 right-8 z-[120]">
         <button

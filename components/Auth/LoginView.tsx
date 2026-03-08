@@ -71,14 +71,14 @@ const LoginView: React.FC<LoginViewProps> = ({
           </label>
           <input
             type="email"
-            
+
             placeholder="example@mail.com"
-            
+
             required
             disabled={loading}
             className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-4 focus:ring-blue-50 focus:border-blue-500 transition-all outline-none font-medium text-slate-900 disabled:bg-slate-100"
             value={email}
-            
+
             onChange={(e) => setEmail(e.target.value)}
           />
         </div>
@@ -89,14 +89,14 @@ const LoginView: React.FC<LoginViewProps> = ({
           </label>
           <input
             type="password"
-            
+
             placeholder="Enter your password"
-            
+
             required
             disabled={loading}
             className="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-lg focus:ring-4 focus:ring-blue-50 focus:border-blue-500 transition-all outline-none font-medium text-slate-900 disabled:bg-slate-100"
             value={password}
-            
+
             onChange={(e) => setPassword(e.target.value)}
           />
           <div className="flex justify-end mt-1.5">
@@ -136,13 +136,10 @@ const LoginView: React.FC<LoginViewProps> = ({
         <div className="grid grid-cols-1 gap-4">
           <button
             type="button"
+            onClick={() => window.location.href = `http://localhost:8080/api/v1/auth/google`}
             className="flex items-center justify-center gap-3 py-3 border border-slate-200 rounded-lg hover:bg-slate-50 transition-all font-bold text-sm text-slate-700"
           >
-            <img
-              src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
-              className="w-5 h-5"
-              alt="Google"
-            />{" "}
+            <i className="fa-brands fa-google text-lg"></i>
             Google
           </button>
         </div>

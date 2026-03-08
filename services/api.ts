@@ -1,7 +1,7 @@
 import axios, { AxiosInstance, AxiosRequestConfig } from "axios";
 
 // API Service for frontend
-const API_BASE_URL =
+export const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:8080/api/v1";
 
 export interface LoginPayload {
@@ -15,12 +15,98 @@ export interface RegisterPayload {
   first_name: string;
   last_name: string;
   role?: string;
+  education_level?: string;
 }
 
 export interface SavePreferencesPayload {
   preference_role: string;
   preference_flow: string;
   preferences: Record<string, any>;
+}
+
+export interface CreateCounsellingBookingPayload {
+  college: string;
+  program_level: string;
+  interested_course: string;
+  session_mode: "online" | "in_person";
+  session_date: string;
+  session_time: string;
+  student_name: string;
+  student_phone: string;
+  student_email: string;
+  student_notes?: string;
+}
+
+export interface CounsellingBooking {
+  id: number;
+  user_id: number;
+  college: string;
+  program_level: string;
+  interested_course: string;
+  session_mode: "online" | "in_person";
+  session_date: string;
+  session_time: string;
+  student_name: string;
+  student_phone: string;
+  student_email: string;
+  student_notes?: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ScholarshipFinderToolPayload {
+  education_level: string;
+  study_mode?: string;
+  academic_score?: string;
+  target_country?: string;
+  need_type?: string;
+  skills?: string[];
+  achievements?: string[];
+  involvements?: string[];
+}
+
+export interface ScholarshipFinderRecommendation {
+  id: number;
+  title: string;
+  provider: string;
+  location: string;
+  value: string;
+  deadline: string;
+  degree_level: string;
+  funding_type: string;
+  scholarship_type: string;
+  description: string;
+  image_url?: string;
+  match_score: number;
+  reasons: string[];
+}
+
+export interface CollegeRecommenderPayload {
+  student_type: string;
+  program_interest?: string;
+  preferred_location?: string;
+  budget_preference?: string;
+  campus_life_priority?: string;
+  career_goal?: string;
+  need_scholarship?: boolean;
+  preferred_mode?: string;
+  college_type?: string;
+  final_priority?: string;
+}
+
+export interface CollegeRecommendation {
+  id: number;
+  name: string;
+  location: string;
+  affiliation: string;
+  type: string;
+  rating: number;
+  reviews: number;
+  image_url?: string;
+  website?: string;
+  match_score: number;
+  reasons: string[];
 }
 
 export interface CreateCollegePayload {
@@ -41,6 +127,11 @@ export interface CreateCollegePayload {
   image_url?: string;
   featured_programs?: string[];
   amenities?: string[];
+  academic_fit_score?: number;
+  campus_life_score?: number;
+  career_fit_score?: number;
+  balanced_fit_score?: number;
+  profile_tags?: string[];
 }
 
 export interface AuthResponse {
@@ -48,7 +139,7 @@ export interface AuthResponse {
   statusCode: number;
   message: string;
   data?: {
-    user: {
+    user?: {
       id: number;
       email: string;
       first_name: string;
@@ -57,7 +148,9 @@ export interface AuthResponse {
       created_at: string;
       updated_at: string;
     };
-    token: string;
+    token?: string;
+    requires_otp?: boolean;
+    email?: string;
   };
 }
 
@@ -101,6 +194,45 @@ export interface College {
   alumni?: string | any;
   departments?: string | any;
   college_reviews?: string | any;
+  academic_fit_score?: number;
+  campus_life_score?: number;
+  career_fit_score?: number;
+  balanced_fit_score?: number;
+  profile_tags?: string[];
+}
+
+export interface ForumPost {
+  id: number;
+  user_id: number;
+  user: {
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+  category: string;
+  title: string;
+  content: string;
+  upvotes: number;
+  comment_count: number;
+  is_poll: boolean;
+  is_liked: boolean;
+  is_disliked: boolean;
+  is_saved: boolean;
+  downvotes: number;
+  created_at: string;
+}
+
+export interface ForumComment {
+  id: number;
+  post_id: number;
+  user_id: number;
+  user: {
+    first_name: string;
+    last_name: string;
+    email: string;
+  };
+  content: string;
+  created_at: string;
 }
 
 export interface University {
@@ -210,6 +342,34 @@ export interface EducationScholarship {
   image: string;
   eligibility?: string;
   tags?: string[];
+  scholarship_type?: string;
+  funding_type?: string;
+  degree_level?: string;
+}
+
+export interface EducationSimilarScholarship {
+  id: number;
+  title: string;
+  provider: string;
+  deadline: string;
+  status: string;
+  location?: string;
+  funding_type?: string;
+  degree_level?: string;
+  image_url?: string;
+  category?: string;
+  description?: string;
+}
+
+export interface EducationScholarshipFilters {
+  search?: string;
+  category?: string;
+  type?: string;
+  location?: string;
+  level?: string;
+  status?: string;
+  sort?: string;
+  order?: "ASC" | "DESC";
 }
 
 export interface EducationScholarshipCategory {
@@ -243,6 +403,47 @@ export interface EducationCourse {
   privateFee: string;
   icon?: string;
   color?: string;
+}
+
+export interface EducationCourseCurriculumSemester {
+  semester: number;
+  title: string;
+  subtitle: string;
+  subjects: string[];
+}
+
+export interface EducationCourseCareerOpportunity {
+  title: string;
+  icon: string;
+  color: string;
+}
+
+export interface EducationCourseOtherProgram {
+  id: string;
+  title: string;
+  duration: string;
+  faculty: string;
+}
+
+export interface EducationCourseDetails {
+  course: EducationCourse;
+  about: string[];
+  mode: string;
+  degreeLabel: string;
+  curriculum: EducationCourseCurriculumSemester[];
+  admissionRequirements: string[];
+  careerOpportunities: EducationCourseCareerOpportunity[];
+  universities: string[];
+  contact: {
+    email: string;
+    phone: string;
+  };
+  otherPrograms: EducationCourseOtherProgram[];
+  highlightsUniversity: string;
+  highlightsFaculty: string;
+  highlightsDuration: string;
+  highlightsDegreeLevel: string;
+  offeringCollegesCount: number;
 }
 
 export interface EducationAdmissionProgram {
@@ -340,6 +541,7 @@ class ApiService {
         first_name: payload.first_name,
         last_name: payload.last_name,
         role: payload.role || "student",
+        education_level: payload.education_level,
       },
     });
   }
@@ -349,6 +551,22 @@ class ApiService {
       method: "POST",
       url: "/auth/login",
       data: payload,
+    });
+  }
+
+  async sendOTP(email: string): Promise<AuthResponse> {
+    return this.request<AuthResponse>({
+      method: "POST",
+      url: "/auth/send-otp",
+      data: { email },
+    });
+  }
+
+  async verifyOTP(email: string, otp: string): Promise<AuthResponse> {
+    return this.request<AuthResponse>({
+      method: "POST",
+      url: "/auth/verify-otp",
+      data: { email, otp },
     });
   }
 
@@ -370,6 +588,32 @@ class ApiService {
         method: "POST",
         url: "/preferences",
         data: preferences,
+      },
+      token,
+    );
+  }
+
+  async createCounsellingBooking(
+    token: string,
+    payload: CreateCounsellingBookingPayload,
+  ): Promise<{ success: boolean; message: string; data?: CounsellingBooking }> {
+    return this.request<{ success: boolean; message: string; data?: CounsellingBooking }>(
+      {
+        method: "POST",
+        url: "/counselling/bookings",
+        data: payload,
+      },
+      token,
+    );
+  }
+
+  async getMyCounsellingBookings(
+    token: string,
+  ): Promise<{ success: boolean; message: string; data?: { bookings: CounsellingBooking[] } }> {
+    return this.request<{ success: boolean; message: string; data?: { bookings: CounsellingBooking[] } }>(
+      {
+        method: "GET",
+        url: "/counselling/bookings/my",
       },
       token,
     );
@@ -457,7 +701,9 @@ class ApiService {
     });
   }
 
-  async getEducationScholarships(): Promise<{
+  async getEducationScholarships(
+    params?: EducationScholarshipFilters,
+  ): Promise<{
     success: boolean;
     message: string;
     data?: {
@@ -468,6 +714,29 @@ class ApiService {
     return this.request({
       method: "GET",
       url: "/education/scholarships",
+      params,
+    });
+  }
+
+  async getEducationScholarshipById(id: string | number): Promise<{
+    success: boolean;
+    message: string;
+    data?: EducationScholarship;
+  }> {
+    return this.request({
+      method: "GET",
+      url: `/education/scholarships/${id}`,
+    });
+  }
+
+  async getEducationSimilarScholarships(id: string | number): Promise<{
+    success: boolean;
+    message: string;
+    data?: { scholarships: EducationSimilarScholarship[] };
+  }> {
+    return this.request({
+      method: "GET",
+      url: `/education/scholarships/${id}/similar`,
     });
   }
 
@@ -493,6 +762,17 @@ class ApiService {
     });
   }
 
+  async getEducationCourseDetailsById(id: string): Promise<{
+    success: boolean;
+    message: string;
+    data?: EducationCourseDetails;
+  }> {
+    return this.request({
+      method: "GET",
+      url: `/education/courses/${id}/details`,
+    });
+  }
+
   async getEducationAdmissions(): Promise<{
     success: boolean;
     message: string;
@@ -501,6 +781,56 @@ class ApiService {
     return this.request({
       method: "GET",
       url: "/education/admissions",
+    });
+  }
+
+  async getEducationNews(): Promise<{
+    success: boolean;
+    message: string;
+    data?: { news: any[] };
+  }> {
+    return this.request({
+      method: "GET",
+      url: "/education/news",
+    });
+  }
+
+  async getEducationEvents(): Promise<{
+    success: boolean;
+    message: string;
+    data?: { events: any[] };
+  }> {
+    return this.request({
+      method: "GET",
+      url: "/education/events",
+    });
+  }
+
+  async getScholarshipFinderRecommendations(
+    payload: ScholarshipFinderToolPayload,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: { recommendations: ScholarshipFinderRecommendation[] };
+  }> {
+    return this.request({
+      method: "POST",
+      url: "/tools/scholarship-finder/recommendations",
+      data: payload,
+    });
+  }
+
+  async getCollegeRecommenderRecommendations(
+    payload: CollegeRecommenderPayload,
+  ): Promise<{
+    success: boolean;
+    message: string;
+    data?: { recommendations: CollegeRecommendation[] };
+  }> {
+    return this.request({
+      method: "POST",
+      url: "/tools/college-recommender/recommendations",
+      data: payload,
     });
   }
 
@@ -546,6 +876,105 @@ class ApiService {
       token,
     );
   }
+
+  // --- Forum Endpoints ---
+  async getForumPosts(category?: string, token?: string): Promise<ForumPost[]> {
+    const res = await this.request<{ data: ForumPost[] }>(
+      {
+        method: "GET",
+        url: `/forum/posts${category ? `?category=${encodeURIComponent(category)}` : ""}`,
+      },
+      token,
+    );
+    return res.data;
+  }
+
+  async createForumPost(
+    token: string,
+    data: { category: string; title: string; content: string },
+  ): Promise<ForumPost> {
+    const res = await this.request<{ data: ForumPost }>(
+      {
+        method: "POST",
+        url: "/forum/posts",
+        data,
+      },
+      token,
+    );
+    return res.data;
+  }
+
+  async likeForumPost(token: string, id: number): Promise<ForumPost> {
+    const res = await this.request<{ data: ForumPost }>(
+      {
+        method: "POST",
+        url: `/forum/posts/${id}/like`,
+      },
+      token,
+    );
+    return res.data;
+  }
+
+  async dislikeForumPost(token: string, id: number): Promise<ForumPost> {
+    const res = await this.request<{ data: ForumPost }>(
+      {
+        method: "POST",
+        url: `/forum/posts/${id}/dislike`,
+      },
+      token,
+    );
+    return res.data;
+  }
+
+  async updateForumPost(
+    token: string,
+    id: number,
+    data: { title?: string; content?: string },
+  ): Promise<ForumPost> {
+    const res = await this.request<{ data: ForumPost }>(
+      {
+        method: "PUT",
+        url: `/forum/posts/${id}`,
+        data,
+      },
+      token,
+    );
+    return res.data;
+  }
+
+  async deleteForumPost(token: string, id: number): Promise<void> {
+    await this.request<void>(
+      {
+        method: "DELETE",
+        url: `/forum/posts/${id}`,
+      },
+      token,
+    );
+  }
+
+  async getForumPostComments(id: number): Promise<ForumComment[]> {
+    const res = await this.request<{ data: ForumComment[] }>({
+      method: "GET",
+      url: `/forum/posts/${id}/comments`,
+    });
+    return res.data;
+  }
+
+  async createForumComment(
+    token: string,
+    id: number,
+    data: { content: string },
+  ): Promise<ForumComment> {
+    const res = await this.request<{ data: ForumComment }>(
+      {
+        method: "POST",
+        url: `/forum/posts/${id}/comments`,
+        data,
+      },
+      token,
+    );
+    return res.data;
+  }
   // Store token in localStorage
   setToken(token: string) {
     localStorage.setItem("authToken", token);
@@ -571,6 +1000,14 @@ class ApiService {
   getUser() {
     const user = localStorage.getItem("authUser");
     return user ? JSON.parse(user) : null;
+  }
+
+  async saveForumPost(token: string, id: number): Promise<ForumPost> {
+    const res = await this.request<{ data: ForumPost }>({
+      method: "POST",
+      url: `/forum/posts/${id}/save`,
+    }, token);
+    return res.data;
   }
 
   // Check if user is authenticated

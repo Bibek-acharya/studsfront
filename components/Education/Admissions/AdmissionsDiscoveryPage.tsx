@@ -36,6 +36,7 @@ const AdmissionsDiscoveryPage: React.FC<AdmissionsDiscoveryPageProps> = ({
         const mergedCollege: College = {
           ...response.data,
           id: college.id,
+          description: response.data.description || apiCollege?.description || college.description || "",
           programs: apiCollege?.programs || college.programs || [],
           facilities: apiCollege?.facilities || college.facilities || [],
           phoneNumber: response.data.phone || apiCollege?.phoneNumber || "",
@@ -71,7 +72,7 @@ const AdmissionsDiscoveryPage: React.FC<AdmissionsDiscoveryPageProps> = ({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-jakarta">
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans">
       {view === "search" ? (
         <>
           <AdmissionsHero />

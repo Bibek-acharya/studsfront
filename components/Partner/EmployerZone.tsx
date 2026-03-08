@@ -109,7 +109,7 @@ const EmployerZone: React.FC = () => {
   );
 
   return (
-    <div className="bg-slate-50 min-h-screen font-jakarta pt-0 overflow-x-hidden">
+    <div className="bg-slate-50 min-h-screen font-sans pt-0 overflow-x-hidden">
       <style>{`
         .folded-card {
             background: white;

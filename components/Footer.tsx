@@ -6,12 +6,12 @@ interface FooterProps {
 
 const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
   return (
-    <footer className="bg-slate-900 text-white relative pt-10 pb-20 overflow-hidden font-jakarta">
+    <footer className="bg-slate-900 text-white relative pt-10 pb-20 overflow-hidden font-sans">
       {/* Background Decorative Elements */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-blue-600/10 blur-[120px] rounded-full -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-purple-600/5 blur-[120px] rounded-full translate-y-1/2 -translate-x-1/2"></div>
 
-      <div className="w-full px-6 lg:px-12 relative z-10">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-16 mb-20">
           {/* Brand Column */}
           <div className="lg:col-span-1">
@@ -68,8 +68,11 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
                 </button>
               </li>
               <li>
-                <button className="hover:text-blue-400 transition-colors text-left w-full">
-                  Career Opportunities
+                <button
+                  onClick={() => onNavigate?.("educationPage")}
+                  className="hover:text-blue-400 transition-colors text-left w-full"
+                >
+                  Our Mission
                 </button>
               </li>
               <li>
@@ -142,42 +145,6 @@ const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
             </ul>
           </div>
 
-          {/* For Employers Column */}
-          <div>
-            <h4 className="font-black text-sm uppercase tracking-[0.2em] mb-8 text-white">
-              For Employers
-            </h4>
-            <ul className="space-y-4 text-[10px] text-slate-400 font-black uppercase tracking-widest">
-              <li>
-                <button
-                  onClick={() => onNavigate?.("employerZone")}
-                  className="hover:text-blue-400 transition-colors text-left w-full"
-                >
-                  Employer Portal
-                </button>
-              </li>
-              <li>
-                <button className="hover:text-blue-400 transition-colors text-left w-full">
-                  Talent Solutions
-                </button>
-              </li>
-              <li>
-                <button className="hover:text-blue-400 transition-colors text-left w-full">
-                  Job Posting
-                </button>
-              </li>
-              <li>
-                <button className="hover:text-blue-400 transition-colors text-left w-full">
-                  Pricing Plans
-                </button>
-              </li>
-              <li>
-                <button className="hover:text-blue-400 transition-colors text-left w-full">
-                  Case Studies
-                </button>
-              </li>
-            </ul>
-          </div>
 
           {/* For Institutions Column */}
           <div>

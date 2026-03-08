@@ -103,7 +103,7 @@ const ScholarshipDetailsPage: React.FC<ScholarshipDetailsPageProps> = ({
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16 font-jakarta">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16 font-sans">
         {/* Overview Section */}
         <section
           id="overview"
@@ -470,8 +470,7 @@ const BenefitCard: React.FC<{
   <div className="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 hover:shadow-xl hover:border-primary-100 transition-all duration-500 group flex flex-col h-full">
     <div
       className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl mb-8 transition-all group-hover:scale-110 shadow-sm
-      ${
-        color === "blue"
+      ${color === "blue"
           ? "bg-blue-100 text-blue-600 group-hover:bg-blue-600 group-hover:text-white"
           : color === "orange"
             ? "bg-orange-100 text-orange-600 group-hover:bg-orange-600 group-hover:text-white"
@@ -482,7 +481,7 @@ const BenefitCard: React.FC<{
                 : color === "pink"
                   ? "bg-pink-100 text-pink-600 group-hover:bg-pink-600 group-hover:text-white"
                   : "bg-teal-100 text-teal-600 group-hover:bg-teal-600 group-hover:text-white"
-      }`}
+        }`}
     >
       <i className={`fa-solid ${icon}`}></i>
     </div>

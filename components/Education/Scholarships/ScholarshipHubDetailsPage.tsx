@@ -1,14 +1,173 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { apiService } from "../../../services/api";
 
 interface ScholarshipHubDetailsPageProps {
-  id: string;
   onNavigate: (view: any, data?: any) => void;
 }
 
+type DetailField = {
+  title?: string;
+  description?: string;
+  stage?: string;
+  criterion?: string;
+  name?: string;
+  date?: string;
+  event?: string;
+  question?: string;
+  answer?: string;
+};
+
+type ScholarshipDetail = {
+  id: number;
+  title: string;
+  provider: string;
+  location: string;
+  value: string;
+  deadline: string;
+  degree_level: string;
+  funding_type: string;
+  scholarship_type: string;
+  description: string;
+  image_url: string;
+  status: string;
+  field_of_study: string[];
+  selection_process: DetailField[];
+  eligibility_criteria: DetailField[];
+  excluded_regions: string[];
+  required_documents: DetailField[];
+  timeline: DetailField[];
+  benefits: DetailField[];
+  faqs: DetailField[];
+};
+
+const fallbackDetail: ScholarshipDetail = {
+  id: 1,
+  title: "Global Future Leaders Scholarship 2026",
+  provider: "Cambridge University, UK",
+  location: "Cambridge, UK",
+  value: "$30,000 / Year",
+  deadline: "May 15, 2026",
+  degree_level: "Masters",
+  funding_type: "Fully Funded",
+  scholarship_type: "Merit Based",
+  description:
+    "Designed for high-achieving international students with leadership potential.",
+  image_url:
+    "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
+  status: "OPEN",
+  field_of_study: [
+    "Computer Science & AI",
+    "Environmental Science",
+    "Public Health",
+    "Business Administration",
+  ],
+  selection_process: [
+    {
+      stage: "Stage 1: Initial Screening",
+      description:
+        "Applications are reviewed for eligibility and completeness. Incomplete applications are rejected immediately.",
+    },
+    {
+      stage: "Stage 2: Academic Review",
+      description:
+        "A panel of professors reviews academic transcripts, research proposals, and recommendation letters.",
+    },
+    {
+      stage: "Stage 3: Interview",
+      description:
+        "Shortlisted candidates are invited for a virtual interview with the scholarship committee in June.",
+    },
+  ],
+  eligibility_criteria: [
+    {
+      criterion: "Nationality",
+      description: "Must be an international student from a non-EU country.",
+    },
+    {
+      criterion: "Academic Merit",
+      description:
+        "Must hold a First Class Honours degree or equivalent GPA (3.7/4.0).",
+    },
+    {
+      criterion: "Language Proficiency",
+      description: "IELTS score of 7.5 overall or TOEFL iBT score of 110.",
+    },
+  ],
+  excluded_regions: [
+    "United Kingdom",
+    "Australia",
+    "New Zealand",
+    "USA (Specific state grants available instead)",
+  ],
+  required_documents: [
+    {
+      name: "Academic Transcripts",
+      description: "Official copies from all universities attended.",
+    },
+    {
+      name: "CV / Resume",
+      description: "Updated CV highlighting academic and leadership achievements.",
+    },
+    {
+      name: "Recommendation Letters",
+      description: "Two academic references on official letterhead.",
+    },
+    {
+      name: "Personal Statement",
+      description: "Max 1000 words outlining your goals and motivation.",
+    },
+  ],
+  timeline: [
+    { date: "Jan 15, 2026", event: "Applications Open" },
+    { date: "May 15, 2026", event: "Submission Deadline" },
+    { date: "June 2026", event: "Interview Stage" },
+    { date: "July 30, 2026", event: "Results Announced" },
+  ],
+  benefits: [
+    {
+      title: "Tuition Coverage",
+      description: "100% of tuition fees covered for the duration of the 1-year Master's program.",
+    },
+    {
+      title: "Living Stipend",
+      description: "Monthly living allowance to cover accommodation and expenses.",
+    },
+    {
+      title: "Travel Grant",
+      description: "Round-trip economy airfare from home country to the host destination.",
+    },
+    {
+      title: "Health Insurance",
+      description: "Coverage for student medical and health charges.",
+    },
+  ],
+  faqs: [
+    {
+      question: "Is there an application fee?",
+      answer:
+        "No, applying for the scholarship itself is free. Some universities may have separate application charges.",
+    },
+    {
+      question: "Can final year students apply?",
+      answer:
+        "Yes, final year students can apply with provisional documents.",
+    },
+    {
+      question: "Are part-time courses eligible?",
+      answer: "No, this scholarship is available for full-time on-campus programs.",
+    },
+  ],
+};
+
 const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
-  id,
   onNavigate,
 }) => {
+  const location = useLocation();
+  const routeState = (location.state as any) || {};
+  const resolvedId = routeState?.id || "1";
+
   const [activeTab, setActiveTab] = useState<
     "overview" | "eligibility" | "documents" | "timeline" | "benefits" | "apply"
   >("overview");
@@ -17,122 +176,125 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [resolvedId]);
 
-  const scholarshipData = {
-    title: "Global Future Leaders Scholarship 2026",
-    provider: "Cambridge University, UK",
-    location: "Cambridge, UK",
-    deadline: "May 15, 2026",
-    value: "$30,000 / Year",
-    tags: ["Fully Funded", "Masters", "Merit Based"],
-    heroImage:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80",
-  };
+  const { data } = useQuery({
+    queryKey: ["education-scholarship-details", resolvedId],
+    queryFn: () => apiService.getEducationScholarshipById(resolvedId),
+    enabled: !!resolvedId,
+  });
 
-  const toggleFaq = (idx: number) => {
-    setOpenFaq(openFaq === idx ? null : idx);
-  };
+  const { data: similarData } = useQuery({
+    queryKey: ["education-scholarship-similar", resolvedId],
+    queryFn: () => apiService.getEducationSimilarScholarships(resolvedId),
+    enabled: !!resolvedId,
+  });
+
+  const scholarshipData = useMemo<ScholarshipDetail>(() => {
+    const api = (data?.data as unknown as Partial<ScholarshipDetail>) || {};
+    return {
+      ...fallbackDetail,
+      ...api,
+      field_of_study: api.field_of_study?.length ? api.field_of_study : fallbackDetail.field_of_study,
+      selection_process: api.selection_process?.length ? api.selection_process : fallbackDetail.selection_process,
+      eligibility_criteria: api.eligibility_criteria?.length
+        ? api.eligibility_criteria
+        : fallbackDetail.eligibility_criteria,
+      excluded_regions: api.excluded_regions?.length ? api.excluded_regions : fallbackDetail.excluded_regions,
+      required_documents: api.required_documents?.length
+        ? api.required_documents
+        : fallbackDetail.required_documents,
+      timeline: api.timeline?.length ? api.timeline : fallbackDetail.timeline,
+      benefits: api.benefits?.length ? api.benefits : fallbackDetail.benefits,
+      faqs: api.faqs?.length ? api.faqs : fallbackDetail.faqs,
+    };
+  }, [data]);
+
+  const similarScholarships = useMemo(() => {
+    return (similarData?.data?.scholarships || []).slice(0, 3);
+  }, [similarData]);
 
   return (
-    <div className="bg-slate-50 min-h-screen text-slate-800 antialiased font-sans pb-20 pt-16">
-      {/* Breadcrumb */}
+    <div className="bg-slate-50 min-h-screen text-slate-800 antialiased font-sans pb-12 pt-16">
       <div className="bg-white border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center text-sm text-slate-500">
-            <button
-              onClick={() => onNavigate("scholarshipMain")}
-              className="hover:text-blue-600"
-            >
-              Scholarship Hub
+            <button className="hover:text-blue-600" onClick={() => onNavigate("scholarshipMain")}>
+              Home
             </button>
-            <i className="fas fa-chevron-right mx-2 text-[10px]"></i>
-            <span className="hover:text-blue-600 cursor-pointer">
+            <i className="fa-solid fa-chevron-right w-4 h-4 mx-2 text-[10px]"></i>
+            <button className="hover:text-blue-600" onClick={() => onNavigate("scholarshipCategory")}>
               International
-            </span>
-            <i className="fas fa-chevron-right mx-2 text-[10px]"></i>
-            <span className="text-slate-900 font-medium">
-              {scholarshipData.title}
-            </span>
+            </button>
+            <i className="fa-solid fa-chevron-right w-4 h-4 mx-2 text-[10px]"></i>
+            <span className="text-slate-900 font-medium">{scholarshipData.title}</span>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header Section */}
+      <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
             <div>
-              <div className="flex items-center gap-2 mb-3">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
                 <span className="bg-green-100 text-green-700 text-xs px-2.5 py-0.5 rounded-full font-semibold border border-green-200">
-                  Fully Funded
+                  {scholarshipData.funding_type || "Fully Funded"}
                 </span>
                 <span className="bg-blue-100 text-blue-700 text-xs px-2.5 py-0.5 rounded-full font-semibold border border-blue-200">
-                  Masters
+                  {scholarshipData.degree_level || "Masters"}
                 </span>
                 <span className="bg-purple-100 text-purple-700 text-xs px-2.5 py-0.5 rounded-full font-semibold border border-purple-200">
-                  Merit Based
+                  {scholarshipData.scholarship_type || "Merit Based"}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">
-                {scholarshipData.title}
-              </h1>
+              <h1 className="text-3xl md:text-4xl font-bold text-slate-900 mb-2">{scholarshipData.title}</h1>
               <p className="text-slate-500 flex items-center gap-2">
-                <i className="fas fa-map-marker-alt text-blue-500"></i> Offered
-                by Cambridge University, UK
+                <i className="fa-solid fa-map-pin w-4 h-4"></i> Offered by {scholarshipData.provider}
               </p>
             </div>
             <div className="flex gap-3 mt-4 md:mt-0">
               <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors bg-white shadow-sm">
-                <i className="fas fa-share-alt"></i> Share
+                <i className="fa-solid fa-share-nodes w-4 h-4"></i> Share
               </button>
               <button
-                onClick={() => setIsSaved(!isSaved)}
-                className={`flex items-center gap-2 px-4 py-2 border rounded-lg transition-colors bg-white shadow-sm group ${isSaved ? "bg-blue-50 border-blue-200 text-blue-600" : "text-slate-700 hover:bg-slate-50"}`}
+                onClick={() => setIsSaved((prev) => !prev)}
+                className={`flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg transition-colors bg-white shadow-sm ${
+                  isSaved ? "text-blue-700 bg-blue-50 border-blue-200" : "text-slate-700 hover:bg-slate-50"
+                }`}
               >
-                <i
-                  className={`${isSaved ? "fas" : "far"} fa-bookmark group-hover:fill-current`}
-                ></i>{" "}
-                <span className="save-text">{isSaved ? "Saved" : "Save"}</span>
+                <i className={`fa-${isSaved ? "solid" : "regular"} fa-bookmark w-4 h-4`}></i>
+                <span>{isSaved ? "Saved" : "Save"}</span>
               </button>
             </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column: Details */}
           <div className="lg:col-span-2 space-y-8">
-            {/* Quick Stats Mobile */}
             <div className="lg:hidden bg-white p-4 rounded-xl shadow-sm border border-slate-200 grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-slate-500 uppercase font-semibold">
-                  Deadline
-                </p>
+                <p className="text-xs text-slate-500 uppercase font-semibold">Deadline</p>
                 <p className="text-red-600 font-medium flex items-center gap-1">
-                  <i className="far fa-clock"></i> May 15, 2026
+                  <i className="fa-regular fa-clock w-3 h-3"></i> {scholarshipData.deadline}
                 </p>
               </div>
               <div>
-                <p className="text-xs text-slate-500 uppercase font-semibold">
-                  Value
-                </p>
-                <p className="text-slate-900 font-medium">$30,000 / Year</p>
+                <p className="text-xs text-slate-500 uppercase font-semibold">Value</p>
+                <p className="text-slate-900 font-medium">{scholarshipData.value}</p>
               </div>
             </div>
 
-            {/* Hero Image */}
             <div className="relative w-full h-64 md:h-80 rounded-2xl overflow-hidden shadow-sm group">
               <img
-                src={scholarshipData.heroImage}
-                alt="University Campus"
+                src={scholarshipData.image_url || fallbackDetail.image_url}
+                alt="Scholarship"
                 className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
               <div className="absolute bottom-4 left-4 text-white">
                 <div className="flex items-center gap-2 mb-1">
                   <span className="bg-white/20 backdrop-blur-md px-2 py-1 rounded text-xs font-medium">
-                    Cambridge, UK
+                    {scholarshipData.location}
                   </span>
                   <span className="bg-blue-600/90 backdrop-blur-md px-2 py-1 rounded text-xs font-medium">
                     #1 Ranked
@@ -142,22 +304,9 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
               </div>
             </div>
 
-            {/* Tabs Navigation */}
             <div className="border-b border-slate-200 overflow-x-auto">
-              <nav
-                className="-mb-px flex space-x-6 min-w-max"
-                aria-label="Tabs"
-              >
-                {(
-                  [
-                    "overview",
-                    "eligibility",
-                    "documents",
-                    "timeline",
-                    "benefits",
-                    "apply",
-                  ] as const
-                ).map((tab) => (
+              <nav className="-mb-px flex space-x-6 min-w-max" aria-label="Tabs">
+                {(["overview", "eligibility", "documents", "timeline", "benefits", "apply"] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
@@ -173,210 +322,82 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
               </nav>
             </div>
 
-            {/* Tab Content */}
             <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200 min-h-[400px]">
-              {/* Overview Section */}
               {activeTab === "overview" && (
-                <div className="animate-fadeIn">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-4">
-                    About the Scholarship
-                  </h2>
-                  <p className="text-slate-600 leading-relaxed mb-6">
-                    The Global Future Leaders Scholarship is designed to support
-                    outstanding international students who have demonstrated
-                    academic excellence and leadership potential. This
-                    prestigious award aims to foster cross-cultural
-                    understanding and prepare the next generation of global
-                    leaders to tackle the world's most pressing challenges.
-                  </p>
-                  <p className="text-slate-600 leading-relaxed mb-6">
-                    Recipients will join a vibrant community of scholars and
-                    gain access to exclusive networking events, mentorship
-                    programs, and leadership workshops throughout their academic
-                    journey at Cambridge University.
-                  </p>
+                <div className="fade-in">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-4">About the Scholarship</h2>
+                  <p className="text-slate-600 leading-relaxed mb-6">{scholarshipData.description}</p>
 
-                  <h3 className="text-xl font-bold text-slate-900 mb-3">
-                    Field of Study
-                  </h3>
-                  <p className="text-slate-600 mb-4">
-                    All Master's degree programs offered at the University,
-                    specifically focusing on:
-                  </p>
+                  <h3 className="text-xl font-bold text-slate-900 mb-3">Field of Study</h3>
                   <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-8">
-                    <li className="flex items-center gap-2 text-slate-600">
-                      <i className="fas fa-check-circle text-green-500"></i>{" "}
-                      Computer Science & AI
-                    </li>
-                    <li className="flex items-center gap-2 text-slate-600">
-                      <i className="fas fa-check-circle text-green-500"></i>{" "}
-                      Environmental Science
-                    </li>
-                    <li className="flex items-center gap-2 text-slate-600">
-                      <i className="fas fa-check-circle text-green-500"></i>{" "}
-                      Public Health
-                    </li>
-                    <li className="flex items-center gap-2 text-slate-600">
-                      <i className="fas fa-check-circle text-green-500"></i>{" "}
-                      Business Administration
-                    </li>
+                    {scholarshipData.field_of_study?.map((field, idx) => (
+                      <li key={idx} className="flex items-center gap-2 text-slate-600">
+                        <i className="fa-solid fa-circle-check w-4 h-4 text-green-500"></i> {field}
+                      </li>
+                    ))}
                   </ul>
 
-                  <h3 className="text-xl font-bold text-slate-900 mb-4">
-                    Selection Process
-                  </h3>
+                  <h3 className="text-xl font-bold text-slate-900 mb-4">Selection Process</h3>
                   <div className="relative border-l-2 border-slate-200 ml-3 space-y-8">
-                    <div className="ml-6 relative">
-                      <span className="absolute -left-[33px] top-1 h-4 w-4 rounded-full bg-white border-4 border-blue-600"></span>
-                      <h4 className="font-semibold text-slate-900">
-                        Stage 1: Initial Screening
-                      </h4>
-                      <p className="text-sm text-slate-600 mt-1">
-                        Applications are reviewed for eligibility and
-                        completeness. Incomplete applications are rejected
-                        immediately.
-                      </p>
-                    </div>
-                    <div className="ml-6 relative">
-                      <span className="absolute -left-[33px] top-1 h-4 w-4 rounded-full bg-white border-4 border-slate-300"></span>
-                      <h4 className="font-semibold text-slate-900">
-                        Stage 2: Academic Review
-                      </h4>
-                      <p className="text-sm text-slate-600 mt-1">
-                        A panel of professors reviews academic transcripts,
-                        research proposals, and recommendation letters.
-                      </p>
-                    </div>
-                    <div className="ml-6 relative">
-                      <span className="absolute -left-[33px] top-1 h-4 w-4 rounded-full bg-white border-4 border-slate-300"></span>
-                      <h4 className="font-semibold text-slate-900">
-                        Stage 3: Interview
-                      </h4>
-                      <p className="text-sm text-slate-600 mt-1">
-                        Shortlisted candidates are invited for a virtual
-                        interview with the scholarship committee in June.
-                      </p>
-                    </div>
+                    {(scholarshipData.selection_process || []).map((step, idx) => (
+                      <div className="ml-6 relative" key={idx}>
+                        <span
+                          className={`absolute -left-[33px] top-1 h-4 w-4 rounded-full bg-white border-4 ${
+                            idx === 0 ? "border-blue-600" : "border-slate-300"
+                          }`}
+                        ></span>
+                        <h4 className="font-semibold text-slate-900">{step.stage || step.title}</h4>
+                        <p className="text-sm text-slate-600 mt-1">{step.description}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Eligibility Section */}
               {activeTab === "eligibility" && (
-                <div className="animate-fadeIn">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-4">
-                    Eligibility Criteria
-                  </h2>
+                <div className="fade-in">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-4">Eligibility Criteria</h2>
                   <div className="space-y-4 mb-6">
-                    <div className="flex gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <div className="flex-shrink-0 mt-1">
-                        <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
-                          1
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-slate-900">
-                          Nationality
-                        </h4>
-                        <p className="text-slate-600 text-sm">
-                          Must be an international student from a non-EU
-                          country.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <div className="flex-shrink-0 mt-1">
-                        <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
-                          2
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-slate-900">
-                          Academic Merit
-                        </h4>
-                        <p className="text-slate-600 text-sm">
-                          Must hold a First Class Honours degree or equivalent
-                          GPA (3.7/4.0).
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <div className="flex-shrink-0 mt-1">
-                        <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
-                          3
-                        </div>
-                      </div>
-                      <div>
-                        <h4 className="font-semibold text-slate-900">
-                          Language Proficiency
-                        </h4>
-                        <p className="text-slate-600 text-sm">
-                          IELTS score of 7.5 overall or TOEFL iBT score of 110.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <h3 className="text-lg font-bold text-slate-900 mb-3">
-                    Excluded Regions
-                  </h3>
-                  <p className="text-sm text-slate-600 mb-2">
-                    Citizens of the following countries are not eligible for
-                    this specific grant:
-                  </p>
-                  <ul className="list-disc list-inside text-sm text-slate-600 bg-red-50 p-4 rounded-lg border border-red-100">
-                    <li>United Kingdom</li>
-                    <li>Australia</li>
-                    <li>New Zealand</li>
-                    <li>USA (Specific state grants available instead)</li>
-                  </ul>
-                </div>
-              )}
-
-              {/* Documents Section */}
-              {activeTab === "documents" && (
-                <div className="animate-fadeIn">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-4">
-                    Required Documents
-                  </h2>
-                  <p className="text-slate-600 mb-6">
-                    Ensure all documents are in PDF format and do not exceed 5MB
-                    each.
-                  </p>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {[
-                      {
-                        title: "Academic Transcripts",
-                        desc: "Official copies from all universities attended.",
-                      },
-                      {
-                        title: "CV / Resume",
-                        desc: "Updated CV highlighting academic and leadership achievements.",
-                      },
-                      {
-                        title: "Recommendation Letters",
-                        desc: "Two academic references on official letterhead.",
-                      },
-                      {
-                        title: "Personal Statement",
-                        desc: "Max 1000 words outlining your goals and motivation.",
-                      },
-                    ].map((doc, idx) => (
-                      <div
-                        key={idx}
-                        className="p-4 border border-slate-200 rounded-xl hover:border-blue-400 transition-all flex items-start gap-3 bg-white cursor-pointer group"
-                      >
-                        <div className="w-5 h-5 rounded border border-slate-300 flex items-center justify-center bg-white mt-1 group-hover:border-blue-500 transition-colors">
-                          <i className="fas fa-check text-[10px] text-blue-500 opacity-0 group-hover:opacity-100"></i>
+                    {(scholarshipData.eligibility_criteria || []).map((item, idx) => (
+                      <div key={idx} className="flex gap-4 p-4 bg-slate-50 rounded-lg border border-slate-100">
+                        <div className="flex-shrink-0 mt-1">
+                          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xs">
+                            {idx + 1}
+                          </div>
                         </div>
                         <div>
-                          <h4 className="font-medium text-slate-900">
-                            {doc.title}
-                          </h4>
-                          <p className="text-xs text-slate-500 mt-1">
-                            {doc.desc}
-                          </p>
+                          <h4 className="font-semibold text-slate-900">{item.criterion || item.title}</h4>
+                          <p className="text-slate-600 text-sm">{item.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <h3 className="text-lg font-bold text-slate-900 mb-3">Excluded Regions</h3>
+                  <ul className="list-disc list-inside text-sm text-slate-600 bg-red-50 p-4 rounded-lg border border-red-100">
+                    {(scholarshipData.excluded_regions || []).map((region, idx) => (
+                      <li key={idx}>{region}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {activeTab === "documents" && (
+                <div className="fade-in">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-4">Required Documents</h2>
+                  <p className="text-slate-600 mb-6">Ensure all documents are in PDF format and do not exceed 5MB each.</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {(scholarshipData.required_documents || []).map((doc, idx) => (
+                      <div
+                        key={idx}
+                        className="p-4 border border-slate-200 rounded-xl hover:border-blue-400 transition-all flex items-start gap-3 h-full"
+                      >
+                        <div className="w-5 h-5 rounded border border-slate-300 flex items-center justify-center bg-white mt-0.5">
+                          <i className="fa-solid fa-check w-3 h-3 text-blue-500"></i>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-slate-900">{doc.name || doc.title}</h4>
+                          <p className="text-xs text-slate-500 mt-1">{doc.description}</p>
                         </div>
                       </div>
                     ))}
@@ -384,460 +405,201 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
                 </div>
               )}
 
-              {/* Timeline Section */}
               {activeTab === "timeline" && (
-                <div className="animate-fadeIn">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                    Scholarship Timeline 2026
-                  </h2>
+                <div className="fade-in">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-6">Scholarship Timeline</h2>
                   <div className="space-y-0">
-                    <div className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
-                        <div className="w-0.5 flex-1 bg-blue-200 h-16"></div>
-                      </div>
-                      <div className="pb-8">
-                        <span className="text-xs font-bold text-blue-600 uppercase tracking-wide">
-                          Jan 15, 2026
-                        </span>
-                        <h4 className="text-lg font-semibold text-slate-900">
-                          Applications Open
-                        </h4>
-                        <p className="text-sm text-slate-500">
-                          Online portal opens for submissions.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 bg-slate-300 rounded-full"></div>
-                        <div className="w-0.5 flex-1 bg-slate-200 h-16"></div>
-                      </div>
-                      <div className="pb-8">
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                          May 15, 2026
-                        </span>
-                        <h4 className="text-lg font-semibold text-slate-900">
-                          Submission Deadline
-                        </h4>
-                        <p className="text-sm text-slate-500">
-                          Portal closes at 11:59 PM GMT.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 bg-slate-300 rounded-full"></div>
-                        <div className="w-0.5 flex-1 bg-slate-200 h-16"></div>
-                      </div>
-                      <div className="pb-8">
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                          June 2026
-                        </span>
-                        <h4 className="text-lg font-semibold text-slate-900">
-                          Interview Stage
-                        </h4>
-                        <p className="text-sm text-slate-500">
-                          Shortlisted candidates contacted for video interviews.
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex gap-4">
-                      <div className="flex flex-col items-center">
-                        <div className="w-3 h-3 bg-slate-300 rounded-full"></div>
-                      </div>
-                      <div>
-                        <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">
-                          July 30, 2026
-                        </span>
-                        <h4 className="text-lg font-semibold text-slate-900">
-                          Results Announced
-                        </h4>
-                        <p className="text-sm text-slate-500">
-                          Final recipients notified via email.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Benefits Section */}
-              {activeTab === "benefits" && (
-                <div className="animate-fadeIn">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                    Scholarship Value
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-6 border border-slate-200 rounded-xl hover:border-blue-500 transition-colors group bg-white shadow-sm">
-                      <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-blue-600 mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-                        <i className="fas fa-coins text-lg"></i>
-                      </div>
-                      <h3 className="font-semibold text-lg text-slate-900 mb-2">
-                        Tuition Coverage
-                      </h3>
-                      <p className="text-slate-600 text-sm">
-                        100% of tuition fees covered for the duration of the
-                        1-year Master's program.
-                      </p>
-                    </div>
-                    <div className="p-6 border border-slate-200 rounded-xl hover:border-blue-500 transition-colors group bg-white shadow-sm">
-                      <div className="w-10 h-10 bg-green-50 rounded-lg flex items-center justify-center text-green-600 mb-4 group-hover:bg-green-600 group-hover:text-white transition-colors">
-                        <i className="fas fa-home text-lg"></i>
-                      </div>
-                      <h3 className="font-semibold text-lg text-slate-900 mb-2">
-                        Living Stipend
-                      </h3>
-                      <p className="text-slate-600 text-sm">
-                        Monthly living allowance of £1,400 to cover
-                        accommodation and expenses.
-                      </p>
-                    </div>
-                    <div className="p-6 border border-slate-200 rounded-xl hover:border-blue-500 transition-colors group bg-white shadow-sm">
-                      <div className="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center text-purple-600 mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-                        <i className="fas fa-plane text-lg"></i>
-                      </div>
-                      <h3 className="font-semibold text-lg text-slate-900 mb-2">
-                        Travel Grant
-                      </h3>
-                      <p className="text-slate-600 text-sm">
-                        Round-trip economy airfare from home country to the UK.
-                      </p>
-                    </div>
-                    <div className="p-6 border border-slate-200 rounded-xl hover:border-blue-500 transition-colors group bg-white shadow-sm">
-                      <div className="w-10 h-10 bg-orange-50 rounded-lg flex items-center justify-center text-orange-600 mb-4 group-hover:bg-orange-600 group-hover:text-white transition-colors">
-                        <i className="fas fa-shield-alt text-lg"></i>
-                      </div>
-                      <h3 className="font-semibold text-lg text-slate-900 mb-2">
-                        Health Insurance
-                      </h3>
-                      <p className="text-slate-600 text-sm">
-                        Coverage for the NHS Immigration Health Surcharge.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Apply Section */}
-              {activeTab === "apply" && (
-                <div className="animate-fadeIn">
-                  <h2 className="text-2xl font-bold text-slate-900 mb-6">
-                    How to Apply
-                  </h2>
-
-                  <div className="mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100 shadow-sm transition-all hover:border-blue-200">
-                    <h3 className="flex items-center gap-2 font-semibold text-blue-900 mb-3">
-                      <i className="fas fa-play-circle text-blue-600"></i> Video
-                      Guide: Application Walkthrough
-                    </h3>
-                    <div className="aspect-video rounded-lg overflow-hidden bg-slate-900 relative group cursor-pointer h-64 border border-blue-200">
-                      <img
-                        src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
-                        alt="Video"
-                        className="w-full h-full object-cover opacity-80 group-hover:opacity-60 transition-opacity"
-                      />
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                          <div className="w-12 h-12 bg-white text-blue-600 rounded-full flex items-center justify-center pl-1 shadow-lg">
-                            <i className="fas fa-play text-xl"></i>
-                          </div>
+                    {(scholarshipData.timeline || []).map((item, idx) => (
+                      <div className="flex gap-4" key={idx}>
+                        <div className="flex flex-col items-center">
+                          <div className={`w-3 h-3 rounded-full ${idx === 0 ? "bg-blue-600" : "bg-slate-300"}`}></div>
+                          {idx !== scholarshipData.timeline.length - 1 && (
+                            <div className={`w-0.5 flex-1 h-16 ${idx === 0 ? "bg-blue-200" : "bg-slate-200"}`}></div>
+                          )}
+                        </div>
+                        <div className={idx === scholarshipData.timeline.length - 1 ? "" : "pb-8"}>
+                          <span className="text-xs font-bold text-slate-500 uppercase tracking-wide">{item.date}</span>
+                          <h4 className="text-lg font-semibold text-slate-900">{item.event || item.title}</h4>
                         </div>
                       </div>
-                    </div>
-                    <p className="text-sm text-blue-700 mt-3 font-medium italic text-center">
-                      Watch our 5-minute step-by-step guide on how to fill out
-                      the scholarship application form correctly.
-                    </p>
+                    ))}
                   </div>
+                </div>
+              )}
 
+              {activeTab === "benefits" && (
+                <div className="fade-in">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-6">Scholarship Value</h2>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {(scholarshipData.benefits || []).map((benefit, idx) => (
+                      <div key={idx} className="p-6 border border-slate-200 rounded-xl hover:border-blue-300 transition-colors">
+                        <h3 className="font-semibold text-lg text-slate-900 mb-2">{benefit.title}</h3>
+                        <p className="text-slate-600 text-sm">{benefit.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "apply" && (
+                <div className="fade-in">
+                  <h2 className="text-2xl font-bold text-slate-900 mb-6">How to Apply</h2>
                   <ol className="relative border-l border-slate-200 ml-3 space-y-8">
-                    <li className="mb-10 ml-6">
-                      <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white shadow-sm">
-                        <i className="fas fa-file-alt text-blue-600 text-[10px]"></i>
+                    <li className="ml-6">
+                      <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white">
+                        <i className="fa-solid fa-file-lines w-3 h-3 text-blue-600"></i>
                       </span>
-                      <h3 className="flex items-center mb-1 text-lg font-semibold text-slate-900">
-                        Prepare Documents
-                      </h3>
-                      <p className="mb-4 text-base font-normal text-slate-500">
-                        Gather your transcripts, CV, two letters of
-                        recommendation, and personal statement (max 1000 words).
-                      </p>
-                    </li>
-                    <li className="mb-10 ml-6">
-                      <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white shadow-sm">
-                        <i className="fas fa-school text-blue-600 text-[10px]"></i>
-                      </span>
-                      <h3 className="mb-1 text-lg font-semibold text-slate-900">
-                        Apply to the University
-                      </h3>
+                      <h3 className="mb-1 text-lg font-semibold text-slate-900">Prepare Documents</h3>
                       <p className="text-base font-normal text-slate-500">
-                        Submit your admission application to a Master's program
-                        at Cambridge University before April 30th.
+                        Gather transcripts, CV, recommendation letters, and your personal statement.
                       </p>
                     </li>
                     <li className="ml-6">
-                      <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white shadow-sm">
-                        <i className="fas fa-paper-plane text-blue-600 text-[10px]"></i>
+                      <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white">
+                        <i className="fa-solid fa-building-columns w-3 h-3 text-blue-600"></i>
                       </span>
-                      <h3 className="mb-1 text-lg font-semibold text-slate-900">
-                        Submit Scholarship Form
-                      </h3>
+                      <h3 className="mb-1 text-lg font-semibold text-slate-900">Apply to Institution</h3>
                       <p className="text-base font-normal text-slate-500">
-                        Once you have your student ID, complete the separate
-                        scholarship application form via the portal.
+                        Submit your institution admission as required by the scholarship provider.
+                      </p>
+                    </li>
+                    <li className="ml-6">
+                      <span className="absolute flex items-center justify-center w-6 h-6 bg-blue-100 rounded-full -left-3 ring-8 ring-white">
+                        <i className="fa-solid fa-paper-plane w-3 h-3 text-blue-600"></i>
+                      </span>
+                      <h3 className="mb-1 text-lg font-semibold text-slate-900">Submit Inquiry/Application</h3>
+                      <p className="text-base font-normal text-slate-500">
+                        Complete the scholarship inquiry form and proceed with application steps.
                       </p>
                     </li>
                   </ol>
                   <div className="mt-8">
-                    <a
-                      href="#"
-                      className="inline-flex items-center justify-center w-full px-5 py-3 text-base font-medium text-white transition-all bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700 shadow-md hover:shadow-lg transform hover:-translate-y-0.5"
+                    <button
+                      onClick={() =>
+                        onNavigate("scholarshipInquiry", {
+                          id: scholarshipData.id,
+                          scholarshipName: scholarshipData.title,
+                          scholarshipType: scholarshipData.funding_type || scholarshipData.scholarship_type,
+                        })
+                      }
+                      className="inline-flex items-center justify-center w-full px-5 py-3 text-base font-medium text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700"
                     >
-                      Go to Official Application Portal
-                      <i className="fas fa-external-link-alt ml-2 text-sm"></i>
-                    </a>
+                      Open Application Form
+                      <i className="fa-solid fa-arrow-right w-5 h-5 ml-2"></i>
+                    </button>
                   </div>
                 </div>
               )}
             </div>
 
-            {/* FAQ Section */}
             <div className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
-              <h2 className="text-xl font-bold text-slate-900 mb-6">
-                Frequently Asked Questions
-              </h2>
-              <div className="space-y-4">
-                {[
-                  {
-                    q: "Is there an application fee?",
-                    a: "No, applying for the scholarship itself is free. However, there may be an application fee for the university admission process depending on the department.",
-                  },
-                  {
-                    q: "Can I apply if I am in my final year of Bachelor's?",
-                    a: "Yes, you can apply with your provisional transcripts. If selected, the offer will be conditional upon achieving the required final grades.",
-                  },
-                  {
-                    q: "Are part-time courses eligible?",
-                    a: "No, this specific scholarship is only available for full-time, on-campus Master's programs.",
-                  },
-                ].map((faq, idx) => (
-                  <div
-                    key={idx}
-                    className="border border-slate-200 rounded-lg overflow-hidden"
-                  >
+              <h2 className="text-xl font-bold text-slate-900 mb-6">Frequently Asked Questions</h2>
+              <div className="space-y-3">
+                {(scholarshipData.faqs || []).map((faq, idx) => (
+                  <div className="border border-slate-200 rounded-lg" key={idx}>
                     <button
-                      onClick={() => toggleFaq(idx)}
-                      className={`w-full px-5 py-4 text-left flex justify-between items-center transition-colors focus:outline-none ${openFaq === idx ? "bg-slate-50" : "hover:bg-slate-50"}`}
+                      onClick={() => setOpenFaq((prev) => (prev === idx ? null : idx))}
+                      className="w-full px-5 py-4 text-left flex justify-between items-center"
                     >
-                      <span className="font-semibold text-slate-700">
-                        {faq.q}
-                      </span>
+                      <span className="font-medium text-slate-700">{faq.question}</span>
                       <i
-                        className={`fas fa-chevron-down text-slate-400 transform transition-transform duration-200 ${openFaq === idx ? "rotate-180" : ""}`}
+                        className={`fa-solid fa-chevron-down w-5 h-5 text-slate-400 transition-transform ${
+                          openFaq === idx ? "rotate-180" : ""
+                        }`}
                       ></i>
                     </button>
-                    <div
-                      className={`px-5 text-slate-600 text-sm overflow-hidden transition-all duration-300 ${openFaq === idx ? "pb-4 max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
-                    >
-                      {faq.a}
-                    </div>
+                    {openFaq === idx && <div className="px-5 pb-4 text-slate-600 text-sm">{faq.answer}</div>}
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Right Column: Sidebar */}
           <div className="space-y-6">
-            {/* At a Glance Card */}
             <div className="bg-white p-6 rounded-2xl shadow-lg border border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2 uppercase tracking-wide text-center">
-                At a Glance
-              </h3>
-
-              <div className="space-y-6 mb-8 mt-4">
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 shrink-0 shadow-sm">
-                    <i className="far fa-calendar-alt text-lg"></i>
+              <h3 className="text-lg font-bold text-slate-900 mb-4 border-b border-slate-100 pb-2">At a Glance</h3>
+              <div className="space-y-4 mb-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+                    <i className="fa-solid fa-calendar w-5 h-5"></i>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">
-                      Deadline
-                    </p>
-                    <p className="text-slate-900 font-semibold">
-                      {scholarshipData.deadline}
-                    </p>
+                    <p className="text-xs text-slate-500 uppercase font-semibold">Deadline</p>
+                    <p className="text-slate-900 font-medium">{scholarshipData.deadline}</p>
                   </div>
                 </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500 shrink-0 shadow-sm">
-                    <i className="fas fa-dollar-sign text-lg"></i>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500 shrink-0">
+                    <i className="fa-solid fa-dollar-sign w-5 h-5"></i>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">
-                      Funding
-                    </p>
-                    <p className="text-slate-900 font-semibold">
-                      Full Tuition + Stipend
-                    </p>
+                    <p className="text-xs text-slate-500 uppercase font-semibold">Value</p>
+                    <p className="text-slate-900 font-medium">{scholarshipData.value}</p>
                   </div>
                 </div>
-
-                <div className="flex items-start gap-4">
-                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 shrink-0 shadow-sm">
-                    <i className="fas fa-graduation-cap text-lg"></i>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
+                    <i className="fa-solid fa-graduation-cap w-5 h-5"></i>
                   </div>
                   <div>
-                    <p className="text-xs text-slate-500 uppercase font-bold tracking-wider">
-                      Level
-                    </p>
-                    <p className="text-slate-900 font-semibold">
-                      Master's Degree
-                    </p>
+                    <p className="text-xs text-slate-500 uppercase font-semibold">Provider</p>
+                    <p className="text-slate-900 font-medium">{scholarshipData.provider}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
+                    <i className="fa-solid fa-graduation-cap w-5 h-5"></i>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 uppercase font-semibold">Level</p>
+                    <p className="text-slate-900 font-medium">{scholarshipData.degree_level}</p>
                   </div>
                 </div>
               </div>
 
               <button
-                onClick={() => onNavigate("scholarshipApplication", { id: id })}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-0.5"
+                onClick={() =>
+                  onNavigate("scholarshipInquiry", {
+                    id: scholarshipData.id,
+                    scholarshipName: scholarshipData.title,
+                    scholarshipType: scholarshipData.funding_type || scholarshipData.scholarship_type,
+                  })
+                }
+                className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
               >
                 Apply Now
               </button>
-              <p className="text-[10px] text-center text-slate-400 mt-4 font-medium italic">
-                Official link from Cambridge University opens in new tab
-              </p>
+              <p className="text-xs text-center text-slate-400 mt-3">Complete application in 5 minutes</p>
             </div>
 
-            {/* Sidebar Ad 1 */}
-            <div className="bg-slate-50 rounded-2xl p-6 border border-slate-200 text-center relative overflow-hidden group cursor-pointer hover:shadow-inner transition-all">
-              <div className="absolute top-2 right-2 bg-white/80 backdrop-blur text-[10px] px-2 py-0.5 rounded text-slate-400 border border-slate-200">
-                Ad
-              </div>
-              <div className="relative z-10">
-                <div className="w-12 h-12 bg-indigo-600 text-white rounded-lg flex items-center justify-center mx-auto mb-3 shadow-lg group-hover:scale-110 transition-transform">
-                  <i className="fas fa-globe"></i>
-                </div>
-                <h4 className="font-bold text-slate-900 mb-1">
-                  Study Abroad Consultant
-                </h4>
-                <p className="text-sm text-slate-600 mb-4">
-                  Get expert guidance on your visa and application process.
-                </p>
-                <button className="text-xs font-semibold text-indigo-600 hover:text-white bg-white border border-indigo-200 px-4 py-2 rounded-full hover:bg-indigo-600 transition-all shadow-sm">
-                  Book Free Session
-                </button>
-              </div>
-            </div>
-
-            {/* Related Scholarships */}
             <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="font-bold text-slate-900">Similar Programs</h3>
-                <button className="text-xs text-blue-600 font-bold hover:underline">
-                  View All
-                </button>
+                <h3 className="font-bold text-slate-900">Similar Scholarships</h3>
+                <button className="text-xs text-blue-600 font-medium hover:underline" onClick={() => onNavigate("scholarshipCategory")}>View All</button>
               </div>
               <ul className="space-y-4">
-                <li className="pb-4 border-b border-slate-100 last:border-0 last:pb-0">
-                  <div className="group block cursor-pointer">
-                    <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded mb-1 inline-block font-bold">
-                      ENDING SOON
-                    </span>
-                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2 leading-relaxed">
-                      Chevening Scholarship UK 2026
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                      <i className="far fa-clock"></i> Deadline: Nov 2025
-                    </p>
-                  </div>
-                </li>
-                <li className="pb-4 border-b border-slate-100 last:border-0 last:pb-0">
-                  <div className="group block cursor-pointer">
-                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2 leading-relaxed">
-                      Fulbright Foreign Student Program USA
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                      <i className="far fa-clock"></i> Deadline: Oct 2025
-                    </p>
-                  </div>
-                </li>
-                <li className="pb-4 border-b border-slate-100 last:border-0 last:pb-0">
-                  <div className="group block cursor-pointer">
-                    <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2 leading-relaxed">
-                      Erasmus Mundus Joint Masters
-                    </h4>
-                    <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                      <i className="far fa-clock"></i> Deadline: Feb 2026
-                    </p>
-                  </div>
-                </li>
+                {similarScholarships.length > 0 ? (
+                  similarScholarships.map((item, idx) => (
+                    <li key={item.id} className={idx !== similarScholarships.length - 1 ? "pb-4 border-b border-slate-100" : ""}>
+                      <button className="text-left group" onClick={() => onNavigate("scholarshipHubDetails", { id: String(item.id) })}>
+                        {item.status === "CLOSING SOON" && (
+                          <span className="text-[10px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded mb-1 inline-block">Ending Soon</span>
+                        )}
+                        <h4 className="text-sm font-semibold text-slate-800 group-hover:text-blue-600 transition-colors line-clamp-2">{item.title}</h4>
+                        <p className="text-xs text-slate-500 mt-1">Deadline: {item.deadline}</p>
+                      </button>
+                    </li>
+                  ))
+                ) : (
+                  <li>
+                    <p className="text-sm text-slate-500">No similar scholarships available yet.</p>
+                  </li>
+                )}
               </ul>
-            </div>
-
-            {/* Sidebar Ad 2 */}
-            <div className="rounded-2xl overflow-hidden border border-slate-200 shadow-sm relative group cursor-pointer h-64">
-              <img
-                src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-1.2.1&auto=format&fit=crop&w=600&q=80"
-                alt="Ad"
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-              />
-              <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-center p-4">
-                <span className="text-[10px] text-white/70 border border-white/30 px-2 rounded mb-2 uppercase font-bold tracking-widest">
-                  Sponsored
-                </span>
-                <h4 className="text-white font-bold text-xl mb-2">
-                  Learn Python in 30 Days
-                </h4>
-                <button className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg mt-2 font-bold shadow-lg shadow-blue-900/40">
-                  Start Learning
-                </button>
-              </div>
-            </div>
-
-            {/* Campus Life Images Widget */}
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
-              <h3 className="font-bold text-slate-900 mb-4">
-                University Gallery
-              </h3>
-              <div className="grid grid-cols-2 gap-2">
-                <img
-                  src="https://images.unsplash.com/photo-1525921429612-e86051f445a7?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                  alt="Library"
-                  className="rounded-lg object-cover h-24 w-full cursor-zoom-in hover:brightness-90 transition-all"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                  alt="Students"
-                  className="rounded-lg object-cover h-24 w-full cursor-zoom-in hover:brightness-90 transition-all"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                  alt="Campus"
-                  className="rounded-lg object-cover h-24 w-full cursor-zoom-in hover:brightness-90 transition-all"
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?ixlib=rb-1.2.1&auto=format&fit=crop&w=300&q=80"
-                  alt="Seminar"
-                  className="rounded-lg object-cover h-24 w-full cursor-zoom-in hover:brightness-90 transition-all"
-                />
-              </div>
             </div>
           </div>
         </div>
       </main>
-
-      <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.5s ease-out forwards;
-        }
-      `}</style>
     </div>
   );
 };

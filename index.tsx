@@ -6,6 +6,8 @@ import './index.css';
 import App from './App';
 import { AuthProvider } from './services/AuthContext';
 
+import { BrowserRouter } from 'react-router-dom';
+
 const queryClient = new QueryClient();
 
 const rootElement = document.getElementById('root');
@@ -18,7 +20,9 @@ root.render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <App />
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
   </React.StrictMode>

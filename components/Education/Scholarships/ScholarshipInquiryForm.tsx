@@ -1,21 +1,60 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { apiService } from "../../../services/api";
 
 interface ScholarshipInquiryFormProps {
+  onNavigate?: (view: any, data?: any) => void;
   scholarshipName?: string;
   onClose?: () => void;
 }
 
 const ScholarshipInquiryForm: React.FC<ScholarshipInquiryFormProps> = ({
+  onNavigate,
   scholarshipName = "Global Scholars Program",
   onClose,
 }) => {
+  const location = useLocation();
+  const routeState = (location.state as any) || {};
+  const scholarshipId = routeState.id;
+
+  const { data: scholarshipDetails } = useQuery({
+    queryKey: ["education-scholarship", scholarshipId],
+    enabled: !!scholarshipId,
+    queryFn: () => apiService.getEducationScholarshipById(scholarshipId),
+  });
+
+  const resolvedScholarshipName =
+    scholarshipDetails?.data?.title ||
+    routeState.scholarshipName ||
+    routeState.title ||
+    scholarshipName;
+
+  const prefillType = useMemo(() => {
+    const raw =
+      scholarshipDetails?.data?.scholarship_type ||
+      scholarshipDetails?.data?.funding_type ||
+      routeState.scholarshipType ||
+      routeState.type ||
+      routeState.fundingType ||
+      "";
+    const normalized = String(raw).toLowerCase();
+    if (normalized.includes("merit")) return "Merit-Based";
+    if (normalized.includes("need")) return "Need-Based";
+    if (normalized.includes("athlet")) return "Athletic";
+    if (normalized.includes("art")) return "Arts";
+    if (normalized.includes("stem") || normalized.includes("tech"))
+      return "STEM";
+    return "General";
+  }, [routeState, scholarshipDetails]);
+
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
     email: "",
-    scholarshipType: "",
+    scholarshipType: prefillType,
     message: "",
   });
 
@@ -44,7 +83,7 @@ const ScholarshipInquiryForm: React.FC<ScholarshipInquiryFormProps> = ({
       firstName: "",
       lastName: "",
       email: "",
-      scholarshipType: "",
+      scholarshipType: prefillType,
       message: "",
     });
     setIsSubmitted(false);
@@ -71,12 +110,12 @@ const ScholarshipInquiryForm: React.FC<ScholarshipInquiryFormProps> = ({
             <h2 className="text-xl font-bold text-white">
               Scholarship Inquiry
             </h2>
-            <p className="text-blue-100 text-sm mt-1">{scholarshipName}</p>
+            <p className="text-blue-100 text-sm mt-1">{resolvedScholarshipName}</p>
           </div>
 
           {isSubmitted ? (
             /* Success Message */
-            <div className="p-8 text-center flex flex-col items-center justify-center min-h-[400px] animate-fadeIn">
+            <div className="p-8 text-center flex flex-col items-center justify-center min-h-[300px] animate-fadeIn">
               <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center mb-4 text-2xl">
                 <i className="fa-solid fa-check"></i>
               </div>

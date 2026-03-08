@@ -110,7 +110,7 @@ const PartnerPage: React.FC = () => {
   ];
 
   return (
-    <div className="pt-24 md:pt-32 pb-20 bg-gray-50 min-h-screen font-jakarta">
+    <div className="pt-24 md:pt-32 pb-20 bg-gray-50 min-h-screen font-sans">
       <div className="container mx-auto px-6 md:px-12 max-w-7xl">
         {/* Page Header */}
         <div className="text-center mb-16">

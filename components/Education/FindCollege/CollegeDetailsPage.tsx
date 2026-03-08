@@ -1,20 +1,26 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { apiService } from "../../../services/api";
 
 interface CollegeDetailsPageProps {
-  id: number;
   onNavigate: (view: any, data?: any) => void;
 }
 
-const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = ({
-  id,
-  onNavigate,
-}) => {
+const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = ({ onNavigate }) => {
+  const location = useLocation();
+  const routeState = (location.state || {}) as { id?: number | string };
+  const parsedCollegeId = Number(routeState.id);
+  const collegeId = Number.isFinite(parsedCollegeId) && parsedCollegeId > 0
+    ? parsedCollegeId
+    : null;
+  const hasInvalidCollegeId = routeState.id !== undefined && collegeId === null;
+
   const [activeTab, setActiveTab] = useState("about");
   const { data, isLoading, error } = useQuery({
-    queryKey: ["college", id],
-    queryFn: () => apiService.getCollegeById(id),
+    queryKey: ["college", collegeId],
+    queryFn: () => apiService.getCollegeById(collegeId as number),
+    enabled: collegeId !== null,
   });
 
   const college = data?.data || null;
@@ -324,14 +330,14 @@ const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = ({
   const coursesData =
     Array.isArray(college?.courses) && college.courses.length > 0
       ? college.courses.map((course: any) => ({
-          name: course.name || "N/A",
-          specialization: course.specialization || course.focus || "General",
-          duration: course.duration || "N/A",
-          type: course.type || "Full Time",
-          fees: course.fees || "N/A",
-          seats: course.seats || "Seats N/A",
-          eligibility: course.eligibility || "Eligibility details available on request",
-        }))
+        name: course.name || "N/A",
+        specialization: course.specialization || course.focus || "General",
+        duration: course.duration || "N/A",
+        type: course.type || "Full Time",
+        fees: course.fees || "N/A",
+        seats: course.seats || "Seats N/A",
+        eligibility: course.eligibility || "Eligibility details available on request",
+      }))
       : courses;
 
   const admissionsData =
@@ -352,18 +358,18 @@ const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = ({
   const scholarshipsData =
     Array.isArray(college?.scholarships) && college.scholarships.length > 0
       ? college.scholarships.map((scholarship: any) => ({
-          title: scholarship.title || "Scholarship",
-          icon: scholarship.icon || "fa-medal",
-          color:
-            scholarship.color === "yellow"
-              ? "amber"
-              : scholarship.color === "green"
+        title: scholarship.title || "Scholarship",
+        icon: scholarship.icon || "fa-medal",
+        color:
+          scholarship.color === "yellow"
+            ? "amber"
+            : scholarship.color === "green"
+              ? "emerald"
+              : scholarship.color === "blue"
                 ? "emerald"
-                : scholarship.color === "blue"
-                  ? "emerald"
-                  : scholarship.color || "amber",
-          desc: scholarship.desc || scholarship.description || "Apply for scholarship support",
-        }))
+                : scholarship.color || "amber",
+        desc: scholarship.desc || scholarship.description || "Apply for scholarship support",
+      }))
       : scholarships;
 
   const reviewsData =
@@ -386,10 +392,15 @@ const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = ({
   const contactWebsiteDisplay = normalizedWebsite ? normalizedWebsite.toUpperCase() : "N/A";
 
   return (
-    <div className="bg-white min-h-screen font-jakarta">
+    <div className="bg-white min-h-screen font-sans">
       {isLoading && (
         <div className="w-full px-6 lg:px-12 py-4 bg-blue-50 border-b border-blue-100 text-blue-700 text-xs font-black uppercase tracking-widest">
           Loading college details...
+        </div>
+      )}
+      {hasInvalidCollegeId && (
+        <div className="w-full px-6 lg:px-12 py-4 bg-amber-50 border-b border-amber-100 text-amber-700 text-xs font-black uppercase tracking-widest">
+          Invalid college id in navigation state
         </div>
       )}
       {error && (
@@ -505,11 +516,10 @@ const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = ({
                   onClick={() =>
                     setActiveTab(tab.toLowerCase().replace(/ /g, "_"))
                   }
-                  className={`text-[12px] font-black uppercase tracking-[0.2em] relative transition-all whitespace-nowrap ${
-                    activeTab === tab.toLowerCase().replace(/ /g, "_")
+                  className={`text-[12px] font-black uppercase tracking-[0.2em] relative transition-all whitespace-nowrap ${activeTab === tab.toLowerCase().replace(/ /g, "_")
                       ? "text-blue-600"
                       : "text-slate-400 hover:text-slate-600"
-                  }`}
+                    }`}
                 >
                   {tab}
                   {activeTab === tab.toLowerCase().replace(/ /g, "_") && (
@@ -806,32 +816,32 @@ const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = ({
             {activeTab === "alumni" && (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-fadeIn">
                 {alumniData.map((person, i) => (
-                    <div
-                      key={i}
-                      className="bg-white rounded-lg border border-slate-100 p-10 text-center shadow-sm hover:shadow-2xl transition-all duration-500 group"
-                    >
-                      <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-6 border-4 border-slate-50 shadow-lg">
-                        <img
-                          src={person.image}
-                          className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                          alt=""
-                        />
-                      </div>
-                      <h4 className="text-xl font-black text-slate-900 mb-1">
-                        {person.name}
-                      </h4>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">
-                        {person.role}
-                      </p>
-                      <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-8">
-                        {person.batch}
-                      </p>
-                      <button className="flex items-center justify-center gap-3 w-full py-4 bg-primary-50 text-primary-600 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary-600 hover:text-white transition-all">
-                        Connect
-                        <i className="fa-brands fa-linkedin-in text-lg"></i>
-                      </button>
+                  <div
+                    key={i}
+                    className="bg-white rounded-lg border border-slate-100 p-10 text-center shadow-sm hover:shadow-2xl transition-all duration-500 group"
+                  >
+                    <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-6 border-4 border-slate-50 shadow-lg">
+                      <img
+                        src={person.image}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                        alt=""
+                      />
                     </div>
-                  ))}
+                    <h4 className="text-xl font-black text-slate-900 mb-1">
+                      {person.name}
+                    </h4>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">
+                      {person.role}
+                    </p>
+                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-8">
+                      {person.batch}
+                    </p>
+                    <button className="flex items-center justify-center gap-3 w-full py-4 bg-primary-50 text-primary-600 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary-600 hover:text-white transition-all">
+                      Connect
+                      <i className="fa-brands fa-linkedin-in text-lg"></i>
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -1077,13 +1087,12 @@ const ContactItem: React.FC<{
 }> = ({ icon, label, value, color }) => (
   <div className="flex items-start gap-6 group">
     <div
-      className={`w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0 transition-all group-hover:scale-110 ${
-        color === "blue"
+      className={`w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0 transition-all group-hover:scale-110 ${color === "blue"
           ? "bg-blue-100 text-blue-600"
           : color === "emerald"
             ? "bg-emerald-100 text-emerald-600"
             : "bg-amber-100 text-amber-600"
-      }`}
+        }`}
     >
       <i className={`fa-solid ${icon}`}></i>
     </div>
@@ -1106,13 +1115,12 @@ const AboutCard: React.FC<{
 }> = ({ icon, title, desc, color }) => (
   <div className="bg-white p-10 rounded-md border border-slate-100 shadow-sm hover:shadow-2xl hover:border-primary-100 transition-all duration-500 group flex flex-col h-full transform hover:-translate-y-2">
     <div
-      className={`w-16 h-16 rounded-md flex items-center justify-center text-3xl mb-8 transition-all group-hover:scale-110 shadow-sm ${
-        color === "blue"
+      className={`w-16 h-16 rounded-md flex items-center justify-center text-3xl mb-8 transition-all group-hover:scale-110 shadow-sm ${color === "blue"
           ? "bg-blue-50 text-blue-600"
           : color === "emerald"
             ? "bg-emerald-50 text-emerald-600"
             : "bg-purple-50 text-purple-600"
-      }`}
+        }`}
     >
       <i className={`fa-solid ${icon}`}></i>
     </div>
@@ -1177,22 +1185,20 @@ const DeptCard: React.FC<{
   desc: string;
 }> = ({ icon, title, color, desc }) => (
   <div
-    className={`bg-white p-10 rounded-lg border transition-all duration-500 hover:shadow-2xl group flex flex-col h-full ${
-      color === "blue"
+    className={`bg-white p-10 rounded-lg border transition-all duration-500 hover:shadow-2xl group flex flex-col h-full ${color === "blue"
         ? "border-blue-100 hover:border-blue-400"
         : color === "emerald"
           ? "border-emerald-100 hover:border-emerald-400"
           : "border-pink-100 hover:border-pink-400"
-    }`}
+      }`}
   >
     <div
-      className={`w-16 h-16 rounded-md flex items-center justify-center text-2xl mb-10 shadow-lg group-hover:scale-110 transition-transform duration-500 ${
-        color === "blue"
+      className={`w-16 h-16 rounded-md flex items-center justify-center text-2xl mb-10 shadow-lg group-hover:scale-110 transition-transform duration-500 ${color === "blue"
           ? "bg-blue-600 text-white shadow-blue-200"
           : color === "emerald"
             ? "bg-emerald-600 text-white shadow-emerald-200"
             : "bg-pink-600 text-white shadow-pink-200"
-      }`}
+        }`}
     >
       <i className={`fa-solid ${icon}`}></i>
     </div>

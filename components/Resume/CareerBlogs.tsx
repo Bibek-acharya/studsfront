@@ -38,7 +38,7 @@ const blogPosts = [
 
 const CareerBlogs: React.FC = () => {
   return (
-    <div className="min-h-screen bg-white font-jakarta text-slate-900 pt-20">
+    <div className="min-h-screen bg-white font-sans text-slate-900 pt-20">
       <style>{`
                 .glass-card {
                     background: rgba(255, 255, 255, 0.7);

@@ -1,11 +1,12 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import UniversitiesHero from "./UniversitiesHero";
+import { useLocation } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import UniversityCard from "./UniversityCard";
 import Pagination from "./Pagination";
 import AffiliationTab from "./AffiliationTab";
 import CollegeListItem from "./CollegeListItem";
+import CollegesAndCoursesPage from "../CourseFinder/CollegesAndCoursesPage";
 import { FilterState, University, College } from "./types";
 import { apiService } from "../../../services/api";
 
@@ -13,13 +14,36 @@ interface UniversitiesPageProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
+interface CourseCollegesRouteState {
+  courseId?: string;
+  courseTitle?: string;
+  collegesCount?: number;
+}
+
 const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
+  const location = useLocation();
+  const routeState = (location.state || {}) as CourseCollegesRouteState;
+  const selectedCourse = routeState.courseTitle
+    ? {
+        id: routeState.courseId,
+        title: routeState.courseTitle,
+        collegesCount:
+          typeof routeState.collegesCount === "number"
+            ? routeState.collegesCount
+            : undefined,
+      }
+    : null;
+
   const [view, setView] = useState<"discovery" | "colleges">("discovery");
   const [selectedUniId, setSelectedUniId] = useState<number>(1);
   const [filters, setFilters] = useState<FilterState>({
     affiliation: ["Nepal University"],
     searchQuery: "",
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const [collegePage, setCollegePage] = useState(1);
+  const itemsPerPage = 9;
+  const collegesPerPage = 21;
 
   const { data: universitiesResponse } = useQuery({
     queryKey: ["universities", filters.searchQuery],
@@ -47,12 +71,9 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
     }));
   };
 
-  const handleSearch = (query: string) => {
-    setFilters((prev) => ({ ...prev, searchQuery: query }));
-  };
-
   const resetFilters = () => {
     setFilters({ affiliation: ["Nepal University"], searchQuery: "" });
+    setCurrentPage(1);
   };
 
   const goToColleges = (uniId: number) => {
@@ -61,81 +82,266 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
   };
 
   useEffect(() => {
+    if (selectedCourse) {
+      setView("colleges");
+    }
+  }, [selectedCourse]);
+
+  useEffect(() => {
     if (universities.length > 0 && !universities.find((uni) => uni.id === selectedUniId)) {
       setSelectedUniId(universities[0].id);
     }
   }, [universities, selectedUniId]);
 
   const filteredUniversities = useMemo(() => {
-    return universities.filter((uni) => {
+    const items = universities.filter((uni) => {
       const matchesSearch = uni.name
         .toLowerCase()
         .includes(filters.searchQuery.toLowerCase());
       return matchesSearch;
     });
+
+    return items;
   }, [universities, filters.searchQuery]);
+
+  const totalPages = Math.ceil(filteredUniversities.length / itemsPerPage);
+
+  const paginatedUniversities = useMemo(() => {
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    return filteredUniversities.slice(startIndex, endIndex);
+  }, [filteredUniversities, currentPage]);
+
+  useEffect(() => {
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    }
+  }, [currentPage, totalPages]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filters.searchQuery, filters.affiliation]);
 
   const filteredColleges = useMemo(() => {
     return colleges.filter((college) => college.universityId === selectedUniId);
   }, [colleges, selectedUniId]);
 
-  if (view === "colleges") {
+  const collegesTotalPages = Math.max(
+    1,
+    Math.ceil(filteredColleges.length / collegesPerPage),
+  );
+
+  const paginatedColleges = useMemo(() => {
+    const start = (collegePage - 1) * collegesPerPage;
+    return filteredColleges.slice(start, start + collegesPerPage);
+  }, [filteredColleges, collegePage]);
+
+  const topColleges = paginatedColleges.slice(0, 12);
+  const bottomColleges = paginatedColleges.slice(12, 21);
+
+  const collegesResultCount =
+    selectedCourse?.collegesCount ?? filteredColleges.length;
+
+  const featuredAds = [
+    {
+      badge: "Advertisement",
+      title: "Study in Australia 🇦🇺",
+      desc: "Apply now for the upcoming 2024 intake. Free counseling.",
+      cta: "Apply Now",
+      cardClass: "from-[#0F172A] to-[#1E293B] border border-gray-800",
+      ctaClass: "bg-blue-600 hover:bg-blue-500 text-white",
+      badgeClass: "text-blue-400",
+      descClass: "text-gray-400",
+    },
+    {
+      badge: "Featured",
+      title: "Up to 50% Scholarships 🎓",
+      desc: "Merit-based scholarships available for top students.",
+      cta: "Learn More",
+      cardClass: "from-[#1D4ED8] to-[#2563EB]",
+      ctaClass: "bg-white text-blue-700 hover:bg-gray-50",
+      badgeClass: "text-blue-200",
+      descClass: "text-blue-100/80",
+    },
+    {
+      badge: "Trending",
+      title: "IT Careers in UK 🇬🇧",
+      desc: "Top universities with 2 years of post-study work visa.",
+      cta: "Explore",
+      cardClass: "from-[#065F46] to-[#047857]",
+      ctaClass: "bg-white text-green-800 hover:bg-gray-50",
+      badgeClass: "text-green-300",
+      descClass: "text-green-100/80",
+    },
+    {
+      badge: "Event",
+      title: "Global Education Fair",
+      desc: "Meet 50+ universities in person this weekend.",
+      cta: "Register Free",
+      cardClass: "from-[#7C3AED] to-[#6D28D9]",
+      ctaClass: "bg-white text-purple-700 hover:bg-gray-50",
+      badgeClass: "text-purple-300",
+      descClass: "text-purple-100/80",
+    },
+  ];
+
+  if (view === "colleges" && selectedCourse) {
     return (
-      <div className="min-h-screen w-full bg-[#fdfdfd] flex flex-col pt-0 font-jakarta">
-        <header className="px-6 py-6 max-w-7xl mx-auto w-full">
-          <button
-            onClick={() => setView("discovery")}
-            className="flex items-center gap-2 text-slate-500 hover:text-primary-600 font-black text-[10px] uppercase tracking-widest mb-6 transition-colors group"
-          >
-            <i className="fa-solid fa-arrow-left transition-transform group-hover:-translate-x-1"></i>
-            <span>Back to Discovery</span>
-          </button>
-          <h1 className="text-3xl font-black text-slate-900 tracking-tight">
+      <CollegesAndCoursesPage
+        selectedCourse={selectedCourse}
+        onBack={() => setView("discovery")}
+      />
+    );
+  }
+
+  if (view === "colleges") {
+    const selectedUniversity =
+      filteredUniversities.find((uni) => uni.id === selectedUniId) ||
+      filteredUniversities[0];
+
+    const selectedUniversityCards =
+      filteredUniversities.length > 0
+        ? filteredUniversities
+        : selectedUniversity
+          ? [selectedUniversity]
+          : [];
+
+    return (
+      <div className="bg-white pb-12 text-gray-900 antialiased">
+        <main className="mx-auto max-w-[1400px] p-4 md:p-6 lg:p-8">
+          <h1 className="text-[22px] font-bold tracking-tight text-gray-900">
             Affiliated Colleges
           </h1>
-        </header>
 
-        <div className="w-full bg-primary-50/40 border-y border-primary-50 py-10 px-6">
-          <div className="max-w-7xl mx-auto overflow-x-auto pb-4 no-scrollbar">
-            <div className="flex gap-4 min-w-max">
-              {filteredUniversities.map((uni) => (
+          <div className="mt-4 rounded-[16px] bg-[#F2F6FE] p-6">
+            <div className="hide-scrollbar flex gap-4 overflow-x-auto pb-2">
+              {selectedUniversityCards.map((uni) => (
                 <AffiliationTab
                   key={uni.id}
                   university={uni}
                   isActive={selectedUniId === uni.id}
-                  onClick={() => setSelectedUniId(uni.id)}
+                  onClick={() => {
+                    setSelectedUniId(uni.id);
+                    setCollegePage(1);
+                  }}
                 />
               ))}
             </div>
           </div>
-        </div>
 
-        <main className="flex-1 container mx-auto px-6 py-12 max-w-7xl">
-          <div className="mb-10">
-            <p className="text-slate-400 font-black text-xs uppercase tracking-widest">
-              Showing{" "}
-              <span className="text-primary-600">
-                {filteredColleges.length * 5}
-              </span>{" "}
-              results for colleges and courses
+          <div className="mb-4 mt-8">
+            <p className="text-[13px] font-medium tracking-wide text-gray-600">
+              Showing {collegesResultCount} results for colleges and courses
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {Array.from({ length: 5 }).map((_, repeat) => (
-              <React.Fragment key={repeat}>
-                {filteredColleges.map((college) => (
-                  <CollegeListItem
-                    key={`${college.id}-${repeat}`}
-                    college={college}
-                  />
-                ))}
-              </React.Fragment>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+            {topColleges.map((college) => (
+              <CollegeListItem
+                key={college.id}
+                college={college}
+                onClick={() => onNavigate("collegeDetails", { id: college.id })}
+              />
             ))}
           </div>
 
-          <div className="mt-12 flex justify-center">
-            <Pagination />
+          <div className="mb-6 mt-16">
+            <div className="mb-5 flex items-center justify-between">
+              <h2 className="text-[18px] font-bold tracking-tight text-gray-900">
+                Featured Opportunities
+              </h2>
+            </div>
+
+            <div className="relative w-full rounded-[16px]">
+              <div className="hide-scrollbar flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-smooth">
+                {featuredAds.map((ad) => (
+                  <div
+                    key={ad.title}
+                    className={`group h-[158px] w-full shrink-0 snap-start cursor-pointer items-center justify-between rounded-[16px] bg-gradient-to-br p-7 shadow-sm md:w-[calc(50%-12px)] ${ad.cardClass} flex`}
+                  >
+                    <div className="pr-4 text-white">
+                      <span
+                        className={`mb-1.5 block text-[11px] font-bold uppercase tracking-widest ${ad.badgeClass}`}
+                      >
+                        {ad.badge}
+                      </span>
+                      <h3 className="line-clamp-1 mb-1.5 text-[20px] font-bold transition-colors group-hover:text-blue-300 lg:text-[22px]">
+                        {ad.title}
+                      </h3>
+                      <p className={`line-clamp-2 text-[13px] lg:text-[14px] ${ad.descClass}`}>
+                        {ad.desc}
+                      </p>
+                    </div>
+                    <div className="hidden shrink-0 sm:block">
+                      <button className={`rounded-lg px-5 py-2.5 text-sm font-semibold shadow-lg transition-all lg:px-6 ${ad.ctaClass}`}>
+                        {ad.cta}
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-10 grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+            {bottomColleges.map((college) => (
+              <CollegeListItem
+                key={`bottom-${college.id}`}
+                college={college}
+                onClick={() => onNavigate("collegeDetails", { id: college.id })}
+              />
+            ))}
+          </div>
+
+          <div className="mb-6 mt-12 flex items-center justify-center gap-2">
+            <button
+              onClick={() => setCollegePage((prev) => Math.max(1, prev - 1))}
+              disabled={collegePage === 1}
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-400 transition-colors disabled:cursor-not-allowed disabled:bg-gray-50"
+            >
+              <i className="fa-solid fa-chevron-left"></i>
+            </button>
+
+            {Array.from({ length: collegesTotalPages }, (_, index) => index + 1)
+              .slice(0, 4)
+              .map((page) => (
+                <button
+                  key={page}
+                  onClick={() => setCollegePage(page)}
+                  className={`h-10 w-10 rounded-lg border font-medium transition-colors ${
+                    collegePage === page
+                      ? "border-blue-600 bg-blue-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.3)]"
+                      : "border-gray-200 text-gray-700 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                  }`}
+                >
+                  {page}
+                </button>
+              ))}
+
+            {collegesTotalPages > 5 && (
+              <span className="flex h-10 w-10 items-center justify-center font-bold tracking-widest text-gray-400">
+                ...
+              </span>
+            )}
+
+            {collegesTotalPages > 4 && (
+              <button
+                onClick={() => setCollegePage(collegesTotalPages)}
+                className="h-10 w-10 rounded-lg border border-gray-200 font-medium text-gray-700 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+              >
+                {collegesTotalPages}
+              </button>
+            )}
+
+            <button
+              onClick={() =>
+                setCollegePage((prev) => Math.min(collegesTotalPages, prev + 1))
+              }
+              disabled={collegePage === collegesTotalPages}
+              className="flex h-10 w-10 items-center justify-center rounded-lg border border-gray-200 text-gray-600 transition-colors hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400"
+            >
+              <i className="fa-solid fa-chevron-right"></i>
+            </button>
           </div>
         </main>
       </div>
@@ -143,74 +349,45 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
   }
 
   return (
-    <div className="min-h-screen w-full flex flex-col bg-slate-50 pt-0 font-jakarta">
-      <UniversitiesHero onSearch={handleSearch} />
+    <div className="min-h-screen w-full bg-[#f9fafb] text-gray-800 antialiased p-4 md:p-8 font-sans">
+      <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-8 items-start">
+        <Sidebar
+          affiliationFilters={filters.affiliation}
+          onFilterChange={handleAffiliationToggle}
+          onRemoveFilter={handleAffiliationToggle}
+          onReset={resetFilters}
+        />
 
-      <main className="flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-16 max-w-7xl">
-        <div className="flex flex-col lg:grid lg:grid-cols-12 gap-10">
-          <aside className="lg:col-span-3">
-            <Sidebar
-              affiliationFilters={filters.affiliation}
-              onFilterChange={handleAffiliationToggle}
-              onReset={resetFilters}
-            />
-          </aside>
-
-          <div className="lg:col-span-9">
-            <div className="mb-10 space-y-6">
-              <div className="flex items-center gap-3 flex-wrap">
-                <span className="text-slate-400 font-black text-[10px] uppercase tracking-widest">
-                  Active :
-                </span>
-                {filters.affiliation.map((f) => (
-                  <div
-                    key={f}
-                    className="flex items-center gap-3 bg-white border border-slate-100 rounded-xl px-4 py-1.5 text-[10px] font-black uppercase tracking-widest text-slate-700 shadow-sm"
-                  >
-                    {f}
-                    <button
-                      onClick={() => handleAffiliationToggle(f)}
-                      className="text-slate-300 hover:text-rose-500 transition-colors"
-                    >
-                      <i className="fa-solid fa-xmark"></i>
-                    </button>
-                  </div>
-                ))}
-              </div>
-              <h4 className="text-slate-400 font-bold uppercase tracking-widest text-xs">
-                Showing{" "}
-                <span className="text-slate-900 font-black">
-                  {filteredUniversities.length}
-                </span>{" "}
-                results for{" "}
-                <span className="text-primary-600 font-black">
-                  {filters.searchQuery || "Scholarship"}
-                </span>
-              </h4>
-            </div>
-
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-              {filteredUniversities.map((uni) => (
-                <div
-                  key={uni.id}
-                  onClick={() => goToColleges(uni.id)}
-                  className="cursor-pointer"
-                >
-                  <UniversityCard
-                    university={uni}
-                    onNavigate={onNavigate}
-                    onShowColleges={goToColleges}
-                  />
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-16 flex justify-center">
-              <Pagination />
-            </div>
+        <main className="flex-1 w-full">
+          <div className="text-[14px] font-bold text-gray-800 mb-6">
+            Showing {filteredUniversities.length} results for Scholarship
           </div>
-        </div>
-      </main>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+            {paginatedUniversities.map((uni) => (
+              <div
+                key={uni.id}
+                onClick={() => goToColleges(uni.id)}
+                className="cursor-pointer"
+              >
+                <UniversityCard
+                  university={uni}
+                  onNavigate={onNavigate}
+                  onShowColleges={goToColleges}
+                />
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-10 mb-8 flex justify-center items-center gap-2">
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+            />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

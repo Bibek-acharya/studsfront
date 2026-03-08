@@ -141,7 +141,7 @@ const JobFeedPage: React.FC<JobFeedPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-24 font-jakarta">
+    <div className="bg-slate-50 min-h-screen pt-24 font-sans">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
           {/* LEFT SIDEBAR */}

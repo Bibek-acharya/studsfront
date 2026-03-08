@@ -18,7 +18,7 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = ({ id, onNavigate }) => {
 
   if (!job) {
     return (
-      <div className="pt-32 pb-20 flex flex-col items-center justify-center min-h-[60vh] bg-slate-50 font-jakarta">
+      <div className="pt-32 pb-20 flex flex-col items-center justify-center min-h-[60vh] bg-slate-50 font-sans">
         <div className="bg-white p-12 rounded-xl shadow-xl text-center max-w-md border border-slate-100">
           <div className="w-20 h-20 bg-rose-50 text-rose-500 rounded-xl flex items-center justify-center text-4xl mx-auto mb-8">
             <i className="fa-solid fa-circle-exclamation"></i>
@@ -42,7 +42,7 @@ const JobDetailsPage: React.FC<JobDetailsPageProps> = ({ id, onNavigate }) => {
   }
 
   return (
-    <main className="w-full bg-slate-50 min-h-screen font-jakarta">
+    <main className="w-full bg-slate-50 min-h-screen font-sans">
       <JobDetailHeader job={job} />
       <JobDetailContent job={job} onNavigate={onNavigate} />
 

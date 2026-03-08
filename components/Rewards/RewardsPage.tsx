@@ -85,7 +85,7 @@ const RewardsPage: React.FC = () => {
   };
 
   return (
-    <div className="relative pt-24 pb-20 overflow-hidden font-jakarta bg-slate-50 min-h-screen">
+    <div className="relative pt-24 pb-20 overflow-hidden font-sans bg-slate-50 min-h-screen">
       {/* Background Mesh (Styled via inline CSS for accuracy) */}
       <div
         className="fixed inset-0 z-[-1] opacity-40 pointer-events-none"
@@ -425,69 +425,67 @@ const RewardCard: React.FC<{
   isPremium,
   onTaskClick,
 }) => (
-  <div
-    className={`bg-white rounded-2xl p-2 border transition-all h-full flex flex-col ${isPremium ? "border-indigo-200 shadow-xl" : "border-slate-100 shadow-sm"}`}
-  >
     <div
-      className={`bg-gradient-to-br ${gradient} p-8 rounded-xl shadow-lg relative overflow-hidden mb-2`}
+      className={`bg-white rounded-2xl p-2 border transition-all h-full flex flex-col ${isPremium ? "border-indigo-200 shadow-xl" : "border-slate-100 shadow-sm"}`}
     >
-      {isPremium && (
-        <span className="absolute top-4 right-6 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-widest">
-          Core Value
-        </span>
-      )}
-      <h3 className="font-bold text-white text-2xl flex items-center gap-3">
-        <i className={`fas ${icon}`}></i> {title}
-      </h3>
-      <p className="text-white/80 text-sm mt-2">{subtitle}</p>
-    </div>
-    <div className="p-4 space-y-3 flex-grow">
-      {tasks.map((task) => {
-        const isDone = completedTasks.has(task.id);
-        const isPart = partialTasks.has(task.id);
-        return (
-          <button
-            key={task.id}
-            onClick={() =>
-              onTaskClick(task.id, task.points, task.isMultiStep, task.isBigWin)
-            }
-            className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all group relative overflow-hidden ${
-              isDone
-                ? "bg-emerald-50 border-emerald-100 cursor-default"
-                : "bg-slate-50/50 border-slate-100 hover:bg-white hover:border-indigo-100 hover:shadow-md"
-            }`}
-          >
-            {isPart && (
-              <div className="absolute left-0 top-0 h-full bg-emerald-100 w-1/2 transition-all"></div>
-            )}
-            <span
-              className={`text-sm font-bold transition-colors relative z-10 ${isDone ? "text-emerald-700" : "text-slate-700"}`}
+      <div
+        className={`bg-gradient-to-br ${gradient} p-8 rounded-xl shadow-lg relative overflow-hidden mb-2`}
+      >
+        {isPremium && (
+          <span className="absolute top-4 right-6 bg-white/20 backdrop-blur-md px-3 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-widest">
+            Core Value
+          </span>
+        )}
+        <h3 className="font-bold text-white text-2xl flex items-center gap-3">
+          <i className={`fas ${icon}`}></i> {title}
+        </h3>
+        <p className="text-white/80 text-sm mt-2">{subtitle}</p>
+      </div>
+      <div className="p-4 space-y-3 flex-grow">
+        {tasks.map((task) => {
+          const isDone = completedTasks.has(task.id);
+          const isPart = partialTasks.has(task.id);
+          return (
+            <button
+              key={task.id}
+              onClick={() =>
+                onTaskClick(task.id, task.points, task.isMultiStep, task.isBigWin)
+              }
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border transition-all group relative overflow-hidden ${isDone
+                  ? "bg-emerald-50 border-emerald-100 cursor-default"
+                  : "bg-slate-50/50 border-slate-100 hover:bg-white hover:border-indigo-100 hover:shadow-md"
+                }`}
             >
-              {task.label}
-            </span>
-            <div
-              className={`relative z-10 text-xs font-bold px-3 py-1 rounded-full border transition-all ${
-                isDone
-                  ? "bg-emerald-500 text-white border-emerald-400"
-                  : isPart
-                    ? "bg-orange-100 text-orange-600 border-orange-200"
-                    : "bg-white text-indigo-600 border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white"
-              }`}
-            >
-              {isDone ? (
-                <i className="fa-solid fa-check"></i>
-              ) : isPart ? (
-                "50%"
-              ) : (
-                `+${task.points}`
+              {isPart && (
+                <div className="absolute left-0 top-0 h-full bg-emerald-100 w-1/2 transition-all"></div>
               )}
-            </div>
-          </button>
-        );
-      })}
+              <span
+                className={`text-sm font-bold transition-colors relative z-10 ${isDone ? "text-emerald-700" : "text-slate-700"}`}
+              >
+                {task.label}
+              </span>
+              <div
+                className={`relative z-10 text-xs font-bold px-3 py-1 rounded-full border transition-all ${isDone
+                    ? "bg-emerald-500 text-white border-emerald-400"
+                    : isPart
+                      ? "bg-orange-100 text-orange-600 border-orange-200"
+                      : "bg-white text-indigo-600 border-indigo-100 group-hover:bg-indigo-600 group-hover:text-white"
+                  }`}
+              >
+                {isDone ? (
+                  <i className="fa-solid fa-check"></i>
+                ) : isPart ? (
+                  "50%"
+                ) : (
+                  `+${task.points}`
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
 
 const LeaderboardItem: React.FC<{
   rank: number;
@@ -500,11 +498,10 @@ const LeaderboardItem: React.FC<{
   const isGold = rank === 1;
   return (
     <div
-      className={`flex items-center justify-between p-5 rounded-2xl transition-all border group hover:scale-[1.02] ${
-        isGold
+      className={`flex items-center justify-between p-5 rounded-2xl transition-all border group hover:scale-[1.02] ${isGold
           ? "bg-gradient-to-r from-yellow-500/10 to-slate-800/50 border-yellow-500/30 shadow-xl shadow-yellow-500/5"
           : "bg-slate-800/50 border-slate-700"
-      }`}
+        }`}
     >
       <div className="flex items-center gap-5">
         <div

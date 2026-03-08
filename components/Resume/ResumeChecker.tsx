@@ -28,7 +28,7 @@ const ResumeChecker: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 font-jakarta">
+    <div className="min-h-screen bg-slate-50 pt-24 font-sans">
       {view === "upload" && (
         <div className="max-w-4xl mx-auto px-6 py-20 flex flex-col items-center animate-fadeInUp">
           <div className="text-center mb-16">
@@ -293,24 +293,22 @@ const DetailStat: React.FC<{
   <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all group">
     <div className="flex justify-between items-start mb-6">
       <div
-        className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all shadow-sm ${
-          color === "red"
+        className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-all shadow-sm ${color === "red"
             ? "bg-rose-50 text-rose-600"
             : color === "amber"
               ? "bg-amber-50 text-amber-600"
               : "bg-emerald-50 text-emerald-600"
-        }`}
+          }`}
       >
         <i className={`fa-solid ${icon}`}></i>
       </div>
       <span
-        className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${
-          color === "red"
+        className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest ${color === "red"
             ? "bg-rose-100 text-rose-700"
             : color === "amber"
               ? "bg-amber-100 text-amber-700"
               : "bg-emerald-100 text-emerald-700"
-        }`}
+          }`}
       >
         {status}
       </span>
@@ -322,13 +320,12 @@ const DetailStat: React.FC<{
     </div>
     <div className="w-full bg-slate-50 rounded-full h-2 border border-slate-100">
       <div
-        className={`h-full rounded-full transition-all duration-1000 ${
-          color === "red"
+        className={`h-full rounded-full transition-all duration-1000 ${color === "red"
             ? "bg-rose-500"
             : color === "amber"
               ? "bg-amber-500"
               : "bg-emerald-500"
-        }`}
+          }`}
         style={{ width: `${score}%` }}
       ></div>
     </div>

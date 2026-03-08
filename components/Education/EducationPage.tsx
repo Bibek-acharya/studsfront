@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { getAllNews } from "../../lib/news-data";
+import { apiService } from "../../services/api";
 
 interface EducationPageProps {
   onNavigate: (view: any, data?: any) => void;
@@ -10,15 +11,6 @@ interface CollegeLinkData {
   url: string;
 }
 
-interface EventData {
-  id: number;
-  title: string;
-  date: string;
-  location: string;
-  image: string;
-  interested: number;
-  trending: boolean;
-}
 
 interface University {
   id: string;
@@ -57,21 +49,7 @@ interface College {
   status: string;
 }
 
-interface CollegeWithDetails extends College {
-  programs: Program[];
-  facilities: Facility[];
-}
 
-interface ExamCardData {
-  id: string;
-  status: "ongoing" | "closed";
-  title: string;
-  university: string;
-  faculty: string;
-  examDate: string;
-  nepaliDate: string;
-  imageUrl: string;
-}
 
 const EducationPage: React.FC<EducationPageProps> = ({ onNavigate }) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -114,7 +92,7 @@ const EducationPage: React.FC<EducationPageProps> = ({ onNavigate }) => {
     : currentCollegeLink?.text;
 
   return (
-    <div className="bg-white min-h-screen font-jakarta text-slate-900">
+    <div className="bg-white min-h-screen font-sans text-slate-900">
       <style>{`
         @keyframes fade-in-up-delay-2 {
           0% { opacity: 0; transform: translateY(30px); }
@@ -126,7 +104,7 @@ const EducationPage: React.FC<EducationPageProps> = ({ onNavigate }) => {
       `}</style>
 
       {/* Education Hero Section */}
-      <section className="relative w-full h-screen min-h-[700px] flex items-center justify-center p-4">
+      <section className="relative w-full h-screen min-h-[600px] flex items-center justify-center p-4 w-[1400px] mx-auto">
         <div className="relative h-full w-full flex flex-col items-center justify-center rounded-2xl overflow-hidden shadow-2xl">
           <div className="absolute inset-0 z-0">
             {images.map((src, index) => (
@@ -134,9 +112,8 @@ const EducationPage: React.FC<EducationPageProps> = ({ onNavigate }) => {
                 key={index}
                 src={src}
                 alt={`College Campus ${index + 1}`}
-                className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out ${
-                  index === currentImageIndex ? "opacity-100" : "opacity-0"
-                }`}
+                className={`absolute top-0 left-0 w-full h-full object-cover transition-opacity duration-[1500ms] ease-in-out ${index === currentImageIndex ? "opacity-100" : "opacity-0"
+                  }`}
                 style={{ filter: "brightness(0.65)" }}
               />
             ))}
@@ -218,8 +195,8 @@ const EducationPage: React.FC<EducationPageProps> = ({ onNavigate }) => {
       </section>
 
       {/* Success Section - Smarter Tools */}
-      <section className="py-24 bg-white text-center px-6">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-24 bg-white">
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <span className="inline-block bg-emerald-50 text-emerald-700 font-black py-2 px-6 rounded-full text-xs uppercase tracking-widest mb-6 border border-emerald-100">
             Smart Academics
           </span>
@@ -295,7 +272,7 @@ const EducationPage: React.FC<EducationPageProps> = ({ onNavigate }) => {
 const AdsSection: React.FC = () => {
   return (
     <section className="py-12 bg-white">
-      <div className="max-w-7xl mx-auto px-6 md:px-12">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <button
             onClick={() => window.open("https://studsphere.com", "_blank")}
@@ -327,54 +304,30 @@ const AdsSection: React.FC = () => {
 const FinancialAidSection: React.FC<{
   onNavigate: (v: any, d?: any) => void;
 }> = ({ onNavigate }) => {
-  const scholarships = [
-    {
-      id: "1",
-      title: "TU Merit Scholarship",
-      provider: "Tribhuvan University",
-      level: "Bachelors",
-      field: "Engineering",
-      covers: "Full Tuition",
-      location: "Kathmandu",
-      category: "Merit-Based",
-      discount: "100% off",
-      deadline: "Oct 15, 2024",
-      competition: "High Competition",
-      icon: "fa-graduation-cap",
-    },
-    {
-      id: "2",
-      title: "KU Excellence Award",
-      provider: "Kathmandu University",
-      level: "Bachelors",
-      field: "Medicine",
-      covers: "50% Off",
-      location: "Dhulikhel",
-      category: "Merit-Based",
-      discount: "50% off",
-      deadline: "Nov 20, 2024",
-      competition: "High Competition",
-      icon: "fa-user-graduate",
-    },
-    {
-      id: "3",
-      title: "Govt Technical Aid",
-      provider: "Ministry of Education",
-      level: "Masters",
-      field: "Science & Tech",
-      covers: "Full Funding",
-      location: "National",
-      category: "Reserved/Quota",
-      discount: "100% off",
-      deadline: "Dec 05, 2024",
-      competition: "Moderate",
-      icon: "fa-certificate",
-    },
-  ];
+  const [scholarships, setScholarships] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchScholarships = async () => {
+      try {
+        const response = await apiService.getEducationScholarships();
+        if (response.success && response.data?.scholarships) {
+          setScholarships(response.data.scholarships);
+        }
+      } catch (error) {
+        console.error("Error fetching scholarships:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchScholarships();
+  }, []);
+
+  if (loading) return <div className="py-24 text-center">Loading financial aid...</div>;
 
   return (
-    <section className="py-24 bg-slate-50/50 px-4 md:px-6">
-      <div className="w-full max-w-[1600px] mx-auto">
+    <section className="py-24 bg-slate-50/50">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between mb-16 gap-8">
           <div className="text-left">
             <h2 className="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tighter uppercase">
@@ -486,45 +439,30 @@ const FinancialAidSection: React.FC<{
 const ExamAnnouncements: React.FC<{
   onNavigate: (v: any, d?: any) => void;
 }> = ({ onNavigate }) => {
-  const examCards: ExamCardData[] = [
-    {
-      id: "1",
-      status: "ongoing",
-      title: "BICTE Entrance Exam",
-      university: "Tribhuvan University",
-      faculty: "Faculty of Education",
-      examDate: "Oct 01, 2026",
-      nepaliDate: "Asoj 01, 2082",
-      imageUrl:
-        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      id: "2",
-      status: "closed",
-      title: "MBBS Entrance Exam",
-      university: "Kathmandu University",
-      faculty: "Faculty of Health",
-      examDate: "Nov 15, 2026",
-      nepaliDate: "Kartik 30, 2082",
-      imageUrl:
-        "https://images.unsplash.com/photo-1576091160550-2173dba999ef?q=80&w=800&auto=format&fit=crop",
-    },
-    {
-      id: "3",
-      status: "ongoing",
-      title: "BE Entrance Exam",
-      university: "Tribhuvan University",
-      faculty: "IOE Pulchowk",
-      examDate: "Dec 10, 2026",
-      nepaliDate: "Mangsir 25, 2082",
-      imageUrl:
-        "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=800&auto=format&fit=crop",
-    },
-  ];
+  const [examCards, setExamCards] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchExams = async () => {
+      try {
+        const response = await apiService.getEducationExams();
+        if (response.success && response.data?.exams) {
+          setExamCards(response.data.exams);
+        }
+      } catch (error) {
+        console.error("Error fetching exams:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchExams();
+  }, []);
+
+  if (loading) return <div className="py-24 text-center">Loading entrance exams...</div>;
 
   return (
     <section className="w-full py-24 bg-slate-50/50">
-      <div className="w-full px-6 md:px-20">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header Section */}
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight uppercase">
@@ -646,8 +584,27 @@ const ExamAnnouncements: React.FC<{
 const LatestNews: React.FC<{ onNavigate: (v: any, d?: any) => void }> = ({
   onNavigate,
 }) => {
-  const newsItems = getAllNews();
-  const featuredNews = newsItems[0];
+  const [newsItems, setNewsItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchNews = async () => {
+      try {
+        const response = await apiService.getEducationNews();
+        if (response.success && response.data?.news) {
+          setNewsItems(response.data.news);
+        }
+      } catch (error) {
+        console.error("Error fetching news:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchNews();
+  }, []);
+
+  if (loading) return <div className="py-24 text-center">Loading news...</div>;
+
 
   const categoryColors = {
     Academic: "bg-orange-50 text-orange-700 border-orange-100",
@@ -658,7 +615,7 @@ const LatestNews: React.FC<{ onNavigate: (v: any, d?: any) => void }> = ({
 
   return (
     <section className="w-full py-24 bg-white">
-      <div className="w-full px-6 md:px-20">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-4xl md:text-6xl font-black tracking-tight text-slate-900 mb-6 uppercase">
             News & Stories
@@ -757,7 +714,7 @@ const TestimonialsSection: React.FC = () => {
 
   return (
     <section className="w-full bg-slate-50 py-16 md:py-24 border-t border-slate-100">
-      <div className="w-full px-6 md:px-12">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex flex-col md:flex-row items-center justify-between gap-8 mb-16">
           <div className="text-left">
             <h2 className="text-3xl md:text-5xl font-black text-slate-900 mb-4 tracking-tight uppercase">
@@ -861,39 +818,36 @@ const FeatureLinkCard: React.FC<{
 
 const EventShowcase: React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [events, setEvents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const events: EventData[] = [
-    {
-      id: 1,
-      title: "Learn today, lead tomorrow — your AI journey starts here!",
-      date: "Sat, 15 Nov",
-      location: "Sallaghari, Bhaktpur",
-      image:
-        "https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      interested: 100,
-      trending: true,
-    },
-    {
-      id: 2,
-      title: "Master the Future of Technology with AI & ML",
-      date: "Mon, 18 Nov",
-      location: "Kathmandu, Nepal",
-      image:
-        "https://images.pexels.com/photos/1181406/pexels-photo-1181406.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      interested: 150,
-      trending: true,
-    },
-    {
-      id: 3,
-      title: "Build Your Career in Data Science",
-      date: "Wed, 20 Nov",
-      location: "Pokhara, Nepal",
-      image:
-        "https://images.pexels.com/photos/1181677/pexels-photo-1181677.jpeg?auto=compress&cs=tinysrgb&w=1200",
-      interested: 200,
-      trending: false,
-    },
-  ];
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const response = await apiService.getEducationEvents();
+        if (response.success && response.data?.events) {
+          setEvents(response.data.events);
+        }
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    if (events.length > 0) {
+      const interval = setInterval(() => {
+        setCurrentIndex((prev) => (prev + 1) % events.length);
+      }, 4000);
+      return () => clearInterval(interval);
+    }
+  }, [events.length]);
+
+  if (loading) return <div className="py-24 text-center">Loading events...</div>;
+  if (events.length === 0) return null;
 
   const avatars = [
     "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix",
@@ -903,19 +857,12 @@ const EventShowcase: React.FC = () => {
 
   const currentEvent = events[currentIndex];
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentIndex((prev) => (prev + 1) % events.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, [events.length]);
-
   return (
     <div className="w-full bg-slate-50/50 py-16 md:py-24 relative overflow-hidden border-y border-slate-100">
       <div className="absolute top-0 right-0 w-96 h-96 bg-primary-100/30 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-emerald-100/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2"></div>
 
-      <div className="relative z-10 w-full px-6 md:px-20">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 w-full">
         <div className="grid lg:grid-cols-[3fr_2fr] gap-12 items-center">
           {/* Left Side - Event Image */}
           <div className="relative group animate-fadeInUp">
@@ -1003,11 +950,10 @@ const EventShowcase: React.FC = () => {
             <button
               key={index}
               onClick={() => setCurrentIndex(index)}
-              className={`transition-all duration-500 rounded-full h-2.5 ${
-                index === currentIndex
-                  ? "bg-primary-600 w-12"
-                  : "bg-slate-200 w-2.5 hover:bg-primary-200"
-              }`}
+              className={`transition-all duration-500 rounded-full h-2.5 ${index === currentIndex
+                ? "bg-primary-600 w-12"
+                : "bg-slate-200 w-2.5 hover:bg-primary-200"
+                }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}
@@ -1085,8 +1031,8 @@ const CourseSection: React.FC<{ onNavigate: (v: any, d?: any) => void }> = ({
   ];
 
   return (
-    <section className="bg-white py-20 px-6 overflow-hidden">
-      <div className="max-w-7xl mx-auto">
+    <section className="bg-white py-24 overflow-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
           <h2 className="text-3xl md:text-4xl font-black text-gray-900 mb-4">
             Top Universities & Institutions
@@ -1142,74 +1088,24 @@ const FeaturedColleges: React.FC<{ onNavigate: (v: any, d?: any) => void }> = ({
   const [selectedDegree, setSelectedDegree] = useState<string>("Bachelor");
   const [selectedProgramOption, setSelectedProgramOption] =
     useState<string>("");
+  const [colleges, setColleges] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const mockColleges: CollegeWithDetails[] = [
-    {
-      id: 1,
-      name: "KIST College of Information Technology",
-      location: "KamalPokari, Kathmandu",
-      rating: 4.2,
-      university: "TU",
-      type: "Private",
-      is_verified: true,
-      is_popular: true,
-      status: "Ongoing",
-      programs: [
-        { id: 1, name: "BE Computer Engineering", degree_type: "Bachelor" },
-        { id: 2, name: "BE Electronics Engineering", degree_type: "Bachelor" },
-        { id: 3, name: "ME Computer Engineering", degree_type: "Master" },
-      ],
-      facilities: [
-        { id: 1, name: "Library" },
-        { id: 2, name: "Lab" },
-        { id: 3, name: "Sports" },
-        { id: 4, name: "Hostel" },
-      ],
-    },
-    {
-      id: 2,
-      name: "Kathmandu University",
-      location: "Dhulikhel, Kavre",
-      rating: 4.5,
-      university: "KU",
-      type: "Private",
-      is_verified: true,
-      is_popular: false,
-      status: "Ongoing",
-      programs: [
-        { id: 4, name: "BCA", degree_type: "Bachelor" },
-        { id: 5, name: "MBA", degree_type: "Master" },
-        { id: 55, name: "BSc Computer Science", degree_type: "Bachelor" },
-      ],
-      facilities: [
-        { id: 5, name: "Library" },
-        { id: 6, name: "Lab" },
-        { id: 7, name: "Cafeteria" },
-      ],
-    },
-    {
-      id: 3,
-      name: "Pulchowk Engineering Campus",
-      location: "Pulchowk, Lalitpur",
-      rating: 4.8,
-      university: "TU",
-      type: "Public",
-      is_verified: true,
-      is_popular: true,
-      status: "Ongoing",
-      programs: [
-        { id: 6, name: "BE Civil Engineering", degree_type: "Bachelor" },
-        { id: 7, name: "BE Mechanical Engineering", degree_type: "Bachelor" },
-        { id: 8, name: "ME Structural Engineering", degree_type: "Master" },
-      ],
-      facilities: [
-        { id: 8, name: "Library" },
-        { id: 9, name: "Lab" },
-        { id: 10, name: "Workshop" },
-        { id: 11, name: "Sports" },
-      ],
-    },
-  ];
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const response = await apiService.getColleges({ popular: true });
+        if (response.success && response.data?.colleges) {
+          setColleges(response.data.colleges);
+        }
+      } catch (error) {
+        console.error("Error fetching colleges:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchColleges();
+  }, []);
 
   const programOptions: Record<string, string[]> = {
     Plus2: ["Humanities", "Science", "Education", "Management"],
@@ -1217,9 +1113,12 @@ const FeaturedColleges: React.FC<{ onNavigate: (v: any, d?: any) => void }> = ({
     Master: ["MBA", "MBA IT", "ME"],
   };
 
-  const filteredColleges = mockColleges.filter((college) => {
-    const hasMatchingProgram = college.programs.some((program) => {
-      const degreeMatch = program.degree_type === selectedDegree;
+  const filteredColleges = colleges.filter((college) => {
+    const programs = Array.isArray(college.programs_list) ? college.programs_list : [];
+    if (programs.length === 0) return true; // Show if no programs list for filtering
+
+    const hasMatchingProgram = programs.some((program: any) => {
+      const degreeMatch = program.degree_type === selectedDegree || program.level === selectedDegree;
       const programMatch =
         !selectedProgramOption ||
         program.name
@@ -1230,10 +1129,12 @@ const FeaturedColleges: React.FC<{ onNavigate: (v: any, d?: any) => void }> = ({
     return hasMatchingProgram;
   });
 
+  if (loading) return <div className="py-24 text-center">Loading featured colleges...</div>;
+
   return (
-    <section className="bg-white py-24 px-6 overflow-hidden">
-      <div className="max-w-[1600px] mx-auto">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-16 gap-8 px-4">
+    <section className="bg-white py-24 overflow-hidden">
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row items-center justify-between mb-16 gap-8">
           <div className="text-left">
             <h2 className="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight uppercase">
               Featured Colleges
@@ -1252,7 +1153,7 @@ const FeaturedColleges: React.FC<{ onNavigate: (v: any, d?: any) => void }> = ({
         </div>
 
         {/* Filters */}
-        <div className="mb-12 px-4">
+        <div className="mb-12">
           <div className="flex flex-wrap items-center gap-4">
             <div className="relative min-w-[160px]">
               <select
@@ -1323,16 +1224,23 @@ const FeaturedColleges: React.FC<{ onNavigate: (v: any, d?: any) => void }> = ({
 
 // Fixed: Added optional second argument to onNavigate prop type to resolve argument mismatch error
 const CollegeFeaturedCard: React.FC<{
-  college: CollegeWithDetails;
+  college: any;
   onNavigate: (v: any, d?: any) => void;
 }> = ({ college, onNavigate }) => {
+  const programs = Array.isArray(college.programs_list) ? college.programs_list : [];
+  const amenities = Array.isArray(college.amenities) ? college.amenities : [];
+
   return (
     <div className="bg-white rounded-2xl p-8 border border-slate-100 shadow-sm hover:shadow-xl hover:border-primary-100 transition-all duration-500 relative group flex flex-col">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-start gap-6">
           <div className="w-20 h-20 shrink-0 rounded-2xl bg-gradient-to-br from-primary-500 to-primary-600 flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform duration-500">
-            <i className="fa-solid fa-building text-3xl text-white"></i>
+            {college.image_url ? (
+              <img src={college.image_url} alt={college.name} className="w-full h-full object-cover rounded-2xl" />
+            ) : (
+              <i className="fa-solid fa-building text-3xl text-white"></i>
+            )}
           </div>
           <div className="flex-1 min-w-0">
             <h3 className="text-xl font-black text-slate-900 leading-tight mb-2 truncate group-hover:text-primary-600 transition-colors uppercase">
@@ -1350,7 +1258,7 @@ const CollegeFeaturedCard: React.FC<{
               <span className="text-slate-100">|</span>
               <div className="flex items-center gap-2">
                 <i className="fa-solid fa-graduation-cap text-primary-400"></i>
-                <span>{college.university}</span>
+                <span>{college.university?.name || college.affiliation}</span>
               </div>
             </div>
           </div>
@@ -1359,20 +1267,14 @@ const CollegeFeaturedCard: React.FC<{
 
       {/* Badges */}
       <div className="flex flex-wrap gap-2 mb-8">
-        {college.is_verified && (
+        {college.verified && (
           <span className="px-3 py-1 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
             <i className="fa-solid fa-circle-check"></i> Verified
           </span>
         )}
-        {college.is_popular && (
+        {college.popular && (
           <span className="px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-lg text-[10px] font-black uppercase tracking-widest">
             Popular
-          </span>
-        )}
-        {college.status === "Ongoing" && (
-          <span className="px-3 py-1 bg-primary-50 text-primary-600 border border-primary-100 rounded-lg text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
-            <div className="w-1.5 h-1.5 bg-primary-500 rounded-full animate-pulse"></div>{" "}
-            Ongoing
           </span>
         )}
       </div>
@@ -1384,13 +1286,13 @@ const CollegeFeaturedCard: React.FC<{
             Featured Programs
           </h4>
           <span className="text-[10px] font-black text-primary-600 uppercase tracking-widest">
-            {college.programs.length} Programs
+            {programs.length} Programs
           </span>
         </div>
         <div className="space-y-2">
-          {college.programs.slice(0, 3).map((program) => (
+          {programs.slice(0, 3).map((program: any, idx: number) => (
             <button
-              key={program.id}
+              key={idx}
               onClick={(e) => {
                 e.stopPropagation();
                 onNavigate("findCollege");
@@ -1401,26 +1303,26 @@ const CollegeFeaturedCard: React.FC<{
                 {program.name}
               </span>
               <span className="px-2.5 py-1 bg-white rounded-lg text-[9px] font-black uppercase text-slate-400 border border-slate-100 group-hover/item:text-primary-400">
-                {program.degree_type}
+                {program.degree_type || program.level}
               </span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Facilities */}
+      {/* Amenities */}
       <div className="mb-10 pt-8 border-t border-slate-50">
         <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">
           Facilities
         </h4>
         <div className="flex flex-wrap gap-x-6 gap-y-3">
-          {college.facilities.slice(0, 4).map((facility) => (
+          {amenities.slice(0, 4).map((facility: string, idx: number) => (
             <div
-              key={facility.id}
+              key={idx}
               className="flex items-center gap-2 text-[11px] font-bold text-slate-500 uppercase tracking-widest"
             >
               <i className="fa-solid fa-circle-check text-primary-500"></i>
-              {facility.name}
+              {facility}
             </div>
           ))}
         </div>

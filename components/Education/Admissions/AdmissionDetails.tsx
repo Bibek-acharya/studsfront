@@ -32,7 +32,7 @@ const AdmissionDetails: React.FC<AdmissionDetailsProps> = ({
   );
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-24 font-jakarta pb-20">
+    <div className="bg-slate-50 min-h-screen pt-24 font-sans pb-20">
       <main className="w-full px-4 lg:px-12">
         {/* Back Button */}
         <button

@@ -28,7 +28,7 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({
 
   if (isLoading || !university) {
     return (
-      <div className="bg-slate-50 min-h-screen pt-20 font-jakarta">
+      <div className="bg-slate-50 min-h-screen pt-20 font-sans">
         <div className="max-w-4xl mx-auto px-6 py-16 text-center text-slate-500 font-bold">
           Loading university details...
         </div>
@@ -49,7 +49,7 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({
     website && !website.startsWith("http") ? `https://${website}` : website;
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-20 font-jakarta selection:bg-primary-600 selection:text-white">
+    <div className="bg-slate-50 min-h-screen pt-20 font-sans selection:bg-primary-600 selection:text-white">
       {/* Hero Banner */}
       <div className="relative h-64 md:h-80 w-full overflow-hidden">
         <img
@@ -115,11 +115,10 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({
               </button>
               <button
                 onClick={() => setIsFavorite(!isFavorite)}
-                className={`shrink-0 w-14 h-14 flex items-center justify-center rounded-xl border-2 transition-all shadow-sm ${
-                  isFavorite
+                className={`shrink-0 w-14 h-14 flex items-center justify-center rounded-xl border-2 transition-all shadow-sm ${isFavorite
                     ? "bg-rose-50 border-rose-100 text-rose-500"
                     : "bg-white border-slate-100 text-slate-300 hover:text-rose-500 hover:border-rose-100"
-                }`}
+                  }`}
               >
                 <i
                   className={`fa-solid fa-heart ${isFavorite ? "scale-110" : "scale-100"} transition-transform`}
@@ -138,11 +137,10 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`py-6 whitespace-nowrap text-xs font-black uppercase tracking-[0.2em] relative transition-all ${
-                  activeTab === tab
+                className={`py-6 whitespace-nowrap text-xs font-black uppercase tracking-[0.2em] relative transition-all ${activeTab === tab
                     ? "text-primary-600"
                     : "text-slate-400 hover:text-slate-600"
-                }`}
+                  }`}
               >
                 {tab.charAt(0).toUpperCase() + tab.slice(1)}
                 {activeTab === tab && (

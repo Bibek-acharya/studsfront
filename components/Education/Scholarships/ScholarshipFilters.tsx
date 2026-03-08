@@ -75,7 +75,7 @@ const ScholarshipFilters: React.FC = () => {
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm sticky top-28 font-jakarta">
+    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm sticky top-28 font-sans">
       {/* Header */}
       <div className="flex items-center justify-between p-8 border-b border-slate-50 bg-slate-50/30">
         <div className="flex items-center gap-3">
@@ -108,11 +108,10 @@ const ScholarshipFilters: React.FC = () => {
               <button
                 key={filter.label}
                 onClick={() => toggleFilter("quickFilters", filter.label)}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border ${
-                  filters.quickFilters.includes(filter.label)
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all border ${filters.quickFilters.includes(filter.label)
                     ? `bg-${filter.color}-50 text-${filter.color}-700 border-${filter.color}-100 shadow-sm`
                     : "bg-white text-slate-400 border-slate-100 hover:border-primary-100"
-                }`}
+                  }`}
               >
                 <i className={`fa-solid ${filter.icon}`}></i>
                 {filter.label}

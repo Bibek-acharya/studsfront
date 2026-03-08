@@ -36,74 +36,74 @@ const studentData = {
     ],
   },
   flowA: [
-    { 
-      id: 'education_level', 
-      question: "Current Education Level", 
-      subtitle: "Where are you in your journey?", 
-      type: 'single', 
+    {
+      id: 'education_level',
+      question: "Current Education Level",
+      subtitle: "Where are you in your journey?",
+      type: 'single',
       options: [
-        { id: 'plus2', label: '+2 / High School', icon: 'fa-school' }, 
-        { id: 'bachelors', label: "Bachelor's Degree", icon: 'fa-graduation-cap' }, 
+        { id: 'plus2', label: '+2 / High School', icon: 'fa-school' },
+        { id: 'bachelors', label: "Bachelor's Degree", icon: 'fa-graduation-cap' },
         { id: 'masters', label: "Master's Degree", icon: 'fa-user-tie' }
-      ] 
+      ]
     },
-    { 
-      id: 'field_of_study', 
-      question: "Field of Study", 
-      subtitle: "What is your major focus?", 
-      type: 'single', 
+    {
+      id: 'field_of_study',
+      question: "Field of Study",
+      subtitle: "What is your major focus?",
+      type: 'single',
       options: [
-        { id: 'science', label: 'Science & Technology', icon: 'fa-atom' }, 
-        { id: 'management', label: 'Business & Management', icon: 'fa-briefcase' }, 
-        { id: 'it', label: 'IT & Computing', icon: 'fa-laptop-code' }, 
-        { id: 'humanities', label: 'Arts & Humanities', icon: 'fa-palette' }, 
+        { id: 'science', label: 'Science & Technology', icon: 'fa-atom' },
+        { id: 'management', label: 'Business & Management', icon: 'fa-briefcase' },
+        { id: 'it', label: 'IT & Computing', icon: 'fa-laptop-code' },
+        { id: 'humanities', label: 'Arts & Humanities', icon: 'fa-palette' },
         { id: 'other', label: 'Other', icon: 'fa-layer-group' }
-      ] 
+      ]
     },
-    { 
-      id: 'institution', 
-      question: "Your Institution", 
-      subtitle: "Enter the name of your college.", 
-      type: 'text', 
-      placeholder: "e.g. Kathmandu University" 
+    {
+      id: 'institution',
+      question: "Your Institution",
+      subtitle: "Enter the name of your college.",
+      type: 'text',
+      placeholder: "e.g. Kathmandu University"
     },
-    { 
-      id: 'interests', 
-      question: "Your Interests", 
-      type: 'multi', 
-      subtitle: "Select all that apply.", 
+    {
+      id: 'interests',
+      question: "Your Interests",
+      type: 'multi',
+      subtitle: "Select all that apply.",
       options: [
-        { id: 'notes', label: 'Study Resources', icon: 'fa-book-open' }, 
-        { id: 'online_class', label: 'Live Classes', icon: 'fa-video' }, 
-        { id: 'exam_prep', label: 'Exam Prep', icon: 'fa-list-check' }, 
-        { id: 'guidance', label: 'Career Counseling', icon: 'fa-compass' }, 
-        { id: 'internships', label: 'Internships', icon: 'fa-handshake' }, 
+        { id: 'notes', label: 'Study Resources', icon: 'fa-book-open' },
+        { id: 'online_class', label: 'Live Classes', icon: 'fa-video' },
+        { id: 'exam_prep', label: 'Exam Prep', icon: 'fa-list-check' },
+        { id: 'guidance', label: 'Career Counseling', icon: 'fa-compass' },
+        { id: 'internships', label: 'Internships', icon: 'fa-handshake' },
         { id: 'scholarships', label: 'Scholarships', icon: 'fa-award' }
-      ] 
+      ]
     }
   ],
   flowB: [
-    { 
-      id: 'target_level', 
-      question: "Target Level", 
-      subtitle: "What are you planning to study?", 
-      type: 'single', 
+    {
+      id: 'target_level',
+      question: "Target Level",
+      subtitle: "What are you planning to study?",
+      type: 'single',
       options: [
-        { id: 'plus2', label: '+2 / High School', icon: 'fa-school' }, 
-        { id: 'bachelors', label: "Bachelor's Degree", icon: 'fa-graduation-cap' }, 
+        { id: 'plus2', label: '+2 / High School', icon: 'fa-school' },
+        { id: 'bachelors', label: "Bachelor's Degree", icon: 'fa-graduation-cap' },
         { id: 'masters', label: "Master's Degree", icon: 'fa-user-tie' }
-      ] 
+      ]
     },
-    { 
-      id: 'preferred_location', 
-      question: "Preferred Location", 
-      subtitle: "Narrow down your search area.", 
-      type: 'single', 
+    {
+      id: 'preferred_location',
+      question: "Preferred Location",
+      subtitle: "Narrow down your search area.",
+      type: 'single',
       options: [
-        { id: 'bagmati', label: 'Bagmati Province', icon: 'fa-map-location-dot' }, 
-        { id: 'any', label: 'Anywhere in Nepal', icon: 'fa-earth-asia' }, 
+        { id: 'bagmati', label: 'Bagmati Province', icon: 'fa-map-location-dot' },
+        { id: 'any', label: 'Anywhere in Nepal', icon: 'fa-earth-asia' },
         { id: 'other_prov', label: 'Other Provinces', icon: 'fa-map' }
-      ] 
+      ]
     }
   ]
 };
@@ -135,48 +135,48 @@ const jobSeekerData = {
     ],
   },
   flowFresher: [
-    { 
-      id: 'highest_qualification', 
-      question: "Highest Qualification", 
-      subtitle: "What is your latest degree?", 
-      type: 'single', 
+    {
+      id: 'highest_qualification',
+      question: "Highest Qualification",
+      subtitle: "What is your latest degree?",
+      type: 'single',
       options: [
-        { id: 'bachelors', label: "Bachelor's Degree", icon: 'fa-graduation-cap' }, 
-        { id: 'masters', label: "Master's Degree", icon: 'fa-user-graduate' }, 
+        { id: 'bachelors', label: "Bachelor's Degree", icon: 'fa-graduation-cap' },
+        { id: 'masters', label: "Master's Degree", icon: 'fa-user-graduate' },
         { id: 'plus2', label: '+2 / High School', icon: 'fa-school' }
-      ] 
+      ]
     },
-    { 
-      id: 'key_skills', 
-      question: "Key Skills", 
-      type: 'multi', 
-      subtitle: "Select skills you possess.", 
+    {
+      id: 'key_skills',
+      question: "Key Skills",
+      type: 'multi',
+      subtitle: "Select skills you possess.",
       options: [
-        { id: 'communication', label: 'Communication', icon: 'fa-comments' }, 
-        { id: 'coding', label: 'Coding / Programming', icon: 'fa-code' }, 
-        { id: 'design', label: 'Design / Creative', icon: 'fa-pen-nib' }, 
+        { id: 'communication', label: 'Communication', icon: 'fa-comments' },
+        { id: 'coding', label: 'Coding / Programming', icon: 'fa-code' },
+        { id: 'design', label: 'Design / Creative', icon: 'fa-pen-nib' },
         { id: 'analysis', label: 'Data Analysis', icon: 'fa-chart-bar' }
-      ] 
+      ]
     }
   ],
   flowExperienced: [
-    { 
-      id: 'years_of_experience', 
-      question: "Years of Experience", 
-      subtitle: "How long have you been working?", 
-      type: 'single', 
+    {
+      id: 'years_of_experience',
+      question: "Years of Experience",
+      subtitle: "How long have you been working?",
+      type: 'single',
       options: [
-        { id: '1-2', label: '1-2 Years', icon: 'fa-seedling' }, 
-        { id: '3-5', label: '3-5 Years', icon: 'fa-tree' }, 
+        { id: '1-2', label: '1-2 Years', icon: 'fa-seedling' },
+        { id: '3-5', label: '3-5 Years', icon: 'fa-tree' },
         { id: '5plus', label: '5+ Years', icon: 'fa-mountain' }
-      ] 
+      ]
     },
-    { 
-      id: 'current_job_role', 
-      question: "Current Job Role", 
-      subtitle: "What is your current designation?", 
-      type: 'text', 
-      placeholder: "e.g. Senior Developer" 
+    {
+      id: 'current_job_role',
+      question: "Current Job Role",
+      subtitle: "What is your current designation?",
+      type: 'text',
+      placeholder: "e.g. Senior Developer"
     }
   ]
 };
@@ -257,7 +257,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   const accentHex = role === "student" ? "#6366f1" : "#10b981";
 
   return (
-    <div className="w-full max-w-[420px] bg-white rounded-[24px] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.08),0_8px_20px_-5px_rgba(0,0,0,0.02)] border border-slate-100 relative min-h-[480px] flex flex-col overflow-hidden font-jakarta">
+    <div className="w-full max-w-[420px] bg-white rounded-[24px] shadow-[0_20px_60px_-10px_rgba(0,0,0,0.08),0_8px_20px_-5px_rgba(0,0,0,0.02)] border border-slate-100 relative min-h-[480px] flex flex-col overflow-hidden font-sans">
       {/* Top Nav */}
       <div className="h-14 flex items-center justify-between px-6 pt-2">
         <button
@@ -399,8 +399,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
           <div className="flex flex-col h-full">
             <div className="mb-6">
               <div className="flex items-center justify-between mb-1.5">
-                 <span className={`text-[10px] font-bold ${accentColor === 'indigo' ? 'text-indigo-600' : 'text-emerald-600'} tracking-widest uppercase`}>Question 0{stepIndex + 1}</span>
-                 <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">of 0{activeFlow.length}</span>
+                <span className={`text-[10px] font-bold ${accentColor === 'indigo' ? 'text-indigo-600' : 'text-emerald-600'} tracking-widest uppercase`}>Question 0{stepIndex + 1}</span>
+                <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-widest">of 0{activeFlow.length}</span>
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-1.5">
                 {activeFlow[stepIndex].question}
@@ -412,10 +412,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
 
             <div className="space-y-2.5 flex-grow">
               {activeFlow[stepIndex].type === 'single' && activeFlow[stepIndex].options.map((opt: any) => (
-                <OptionItem 
-                  key={opt.id} 
-                  icon={opt.icon} 
-                  label={opt.label} 
+                <OptionItem
+                  key={opt.id}
+                  icon={opt.icon}
+                  label={opt.label}
                   selected={answers[activeFlow[stepIndex].id] === opt.id}
                   accent={accentColor}
                   accentHex={accentHex}
@@ -423,10 +423,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 />
               ))}
               {activeFlow[stepIndex].type === 'multi' && activeFlow[stepIndex].options.map((opt: any) => (
-                <OptionItem 
-                  key={opt.id} 
-                  icon={opt.icon} 
-                  label={opt.label} 
+                <OptionItem
+                  key={opt.id}
+                  icon={opt.icon}
+                  label={opt.label}
                   multi
                   selected={(answers[activeFlow[stepIndex].id] || []).includes(opt.id)}
                   accent={accentColor}
@@ -493,7 +493,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 ? "We've personalized your StudSphere dashboard based on your goals."
                 : "We've curated a list of jobs and internships just for you."}
             </p>
-            <button 
+            <button
               onClick={async () => {
                 if (!token) {
                   setError('Authentication token not found');
@@ -547,7 +547,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
 const RoleButton: React.FC<{ icon: string, title: string, sub: string, color: string, onClick: () => void }> = ({ icon, title, sub, color, onClick }) => {
   const colorBg = color === 'indigo' ? '#e0e7ff' : '#f0fdf4';
   const colorText = color === 'indigo' ? '#4f46e5' : '#059669';
-  
+
   return (
     <button onClick={onClick} className="w-full group flex items-center p-4 bg-white border border-slate-100 rounded-xl hover:shadow-md transition-all text-left active:scale-95">
       <div className="w-10 h-10 rounded-lg flex items-center justify-center mr-4 group-hover:text-white transition-colors" style={{ backgroundColor: colorBg, color: colorText }}>
@@ -570,7 +570,7 @@ const OptionItem: React.FC<{ icon?: string, label: string, selected: boolean, mu
 
   return (
     <label
-    
+
       onClick={onClick}
       className={`cursor-pointer w-full flex items-center p-3.5 rounded-xl border group relative transition-all active:scale-[0.98] border-slate-100 bg-white hover:border-slate-300 hover:bg-slate-50`}
       style={selected ? { backgroundColor: selectedBg, borderColor: selectedBorder } : {}}
@@ -591,7 +591,7 @@ const OptionItem: React.FC<{ icon?: string, label: string, selected: boolean, mu
           <i className={`fa-solid fa-check transition-opacity ${selected ? 'opacity-100' : 'opacity-0'}`}></i>
         </div>
       ) : (
-        <div 
+        <div
           className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[10px] transition-all transform"
           style={{ backgroundColor: selected ? accentHex : 'transparent', transform: selected ? 'scale(1)' : 'scale(0.75)', opacity: selected ? 1 : 0 }}
         >

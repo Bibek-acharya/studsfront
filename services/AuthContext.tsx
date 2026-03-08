@@ -18,7 +18,8 @@ interface AuthContextType {
   isAuthenticated: boolean;
   token: string | null;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, firstName: string, lastName: string, role?: string) => Promise<void>;
+  register: (email: string, password: string, firstName: string, lastName: string, role?: string, educationLevel?: string) => Promise<{ requires_otp?: boolean, email?: string }>;
+  verifyOTP: (email: string, otp: string) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
 }
@@ -63,7 +64,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     password: string,
     firstName: string,
     lastName: string,
-    role?: string
+    role?: string,
+    educationLevel?: string
   ) => {
     const response = await registerMutation.mutateAsync({
       email,
@@ -71,15 +73,33 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       first_name: firstName,
       last_name: lastName,
       role,
+      education_level: educationLevel,
     });
+
+    if (response.data?.requires_otp) {
+      return { requires_otp: true, email: response.data.email };
+    }
 
     if (response.data?.token && response.data?.user) {
       apiService.setToken(response.data.token);
       apiService.setUser(response.data.user);
       setToken(response.data.token);
-      setUser(response.data.user);
+      setUser(response.data.user as any);
+      return { requires_otp: false };
     } else {
       throw new Error('Invalid response from server');
+    }
+  };
+
+  const verifyOTP = async (email: string, otp: string) => {
+    const response = await apiService.verifyOTP(email, otp);
+    if (response.data?.token && response.data?.user) {
+      apiService.setToken(response.data.token);
+      apiService.setUser(response.data.user);
+      setToken(response.data.token);
+      setUser(response.data.user as any);
+    } else {
+      throw new Error(response.message || 'OTP verification failed');
     }
   };
 
@@ -100,6 +120,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         register,
         logout,
         setUser,
+        verifyOTP,
       }}
     >
       {children}

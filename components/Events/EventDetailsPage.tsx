@@ -25,7 +25,7 @@ const EventDetailsPage: React.FC<EventDetailsPageProps> = ({
     );
 
   return (
-    <div className="bg-white min-h-screen pt-24 font-jakarta pb-20">
+    <div className="bg-white min-h-screen pt-24 font-sans pb-20">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-10 overflow-hidden">

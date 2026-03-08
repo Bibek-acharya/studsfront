@@ -4,7 +4,7 @@ const ResumeBuilder: React.FC = () => {
   const [email, setEmail] = useState("");
 
   return (
-    <div className="min-h-screen bg-white font-jakarta text-slate-900 pt-20">
+    <div className="min-h-screen bg-white font-sans text-slate-900 pt-20">
       <style>{`
             .bg-grid {
                 background-size: 40px 40px;

@@ -13,27 +13,29 @@ const AffiliationTab: React.FC<AffiliationTabProps> = ({
   onClick,
 }) => {
   return (
-    <div
+    <button
       onClick={onClick}
-      className={`relative flex-1 min-w-[240px] cursor-pointer p-6 rounded-xl border transition-all duration-300 group ${
+      className={`relative min-w-[240px] flex-shrink-0 rounded-xl p-5 text-left transition-all duration-200 ${
         isActive
-          ? "bg-white border-primary-500 shadow-xl shadow-primary-500/10 scale-105 z-10"
-          : "bg-white border-transparent hover:border-slate-200 opacity-60 hover:opacity-100"
+          ? "border-2 border-[#3B82F6] bg-white shadow-[0_2px_6px_rgba(59,130,246,0.12)]"
+          : "border-2 border-transparent bg-white hover:border-gray-100 hover:shadow-md"
       }`}
     >
       {isActive && (
-        <div className="absolute top-4 right-4 text-primary-500 animate-fadeIn">
-          <i className="fa-solid fa-circle-check text-lg"></i>
+        <div className="absolute right-4 top-4 text-[#3B82F6]">
+          <i className="fa-solid fa-circle-check text-base"></i>
         </div>
       )}
-      <h3 className="text-slate-900 font-black text-sm mb-2 group-hover:text-primary-600 transition-colors uppercase tracking-tight">
+
+      <h3 className="mb-1.5 text-[16px] font-bold text-gray-900">
         {university.name}
       </h3>
-      <div className="flex items-center gap-2 text-primary-500 text-[10px] font-black uppercase tracking-widest">
+
+      <div className="flex items-center text-[13px] font-medium text-[#3B82F6]">
         <span>{university.collegesCount.toLocaleString()} colleges</span>
-        <i className="fa-solid fa-arrow-right-long transition-transform group-hover:translate-x-1"></i>
+        <i className="fa-solid fa-chevron-right ml-1 mt-0.5 text-[11px]"></i>
       </div>
-    </div>
+    </button>
   );
 };
 

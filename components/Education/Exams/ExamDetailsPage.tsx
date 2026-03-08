@@ -162,7 +162,7 @@ const ExamDetailsPage: React.FC<ExamDetailsPageProps> = ({
   };
 
   return (
-    <div className="bg-slate-50 min-h-screen font-jakarta pt-20 pb-20">
+    <div className="bg-slate-50 min-h-screen font-sans pt-20 pb-20">
       {/* PDF Modal */}
       {pdfModal.open && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4 md:p-8 overflow-hidden">

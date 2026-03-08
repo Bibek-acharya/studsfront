@@ -168,7 +168,7 @@ const CompanyDetailsPage: React.FC<CompanyDetailsPageProps> = ({
   ];
 
   return (
-    <div className="bg-white min-h-screen pt-24 font-jakarta">
+    <div className="bg-white min-h-screen pt-24 font-sans">
       {/* Banner */}
       <div className="h-48 md:h-64 w-full relative overflow-hidden">
         <img
@@ -259,11 +259,10 @@ const CompanyDetailsPage: React.FC<CompanyDetailsPageProps> = ({
             </span>
             <button
               onClick={() => setIsFollowed(!isFollowed)}
-              className={`w-full md:w-44 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 ${
-                isFollowed
+              className={`w-full md:w-44 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest transition-all shadow-xl active:scale-95 flex items-center justify-center gap-3 ${isFollowed
                   ? "bg-white border-2 border-primary-600 text-primary-600 shadow-primary-600/5"
                   : "bg-primary-600 text-white shadow-primary-500/20 hover:bg-primary-700"
-              }`}
+                }`}
             >
               <i
                 className={`fa-solid ${isFollowed ? "fa-check" : "fa-plus"}`}
@@ -922,13 +921,12 @@ const MetaBlock: React.FC<{
 }> = ({ icon, label, val, color }) => (
   <div className="flex items-center gap-4">
     <div
-      className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg shadow-sm border ${
-        color === "blue" ? "bg-blue-50 text-blue-600 border-blue-100" :
-        color === "rose" ? "bg-rose-50 text-rose-600 border-rose-100" :
-        color === "indigo" ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
-        color === "emerald" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
-        "bg-orange-50 text-orange-600 border-orange-100"
-      }`}
+      className={`w-12 h-12 rounded-xl flex items-center justify-center text-lg shadow-sm border ${color === "blue" ? "bg-blue-50 text-blue-600 border-blue-100" :
+          color === "rose" ? "bg-rose-50 text-rose-600 border-rose-100" :
+            color === "indigo" ? "bg-indigo-50 text-indigo-600 border-indigo-100" :
+              color === "emerald" ? "bg-emerald-50 text-emerald-600 border-emerald-100" :
+                "bg-orange-50 text-orange-600 border-orange-100"
+        }`}
     >
       <i className={`fa-solid ${icon}`}></i>
     </div>
@@ -949,8 +947,7 @@ const BenefitCard: React.FC<{
 }> = ({ icon, color, title, desc }) => (
   <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-2xl hover:-translate-y-1 transition-all group">
     <div
-      className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl mb-6 shadow-sm border ${
-        color === "rose"
+      className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl mb-6 shadow-sm border ${color === "rose"
           ? "bg-rose-50 text-rose-500 border-rose-100"
           : color === "blue"
             ? "bg-blue-50 text-blue-500 border-blue-100"
@@ -965,7 +962,7 @@ const BenefitCard: React.FC<{
                     : color === "pink"
                       ? "bg-pink-50 text-pink-500 border-pink-100"
                       : "bg-teal-50 text-teal-600 border-teal-100"
-      }`}
+        }`}
     >
       <i className={`fa-solid ${icon}`}></i>
     </div>
@@ -1003,15 +1000,14 @@ const InsightStats: React.FC<{ label: string; val: string; color: string }> = ({
 }) => (
   <div className="bg-white p-8 rounded-2xl border border-slate-100 text-center shadow-sm hover:shadow-xl transition-all duration-500">
     <div
-      className={`text-2xl font-black mb-1 leading-none ${
-        color === "primary"
+      className={`text-2xl font-black mb-1 leading-none ${color === "primary"
           ? "text-primary-600"
           : color === "emerald"
             ? "text-emerald-600"
             : color === "purple"
               ? "text-purple-600"
               : "text-orange-600"
-      }`}
+        }`}
     >
       {val}
     </div>

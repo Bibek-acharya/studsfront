@@ -12,7 +12,7 @@ const CoverLetterBuilder: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-jakarta text-slate-900 overflow-x-hidden pt-20">
+    <div className="min-h-screen bg-white font-sans text-slate-900 overflow-x-hidden pt-20">
       <style>{`
         .dot-pattern {
             background-image: radial-gradient(#93C5FD 2px, transparent 2px);

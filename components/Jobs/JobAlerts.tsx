@@ -101,7 +101,7 @@ const JobAlerts: React.FC = () => {
     .slice(0, 6);
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-4 md:px-8 font-jakarta">
+    <div className="min-h-screen bg-slate-50 pt-24 pb-12 px-4 md:px-8 font-sans">
       <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-end gap-6 mb-8">
         <div>
           <div className="flex items-center gap-4">

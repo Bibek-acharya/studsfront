@@ -67,7 +67,7 @@ const ServicesPage: React.FC = () => {
   const [audience, setAudience] = useState("students");
 
   return (
-    <div className="min-h-screen bg-white font-jakarta">
+    <div className="min-h-screen bg-white font-sans">
       {/* Header Section */}
       <div className="pt-24 md:pt-32 pb-8 bg-white border-b border-gray-100">
         <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">

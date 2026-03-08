@@ -21,7 +21,7 @@ const NewsDetailsPage: React.FC<NewsDetailsPageProps> = ({
     return <div className="pt-32 text-center">Article not found.</div>;
 
   return (
-    <div className="bg-white min-h-screen pt-24 font-jakarta pb-20">
+    <div className="bg-white min-h-screen pt-24 font-sans pb-20">
       <div className="max-w-7xl mx-auto px-4 md:px-8">
         {/* Breadcrumb */}
         <nav className="flex items-center gap-3 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-10 overflow-hidden">

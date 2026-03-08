@@ -134,7 +134,11 @@ const ScholarshipGrid: React.FC<ScholarshipGridProps> = ({ onNavigate }) => {
                 </button>
                 <button
                   onClick={() =>
-                    onNavigate?.("scholarshipApplication", { id: s.id })
+                    onNavigate?.("scholarshipInquiry", {
+                      id: s.id,
+                      scholarshipName: s.title,
+                      scholarshipType: s.category,
+                    })
                   }
                   className="flex-[1.5] py-4 bg-slate-900 hover:bg-black text-white rounded-2xl font-black text-[10px] uppercase tracking-widest rounded-2xl shadow-xl shadow-slate-900/10 transition-all active:scale-95 flex items-center justify-center gap-2"
                 >

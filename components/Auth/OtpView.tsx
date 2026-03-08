@@ -1,19 +1,27 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useAuth } from "../../services/AuthContext";
+import { apiService } from "../../services/api";
 
 interface OtpViewProps {
   identifier: string;
   type?: "phone" | "email";
   onVerified: () => void;
+  onBack?: () => void;
 }
 
 const OtpView: React.FC<OtpViewProps> = ({
   identifier,
   type = "phone",
   onVerified,
+  onBack,
 }) => {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const inputsRef = useRef<(HTMLInputElement | null)[]>([]);
+  const { verifyOTP } = useAuth();
 
   useEffect(() => {
     inputsRef.current[0]?.focus();
@@ -24,6 +32,7 @@ const OtpView: React.FC<OtpViewProps> = ({
     const newOtp = [...otp];
     newOtp[index] = val;
     setOtp(newOtp);
+    setError("");
 
     if (val && index < 5) {
       inputsRef.current[index + 1]?.focus();
@@ -36,28 +45,49 @@ const OtpView: React.FC<OtpViewProps> = ({
     }
   };
 
-  const handleVerify = (e: React.FormEvent) => {
+  const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.some((v) => !v)) return;
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    setError("");
+    try {
+      await verifyOTP(identifier, otp.join(""));
       onVerified();
-    }, 1500);
+    } catch (err: any) {
+      setError(err.message || "Invalid or expired code. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResend = async () => {
+    setResending(true);
+    setError("");
+    setSuccess("");
+    try {
+      await apiService.sendOTP(identifier);
+      setSuccess("New code sent to your email!");
+      setOtp(["", "", "", "", "", ""]);
+      inputsRef.current[0]?.focus();
+    } catch (err: any) {
+      setError(err.message || "Failed to resend code.");
+    } finally {
+      setResending(false);
+    }
   };
 
   return (
     <div className="animate-fadeInUp text-center">
-      <div className="inline-flex items-center gap-2 mb-10">
+      <div className="inline-flex items-center gap-2 mb-8">
         <img src="/logo-blue.png" alt="StudSphere" className="h-10 w-auto" />
       </div>
 
-      <div className="mb-10">
+      <div className="mb-8">
         <h1 className="text-3xl font-bold text-slate-900 mb-2">
           {type === "phone" ? "Verify Phone" : "Verify Email"}
         </h1>
-        <p className="text-slate-500 font-medium">
+        <p className="text-slate-500 font-medium text-sm">
           We've sent a 6-digit code to{" "}
           <strong className="text-slate-900">
             {type === "phone"
@@ -67,12 +97,25 @@ const OtpView: React.FC<OtpViewProps> = ({
         </p>
       </div>
 
+      {error && (
+        <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-bold uppercase tracking-wider">
+          <i className="fa-solid fa-circle-exclamation mr-2"></i>
+          {error}
+        </div>
+      )}
+
+      {success && (
+        <div className="mb-6 p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-xs font-bold uppercase tracking-wider">
+          <i className="fa-solid fa-circle-check mr-2"></i>
+          {success}
+        </div>
+      )}
+
       <form onSubmit={handleVerify} className="space-y-8">
         <div className="flex justify-between gap-2 max-w-[340px] mx-auto">
           {otp.map((digit, idx) => (
             <input
               key={idx}
-              // Fix: Wrapped assignment in braces to return void and satisfy Ref type
               ref={(el) => {
                 inputsRef.current[idx] = el;
               }}
@@ -86,26 +129,40 @@ const OtpView: React.FC<OtpViewProps> = ({
           ))}
         </div>
 
-        <button
-          type="submit"
-          disabled={loading || otp.some((v) => !v)}
-          className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 text-white font-bold rounded-xl shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-        >
-          {loading ? (
-            <i className="fa-solid fa-spinner animate-spin"></i>
-          ) : (
-            "Verify & Continue"
+        <div className="space-y-4">
+          <button
+            type="submit"
+            disabled={loading || otp.some((v) => !v)}
+            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 text-white font-bold rounded-xl shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
+          >
+            {loading ? (
+              <i className="fa-solid fa-spinner animate-spin"></i>
+            ) : (
+              "Verify & Continue"
+            )}
+          </button>
+
+          {onBack && (
+            <button
+              type="button"
+              onClick={onBack}
+              className="w-full py-4 bg-white border border-slate-200 text-slate-500 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm"
+            >
+              Change Email
+            </button>
           )}
-        </button>
+        </div>
 
         <div className="space-y-4">
           <p className="text-sm text-slate-500 font-medium">
             Didn't receive the code?{" "}
             <button
               type="button"
-              className="text-blue-600 font-bold hover:underline"
+              onClick={handleResend}
+              disabled={resending}
+              className="text-blue-600 font-bold hover:underline disabled:opacity-50"
             >
-              Resend
+              {resending ? "Sending..." : "Resend Code"}
             </button>
           </p>
         </div>

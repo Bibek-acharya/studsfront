@@ -21,7 +21,7 @@ const BlogDetailsPage: React.FC<BlogDetailsPageProps> = ({
     return <div className="pt-32 text-center">Blog post not found.</div>;
 
   return (
-    <div className="bg-white min-h-screen pt-24 font-jakarta pb-20">
+    <div className="bg-white min-h-screen pt-24 font-sans pb-20">
       <div className="max-w-4xl mx-auto px-6">
         {/* Navigation / Header */}
         <button

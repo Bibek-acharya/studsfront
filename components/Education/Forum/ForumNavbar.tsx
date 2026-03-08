@@ -9,7 +9,7 @@ const ForumNavbar: React.FC<ForumNavbarProps> = ({ onNavigate, user }) => {
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
   return (
-    <header className="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-[150] shadow-sm font-jakarta">
+    <header className="bg-white/90 backdrop-blur-md border-b border-slate-200 sticky top-0 z-[150] shadow-sm font-sans">
       <div className="container mx-auto px-4 lg:px-8 h-20 flex items-center justify-between">
         {/* Logo & Brand */}
         <div className="flex items-center gap-4">

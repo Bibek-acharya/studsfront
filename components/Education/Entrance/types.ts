@@ -4,7 +4,7 @@ export interface Exam {
   title: string;
   university: string;
   faculty: string;
-  status: 'Ongoing' | 'Upcoming' | 'Closed';
+  status: 'Ongoing' | 'Upcoming' | 'Closing Soon' | 'Closed';
   examDate: string;
   nepaliDate: string;
   imageUrl: string;

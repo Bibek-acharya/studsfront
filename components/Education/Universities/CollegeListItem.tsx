@@ -3,12 +3,17 @@ import { College } from "./types";
 
 interface CollegeListItemProps {
   college: College;
+  onClick?: () => void;
 }
 
-const CollegeListItem: React.FC<CollegeListItemProps> = ({ college }) => {
+const CollegeListItem: React.FC<CollegeListItemProps> = ({ college, onClick }) => {
   return (
-    <div className="bg-white border border-slate-100 rounded-xl p-5 flex items-center gap-5 hover:shadow-xl hover:border-primary-100 transition-all duration-300 cursor-pointer group animate-fadeInUp">
-      <div className="w-16 h-16 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center p-3 shrink-0 shadow-inner group-hover:scale-110 transition-transform duration-500">
+    <div
+      onClick={onClick}
+      className="group flex cursor-pointer items-center justify-between rounded-[16px] border border-[#E5E7EB] bg-white p-5 transition-all duration-300 hover:border-blue-300 hover:shadow-[0_4px_20px_-4px_rgba(59,130,246,0.12)]"
+    >
+      <div className="flex items-center gap-4">
+        <div className="h-[68px] w-[68px] flex-shrink-0 overflow-hidden rounded-[14px] border border-gray-200 bg-white p-1 shadow-sm">
         <img
           src={college.logo}
           alt="Logo"
@@ -16,34 +21,39 @@ const CollegeListItem: React.FC<CollegeListItemProps> = ({ college }) => {
         />
       </div>
 
-      <div className="flex-1 min-w-0">
-        <h3 className="text-slate-900 font-black text-lg leading-tight mb-2 truncate group-hover:text-primary-600 transition-colors">
+        <div className="flex flex-col">
+          <h3 className="mb-1.5 text-[17px] font-bold leading-tight text-gray-900 transition-colors group-hover:text-[#3B82F6]">
           {college.name}
         </h3>
-        <div className="flex items-center gap-4 mb-3">
-          <div className="flex items-center gap-1.5 text-amber-500">
-            <i className="fa-solid fa-star text-xs"></i>
-            <span className="text-xs font-black text-slate-800">
+
+          <div className="mb-3 flex items-center">
+            <div className="flex items-center gap-1">
+              <i className="fa-solid fa-star text-sm text-[#F59E0B]"></i>
+              <span className="mt-0.5 text-[13px] font-bold text-gray-800">
               {college.rating}
             </span>
-          </div>
-          <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">
-            {college.reviews} reviews
-          </span>
-        </div>
+            </div>
 
-        <div className="flex gap-2">
-          <span className="bg-primary-50 text-primary-600 text-[9px] font-black px-3 py-1 rounded-lg border border-primary-100 uppercase tracking-widest">
+            <div className="mx-2.5 h-3.5 w-px bg-gray-300"></div>
+
+            <span className="mt-0.5 text-[12px] font-medium text-gray-500">
+              {college.reviews} reviews
+            </span>
+          </div>
+
+          <div className="flex gap-2">
+            <span className="rounded-full border border-gray-100 bg-gray-50 px-3 py-1 text-[11px] font-medium text-gray-600 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50 group-hover:text-blue-600">
             {college.affiliation}
           </span>
-          <span className="bg-slate-50 text-slate-400 text-[9px] font-black px-3 py-1 rounded-lg border border-slate-100 uppercase tracking-widest">
+            <span className="rounded-full border border-gray-100 bg-gray-50 px-3 py-1 text-[11px] font-medium text-gray-600 transition-colors group-hover:border-blue-100 group-hover:bg-blue-50 group-hover:text-blue-600">
             {college.type}
           </span>
+          </div>
         </div>
       </div>
 
-      <div className="w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-200 group-hover:bg-primary-50 group-hover:text-primary-600 group-hover:rotate-45 transition-all duration-500">
-        <i className="fa-solid fa-arrow-right"></i>
+      <div className="pr-1">
+        <i className="fa-solid fa-chevron-right text-gray-300 transition-all duration-300 group-hover:translate-x-1 group-hover:text-[#3B82F6]"></i>
       </div>
     </div>
   );

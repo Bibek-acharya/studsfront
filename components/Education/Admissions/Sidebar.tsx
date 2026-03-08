@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 const SidebarFilters: React.FC = () => {
   return (
-    <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden font-jakarta">
+    <div className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden font-sans">
       <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
         <div className="flex items-center gap-3">
           <i className="fa-solid fa-sliders text-primary-600"></i>

@@ -1,566 +1,382 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiService, EducationCourse } from "../../../services/api";
+import { useLocation } from "react-router-dom";
+import { apiService, EducationCourseDetails } from "../../../services/api";
 
 interface CourseDetailsPageProps {
-  id: number;
-  onNavigate: (view: any) => void;
+  onNavigate: (view: any, data?: any) => void;
 }
 
-const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({
-  id,
-  onNavigate,
-}) => {
-  const [openFaq, setOpenFaq] = useState<number | null>(null);
+type TabKey = "overview" | "curriculum" | "admissions" | "careers";
 
-  const defaultCourse: EducationCourse & { faculty: string } = {
-    title: "Bachelor in Information Technology",
-    shortTitle: "BIT",
-    description:
-      "Build a strong foundation in software development, networking, databases, and modern IT systems. A comprehensive program designed to prepare you for a successful global tech career.",
-    id: String(id),
-    colleges: 15,
-    affiliation: "TU Affiliated",
-    badges: ["Top Choice"],
-    field: "IT / Computing",
-    estFee: "NPR 6L - 10L",
-    highlights: ["Internship", "Projects"],
-    careerPath: "Software Engineer, Analyst",
-    duration: "4 Years (8 Semesters)",
-    level: "Bachelor",
-    faculty: "Science / Management",
-    location: "Available in Nepal",
-    govtFee: "NPR 3,50,000",
-    privateFee: "NPR 8,50,000 - 12,00,000",
-  };
+const sectionIds: TabKey[] = ["overview", "curriculum", "admissions", "careers"];
 
-  const { data } = useQuery({
-    queryKey: ["education-course", String(id)],
-    queryFn: () => apiService.getEducationCourseById(String(id)),
+const iconByCareer: Record<string, string> = {
+  database: "fa-database",
+  cpu: "fa-microchip",
+  chart: "fa-chart-line",
+};
+
+const bgByCareer: Record<string, string> = {
+  blue: "bg-blue-50 text-blue-600",
+  emerald: "bg-emerald-50 text-emerald-600",
+  purple: "bg-purple-50 text-purple-600",
+};
+
+const CourseDetailsPage: React.FC<CourseDetailsPageProps> = ({ onNavigate }) => {
+  const location = useLocation();
+  const routeState = (location.state || {}) as { id?: string | number };
+  const courseId = String(routeState.id || "1");
+
+  const [openSemester, setOpenSemester] = useState<number | null>(1);
+  const [activeTab, setActiveTab] = useState<TabKey>("overview");
+
+  const { data, isLoading } = useQuery({
+    queryKey: ["education-course-details", courseId],
+    queryFn: () => apiService.getEducationCourseDetailsById(courseId),
   });
 
-  const course = {
-    ...defaultCourse,
-    ...(data?.data || {}),
-    faculty: defaultCourse.faculty,
+  const details = data?.data as EducationCourseDetails | undefined;
+
+  const tags = useMemo(() => {
+    if (!details) return [];
+    return [
+      { icon: "fa-clock", label: details.highlightsDuration || "-" },
+      { icon: "fa-graduation-cap", label: details.degreeLabel || "-" },
+      { icon: "fa-building-columns", label: details.mode || "On-Campus" },
+    ];
+  }, [details]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      let current: TabKey = "overview";
+      sectionIds.forEach((id) => {
+        const element = document.getElementById(id);
+        if (!element) return;
+        const offsetTop = element.offsetTop;
+        if (window.scrollY >= offsetTop - 120) {
+          current = id;
+        }
+      });
+      setActiveTab(current);
+    };
+
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const handleTabClick = (tab: TabKey) => {
+    const target = document.getElementById(tab);
+    if (!target) return;
+    const y = target.getBoundingClientRect().top + window.pageYOffset - 90;
+    window.scrollTo({ top: y, behavior: "smooth" });
   };
 
-  const learningTopics = [
-    {
-      icon: "fa-code",
-      title: "Programming",
-      subtitle: "C, C++, Java, Python",
-      color: "blue",
-    },
-    {
-      icon: "fa-globe",
-      title: "Web Development",
-      subtitle: "HTML, CSS, JS, React",
-      color: "emerald",
-    },
-    {
-      icon: "fa-database",
-      title: "Database Mgmt",
-      subtitle: "SQL, NoSQL, Normalization",
-      color: "indigo",
-    },
-    {
-      icon: "fa-network-wired",
-      title: "Networks & Security",
-      subtitle: "Protocols, Cyber Security",
-      color: "purple",
-    },
-    {
-      icon: "fa-cloud",
-      title: "Cloud & Tech",
-      subtitle: "AWS, IoT, AI Basics",
-      color: "orange",
-    },
-    {
-      icon: "fa-microchip",
-      title: "Software Eng",
-      subtitle: "SDLC, Agile, Testing",
-      color: "pink",
-    },
-  ];
-
-  const courseStructure = [
-    {
-      title: "Semester 1–2",
-      description:
-        "Fundamentals of IT, Programming Basics, Mathematics, Communication Skills.",
-    },
-    {
-      title: "Semester 3–4",
-      description:
-        "Object-Oriented Programming, Data Structures, DBMS, Web Technologies.",
-    },
-    {
-      title: "Semester 5–6",
-      description:
-        "Software Engineering, Networking, Operating Systems, Electives.",
-    },
-    {
-      title: "Semester 7–8",
-      description: "Advanced Electives, Internship, Final Year Project.",
-      isLast: true,
-    },
-  ];
-
-  const universities = [
-    { name: "Tribhuvan University", abbr: "TU" },
-    { name: "Pokhara University", abbr: "PU" },
-    { name: "Purbanchal University", abbr: "PPU" },
-    { name: "Kathmandu University", abbr: "KU" },
-  ];
-
-  const eligibilityCriteria = [
-    "Completed +2 (Science or Management)",
-    "Minimum GPA as per university rules",
-    "Mathematics preferred (varies by university)",
-  ];
-
-  const careerOptions = [
-    "Software Developer",
-    "Web Developer",
-    "System Analyst",
-    "Network Admin",
-    "Database Admin",
-    "Startup Founder",
-  ];
-
-  const faqs = [
-    {
-      question: "Is BIT good for the future?",
-      answer:
-        "Yes, IT is one of the fastest-growing fields with global demand. Graduates can explore careers internationally in various tech sectors.",
-    },
-    {
-      question: "Can management students apply?",
-      answer:
-        "Yes, many universities accept management students, though some may require a minimum grade in specific subjects.",
-    },
-    {
-      question: "Is internship compulsory?",
-      answer:
-        "Yes, most universities include a mandatory internship component in the final semesters to ensure students are job-ready.",
-    },
-  ];
+  if (isLoading || !details) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center text-slate-500 font-semibold">
+        Loading course details...
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-slate-50 min-h-screen font-jakarta -mt-20">
-      {/* Hero Section */}
-      <header className="relative bg-white border-b border-slate-100 overflow-hidden pt-16 md:pt-20">
-        <div className="absolute top-0 right-0 -mr-20 -mt-2 w-96 h-96 bg-primary-50 rounded-full blur-3xl opacity-50"></div>
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-emerald-50 rounded-full blur-3xl opacity-50"></div>
+    <div className="bg-white text-gray-800 font-sans antialiased">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
+        <button
+          onClick={() => onNavigate("courseFinder")}
+          className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 mb-8 transition-colors"
+        >
+          <i className="fa-solid fa-arrow-left"></i> Back to Programs
+        </button>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-20">
-          <div className="max-w-3xl">
-            <nav className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 mb-8">
+        <div className="mb-12">
+          <h1 className="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight leading-tight mb-6">
+            {details.course.title}
+          </h1>
+
+          <div className="flex flex-wrap items-center gap-3 mb-8">
+            {tags.map((tag) => (
               <span
-                onClick={() => onNavigate("courseFinder")}
-                className="hover:text-primary-600 cursor-pointer transition-colors"
+                key={tag.label}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-gray-100 text-sm font-medium text-gray-700"
               >
-                Course Finder
+                <i className={`fa-solid ${tag.icon} text-gray-400`}></i>
+                {tag.label}
               </span>
-              <i className="fa-solid fa-chevron-right text-[8px]"></i>
-              <span className="text-primary-600">Course Details</span>
-            </nav>
+            ))}
+          </div>
 
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-50 text-primary-600 text-[10px] font-black uppercase tracking-widest mb-8 border border-primary-100">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-600 animate-pulse"></span>
-              Admissions Open for 2025
-            </div>
-
-            <h1 className="text-4xl lg:text-6xl font-black text-slate-900 leading-tight mb-6 tracking-tight">
-              Bachelor in{" "}
-              <span className="bg-gradient-to-r from-primary-600 to-emerald-500 bg-clip-text text-transparent">
-                {course.title}
-              </span>{" "}
-              ({course.shortTitle})
-            </h1>
-
-            <p className="text-lg text-slate-500 leading-relaxed mb-10 font-medium max-w-2xl">
-              {course.description}
-            </p>
-
-            <div className="flex flex-wrap gap-4">
-              <button className="flex items-center gap-3 bg-primary-600 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-primary-700 transition-all shadow-xl shadow-primary-500/20 transform hover:-translate-y-0.5 active:scale-95">
-                Apply Now <i className="fa-solid fa-arrow-right"></i>
-              </button>
-              <button className="flex items-center gap-3 bg-white text-slate-700 border border-slate-200 px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-50 transition-all active:scale-95">
-                <i className="fa-solid fa-download"></i> Download Syllabus
-              </button>
-            </div>
+          <div className="flex flex-wrap items-center gap-4">
+            <button className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-all shadow-sm flex items-center gap-2">
+              Apply for Admission
+            </button>
+            <button className="bg-white hover:bg-gray-50 text-gray-700 font-semibold py-3 px-6 rounded-xl transition-all border border-gray-200 shadow-sm flex items-center gap-2">
+              <i className="fa-solid fa-download"></i> Download Brochure
+            </button>
           </div>
         </div>
-      </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Left Column */}
-          <div className="lg:col-span-8 space-y-16">
-            {/* About Section */}
+        <div className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-gray-200 mb-10 -mx-4 px-4 sm:mx-0 sm:px-0">
+          <nav className="flex gap-8 overflow-x-auto no-scrollbar pt-4">
+            <button
+              onClick={() => handleTabClick("overview")}
+              className={`border-b-2 pb-4 text-sm whitespace-nowrap px-1 transition-colors ${activeTab === "overview" ? "border-blue-600 text-blue-600 font-semibold" : "border-transparent text-gray-500 hover:text-gray-900 font-medium"}`}
+            >
+              Overview
+            </button>
+            <button
+              onClick={() => handleTabClick("curriculum")}
+              className={`border-b-2 pb-4 text-sm whitespace-nowrap px-1 transition-colors ${activeTab === "curriculum" ? "border-blue-600 text-blue-600 font-semibold" : "border-transparent text-gray-500 hover:text-gray-900 font-medium"}`}
+            >
+              Curriculum
+            </button>
+            <button
+              onClick={() => handleTabClick("admissions")}
+              className={`border-b-2 pb-4 text-sm whitespace-nowrap px-1 transition-colors ${activeTab === "admissions" ? "border-blue-600 text-blue-600 font-semibold" : "border-transparent text-gray-500 hover:text-gray-900 font-medium"}`}
+            >
+              Admissions
+            </button>
+            <button
+              onClick={() => handleTabClick("careers")}
+              className={`border-b-2 pb-4 text-sm whitespace-nowrap px-1 transition-colors ${activeTab === "careers" ? "border-blue-600 text-blue-600 font-semibold" : "border-transparent text-gray-500 hover:text-gray-900 font-medium"}`}
+            >
+              Careers
+            </button>
+          </nav>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="lg:col-span-2 space-y-20">
             <section id="overview" className="scroll-mt-24">
-              <h2 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-4">
-                <div className="w-10 h-10 rounded-xl bg-primary-50 flex items-center justify-center text-primary-600 text-lg">
-                  <i className="fa-solid fa-book-open"></i>
-                </div>
-                About the Course
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <i className="fa-solid fa-circle-info text-blue-600"></i> About the Course
               </h2>
-              <div className="space-y-4 text-slate-500 font-medium leading-relaxed text-lg">
-                <p>
-                  The Bachelor in Information Technology (BIT) program is
-                  designed to develop skilled IT professionals with practical
-                  and theoretical knowledge. The course focuses on programming,
-                  system analysis, networking, databases, and emerging
-                  technologies.
-                </p>
-                <p>
-                  Students gain hands-on experience through projects, labs, and
-                  internships, making them industry-ready after graduation. It
-                  bridges the gap between traditional computer science theory
-                  and modern practical application.
-                </p>
-              </div>
-            </section>
-
-            {/* Learning Topics Grid */}
-            <section>
-              <h2 className="text-2xl font-black text-slate-900 mb-8 uppercase tracking-tight">
-                What You Will Learn
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {learningTopics.map((topic, index) => (
-                  <div
-                    key={index}
-                    className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-300 flex items-start gap-5 group"
-                  >
-                    <div
-                      className={`w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 group-hover:bg-primary-600 group-hover:text-white flex items-center justify-center text-xl transition-all`}
-                    >
-                      <i className={`fa-solid ${topic.icon}`}></i>
-                    </div>
-                    <div>
-                      <h3 className="font-black text-slate-900 text-lg mb-1">
-                        {topic.title}
-                      </h3>
-                      <p className="text-sm text-slate-400 font-bold uppercase tracking-widest">
-                        {topic.subtitle}
-                      </p>
-                    </div>
-                  </div>
+              <div className="text-gray-600 space-y-4 text-sm leading-relaxed max-w-4xl">
+                {details.about.map((para) => (
+                  <p key={para}>{para}</p>
                 ))}
               </div>
             </section>
 
-            {/* Structure Timeline */}
-            <section>
-              <h2 className="text-2xl font-black text-slate-900 mb-8 uppercase tracking-tight">
-                Course Structure
+            <section id="curriculum" className="scroll-mt-24">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <i className="fa-solid fa-book text-blue-600"></i> Curriculum
               </h2>
-              <div className="space-y-4 pl-4">
-                {courseStructure.map((item, index) => (
-                  <div key={index} className="flex group">
-                    <div className="flex flex-col items-center mr-8">
-                      <div
-                        className={`w-4 h-4 ${item.isLast ? "bg-emerald-500" : "bg-primary-600"} rounded-full mt-2 ring-4 ring-white shadow-lg`}
-                      ></div>
-                      {!item.isLast && (
-                        <div className="w-0.5 bg-slate-200 h-full my-2"></div>
+              <div className="border border-gray-200 rounded-2xl bg-white overflow-hidden shadow-sm">
+                {details.curriculum.map((semester, index) => {
+                  const isOpen = openSemester === semester.semester;
+                  return (
+                    <div
+                      key={semester.semester}
+                      className={`border-b border-gray-100 ${index === details.curriculum.length - 1 ? "border-b-0" : ""}`}
+                    >
+                      <button
+                        className="w-full flex justify-between items-center p-5 hover:bg-gray-50 transition-colors"
+                        onClick={() =>
+                          setOpenSemester(isOpen ? null : semester.semester)
+                        }
+                      >
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-full bg-blue-50 text-blue-600 font-bold flex items-center justify-center text-sm">
+                            {semester.semester}
+                          </div>
+                          <div className="text-left">
+                            <h4 className="font-bold text-gray-900 text-sm">{semester.title}</h4>
+                            <p className="text-xs text-gray-500 mt-0.5 font-medium">{semester.subtitle}</p>
+                          </div>
+                        </div>
+                        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-white border border-gray-100 shadow-sm text-gray-400">
+                          <i
+                            className={`fa-solid fa-chevron-down text-sm transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
+                          ></i>
+                        </div>
+                      </button>
+
+                      {isOpen && (
+                        <div className="p-5 pl-[4.5rem] text-sm text-gray-600 border-t border-gray-100 bg-gray-50/50">
+                          <ul className="space-y-3">
+                            {semester.subjects.map((subject) => (
+                              <li key={subject} className="flex items-start gap-2">
+                                <i className="fa-solid fa-circle-check text-blue-500 mt-0.5"></i>
+                                <span>{subject}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
                     </div>
-                    <div className={item.isLast ? "pb-2" : "pb-12"}>
-                      <h3 className="text-xl font-black text-slate-900 mb-2">
-                        {item.title}
-                      </h3>
-                      <p className="text-slate-500 font-medium leading-relaxed">
-                        {item.description}
-                      </p>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </section>
 
-            {/* Universities Card */}
-            <section className="bg-primary-600 rounded-2xl p-10 md:p-12 text-white relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -mr-32 -mt-32"></div>
-              <div className="relative z-10">
-                <h2 className="text-3xl font-black mb-8 tracking-tight leading-tight">
-                  Universities Offering This Course
-                </h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {universities.map((uni, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-4 bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/20 hover:bg-white/20 transition-all cursor-default"
-                    >
-                      <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center font-black text-primary-600 text-sm">
-                        {uni.abbr}
-                      </div>
-                      <span className="font-bold text-white text-sm">
-                        {uni.name}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-10 text-center">
-                  <button
-                    onClick={() => onNavigate("findCollege")}
-                    className="text-white font-black text-[10px] uppercase tracking-[0.2em] border-b-2 border-white/30 hover:border-white transition-all pb-1"
-                  >
-                    View All Colleges Offering BIT{" "}
-                    <i className="fa-solid fa-arrow-right-long ml-2"></i>
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            {/* Eligibility & Careers */}
-            <div className="grid md:grid-cols-2 gap-10">
-              <section className="bg-white p-10 rounded-2xl border border-slate-100 shadow-sm">
-                <h2 className="text-xl font-black text-slate-900 mb-8 uppercase tracking-widest">
-                  Eligibility
-                </h2>
-                <ul className="space-y-4">
-                  {eligibilityCriteria.map((c, i) => (
-                    <li key={i} className="flex items-start gap-4">
-                      <i className="fa-solid fa-circle-check text-emerald-500 text-lg mt-0.5"></i>
-                      <span className="text-slate-500 font-bold text-sm leading-relaxed">
-                        {c}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              </section>
-
-              <section className="bg-white p-10 rounded-2xl border border-slate-100 shadow-sm">
-                <h2 className="text-xl font-black text-slate-900 mb-8 uppercase tracking-widest">
-                  Careers
-                </h2>
-                <div className="flex flex-wrap gap-2">
-                  {careerOptions.map((career, index) => (
-                    <span
-                      key={index}
-                      className="px-4 py-2 bg-slate-50 text-slate-500 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary-50 hover:text-primary-600 hover:border-primary-100 transition-all cursor-default"
-                    >
-                      {career}
-                    </span>
-                  ))}
-                </div>
-              </section>
-            </div>
-
-            {/* Internship Banner */}
-            <section className="bg-slate-900 text-white p-10 md:p-16 rounded-2xl relative overflow-hidden shadow-2xl">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-primary-600/20 rounded-full blur-[100px] -mr-48 -mt-48"></div>
-              <div className="relative z-10 grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                  <h2 className="text-3xl font-black mb-6 tracking-tight">
-                    Internship & Practical Exposure
-                  </h2>
-                  <p className="text-slate-400 font-medium leading-relaxed mb-8">
-                    Gain industry experience before you graduate through our
-                    network of 200+ tech partners.
-                  </p>
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-primary-400">
-                        <i className="fa-solid fa-briefcase"></i>
-                      </div>
-                      <span className="font-bold text-sm">
-                        Mandatory Industrial Internship
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-primary-400">
-                        <i className="fa-solid fa-users"></i>
-                      </div>
-                      <span className="font-bold text-sm">
-                        Industry Led Workshops
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-white/5 border border-white/10 p-8 rounded-2xl backdrop-blur-md">
-                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-400 mb-4">
-                    Partner Spotlight
-                  </p>
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-slate-900 font-black">
-                      TF
-                    </div>
-                    <div>
-                      <p className="font-black text-lg">TechFlow Systems</p>
-                      <p className="text-xs text-slate-500">
-                        Official Internship Partner
-                      </p>
-                    </div>
-                  </div>
-                  <button className="w-full py-4 bg-white text-slate-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-slate-50 transition-all">
-                    View All Partners
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            {/* FAQs */}
-            <section>
-              <h2 className="text-2xl font-black text-slate-900 mb-10 uppercase tracking-tight text-center">
-                Frequently Asked Questions
+            <section id="admissions" className="scroll-mt-24">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <i className="fa-solid fa-file-lines text-blue-600"></i> Admission Requirements
               </h2>
-              <div className="space-y-4 max-w-3xl mx-auto">
-                {faqs.map((faq, index) => (
-                  <div
-                    key={index}
-                    className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-sm"
-                  >
-                    <button
-                      onClick={() =>
-                        setOpenFaq(openFaq === index ? null : index)
-                      }
-                      className="w-full px-8 py-6 text-left flex justify-between items-center transition-colors hover:bg-slate-50"
-                    >
-                      <span className="font-black text-slate-800 text-sm uppercase tracking-widest">
-                        {faq.question}
-                      </span>
-                      <i
-                        className={`fa-solid fa-chevron-down text-slate-300 transition-transform duration-300 ${openFaq === index ? "rotate-180" : ""}`}
-                      ></i>
-                    </button>
-                    {openFaq === index && (
-                      <div className="px-8 pb-8 text-slate-500 font-medium leading-relaxed animate-fadeInDown">
-                        {faq.answer}
+              <div className="bg-gray-50 p-6 rounded-2xl border border-gray-100">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-4">
+                  {details.admissionRequirements.map((item) => (
+                    <div key={item} className="flex items-center gap-3 text-sm text-gray-700 font-medium">
+                      <div className="w-8 h-8 rounded-full bg-white border border-gray-200 flex items-center justify-center text-blue-500 shadow-sm">
+                        <i className="fa-solid fa-check"></i>
                       </div>
-                    )}
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </section>
+
+            <section id="careers" className="scroll-mt-24 pb-8">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                <i className="fa-solid fa-briefcase text-blue-600"></i> Career Opportunities
+              </h2>
+              <p className="text-gray-600 mb-8 max-w-4xl leading-relaxed text-sm">
+                Graduates of this program are highly sought after in both local and international tech industries.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                {details.careerOpportunities.map((career) => (
+                  <div
+                    key={career.title}
+                    className="p-4 border border-gray-100 rounded-xl bg-white shadow-sm flex items-center gap-3"
+                  >
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center ${bgByCareer[career.color] || "bg-blue-50 text-blue-600"}`}>
+                      <i className={`fa-solid ${iconByCareer[career.icon] || "fa-briefcase"} text-xl`}></i>
+                    </div>
+                    <span className="font-semibold text-sm text-gray-900">{career.title}</span>
                   </div>
                 ))}
               </div>
             </section>
           </div>
 
-          {/* Right Column (Sidebar) */}
-          <aside className="lg:col-span-4 space-y-8">
-            <div className="sticky top-28 space-y-8">
-              {/* Key Highlights Card */}
-              <div className="bg-white rounded-2xl p-10 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.05)] border border-slate-100">
-                <h3 className="text-xl font-black text-slate-900 mb-10 uppercase tracking-widest border-b border-slate-50 pb-6">
-                  Key Highlights
-                </h3>
-                <ul className="space-y-8">
-                  <HighlightItem
-                    icon="fa-clock"
-                    color="blue"
-                    label="Duration"
-                    val={course.duration}
-                  />
-                  <HighlightItem
-                    icon="fa-graduation-cap"
-                    color="emerald"
-                    label="Level"
-                    val={course.level}
-                  />
-                  <HighlightItem
-                    icon="fa-layer-group"
-                    color="indigo"
-                    label="Faculty"
-                    val={course.faculty}
-                  />
-                  <HighlightItem
-                    icon="fa-location-dot"
-                    color="orange"
-                    label="Location"
-                    val={course.location}
-                  />
-                </ul>
-                <div className="mt-12 space-y-4">
-                  <button className="w-full py-5 bg-primary-600 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl shadow-primary-500/20 hover:bg-primary-700 transition-all active:scale-95">
-                    Apply Now
+          <div className="lg:col-span-1">
+            <div className="sticky top-24 space-y-6">
+              <div className="border border-slate-100 shadow-sm bg-white rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-5">Are you looking to joining this Course?</h3>
+                <div className="space-y-3">
+                  <button className="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-3 px-4 rounded-lg transition-colors text-sm shadow-sm">
+                    Get Admission
                   </button>
-                  <button className="w-full py-5 bg-white border-2 border-primary-600 text-primary-600 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-primary-50 transition-all active:scale-95">
-                    Download Brochure
+                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors text-sm shadow-sm">
+                    Talk to Counselor
                   </button>
                 </div>
               </div>
 
-              {/* Fee Structure Card */}
-              <div className="bg-slate-900 text-white rounded-2xl p-10 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16"></div>
-                <h3 className="text-xl font-black mb-8 uppercase tracking-widest">
-                  Fee Structure
-                </h3>
-                <div className="space-y-8">
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">
-                      Government Colleges
-                    </p>
-                    <p className="text-2xl font-black text-primary-400">
-                      {course.govtFee}
-                    </p>
+              <div className="border border-slate-100 shadow-sm bg-white rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-6">Key Highlights</h3>
+                <div className="space-y-6 mb-8">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                      <i className="fa-solid fa-clock text-lg"></i>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Duration</p>
+                      <p className="text-sm font-semibold text-gray-900">{details.highlightsDuration}</p>
+                    </div>
                   </div>
-                  <div className="h-px bg-white/5"></div>
-                  <div>
-                    <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-2">
-                      Private Colleges
-                    </p>
-                    <p className="text-2xl font-black text-emerald-400">
-                      {course.privateFee}
-                    </p>
+
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                      <i className="fa-solid fa-graduation-cap text-lg"></i>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Degree Level</p>
+                      <p className="text-sm font-semibold text-gray-900">{details.highlightsDegreeLevel}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-500 flex items-center justify-center shrink-0">
+                      <i className="fa-solid fa-building text-lg"></i>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Faculty</p>
+                      <p className="text-sm font-semibold text-gray-900">{details.highlightsFaculty}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-rose-100 text-rose-500 flex items-center justify-center shrink-0">
+                      <i className="fa-solid fa-university text-lg"></i>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">University</p>
+                      <p className="text-sm font-semibold text-gray-900">{details.highlightsUniversity}</p>
+                    </div>
                   </div>
                 </div>
-                <p className="text-[10px] text-slate-500 font-bold uppercase mt-10 tracking-widest">
-                  *Estimated total course fee. Varies by college.
-                </p>
+
+                <button
+                  onClick={() => onNavigate("universitiesPage", { courseId: details.course.id, courseTitle: details.course.title, collegesCount: details.offeringCollegesCount })}
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition-colors text-sm shadow-sm"
+                >
+                  Explore College
+                </button>
               </div>
 
-              {/* Why Card */}
-              <div className="bg-gradient-to-br from-primary-600 to-indigo-700 rounded-2xl p-10 text-white shadow-xl">
-                <h3 className="text-xl font-black mb-8 uppercase tracking-widest">
-                  Why Choose BIT?
-                </h3>
-                <ul className="space-y-4">
-                  <BenefitRow text="High demand in job market" />
-                  <BenefitRow text="Global career opportunities" />
-                  <BenefitRow text="Tech enthusiast friendly" />
-                  <BenefitRow text="Foundation for Masters" />
-                </ul>
+              <div className="border border-slate-100 shadow-sm bg-white rounded-2xl p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-6">Contact & Support</h3>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center shrink-0">
+                      <i className="fa-solid fa-envelope text-lg"></i>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">G-Mail</p>
+                      <p className="text-sm font-semibold text-gray-900">{details.contact.email}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                      <i className="fa-solid fa-phone text-lg"></i>
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wider mb-0.5">Phone Support</p>
+                      <p className="text-sm font-semibold text-gray-900">{details.contact.phone}</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
-          </aside>
+          </div>
         </div>
-      </main>
+
+        <div className="mt-24 pt-16 border-t border-gray-100">
+          <h2 className="text-2xl font-bold text-gray-900 mb-8">
+            Other Programs
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {details.otherPrograms.map((program, index) => (
+              <div
+                key={`${program.id}-${program.title}`}
+                className="bg-white border border-gray-100 rounded-2xl overflow-hidden hover:border-blue-200 transition-all group shadow-sm"
+              >
+                <div className="h-32 bg-slate-50 flex items-center justify-center border-b border-gray-50">
+                  <i className={`fa-solid ${index % 3 === 0 ? "fa-code text-blue-500" : index % 3 === 1 ? "fa-desktop text-emerald-500" : "fa-chart-line text-purple-500"} text-5xl group-hover:scale-110 transition-transform`}></i>
+                </div>
+                <div className="p-6">
+                  <h3 className="font-bold text-lg text-gray-900 mb-2 leading-tight">{program.title}</h3>
+                  <p className="text-xs text-gray-500 mb-5">{program.duration} • {program.faculty}</p>
+                  <button
+                    onClick={() => onNavigate("courseDetails", { id: program.id })}
+                    className="inline-flex items-center text-blue-600 font-semibold text-sm hover:text-blue-700 transition-colors"
+                  >
+                    View Program Details <i className="fa-solid fa-arrow-right ml-1"></i>
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
-
-const HighlightItem: React.FC<{
-  icon: string;
-  color: string;
-  label: string;
-  val: string;
-}> = ({ icon, color, label, val }) => (
-  <li className="flex items-center gap-5">
-    <div
-      className={`w-12 h-12 rounded-2xl flex items-center justify-center text-xl bg-slate-50 text-slate-400 shadow-inner shrink-0`}
-    >
-      <i className={`fa-solid ${icon}`}></i>
-    </div>
-    <div>
-      <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-0.5">
-        {label}
-      </p>
-      <p className="text-sm font-black text-slate-800 leading-tight">{val}</p>
-    </div>
-  </li>
-);
-
-const BenefitRow: React.FC<{ text: string }> = ({ text }) => (
-  <li className="flex items-center gap-3 text-sm font-bold">
-    <i className="fa-solid fa-circle-check text-primary-300"></i>
-    {text}
-  </li>
-);
 
 export default CourseDetailsPage;

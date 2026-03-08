@@ -1,8 +1,16 @@
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { apiService } from "../../../services/api";
+import { CollegeFilters } from "./FindCollegePage";
 
-const FilterSidebar: React.FC = () => {
+interface FilterSidebarProps {
+  filters: CollegeFilters;
+  setFilters: React.Dispatch<React.SetStateAction<CollegeFilters>>;
+}
+
+const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) => {
   const [openSections, setOpenSections] = useState<Set<string>>(
-    new Set(["academic", "stream"]),
+    new Set(["academic", "stream", "location", "type"])
   );
 
   const toggleSection = (id: string) => {
@@ -12,132 +20,188 @@ const FilterSidebar: React.FC = () => {
     setOpenSections(newSet);
   };
 
+  const toggleType = (typeVal: string) => {
+    setFilters(prev => {
+      const types = prev.type.includes(typeVal)
+        ? prev.type.filter(t => t !== typeVal)
+        : [...prev.type, typeVal];
+      return { ...prev, type: types };
+    });
+  };
+
+  const toggleAcademic = (value: string) => {
+    setFilters((prev) => {
+      const academic = prev.academic.includes(value)
+        ? prev.academic.filter((item) => item !== value)
+        : [...prev.academic, value];
+      return { ...prev, academic };
+    });
+  };
+
+  const toggleStream = (value: string) => {
+    setFilters((prev) => {
+      const stream = prev.stream.includes(value)
+        ? prev.stream.filter((item) => item !== value)
+        : [...prev.stream, value];
+      return { ...prev, stream };
+    });
+  };
+
+  const { data: publicCountData } = useQuery({
+    queryKey: ["college-count-public"],
+    queryFn: () =>
+      apiService.getColleges({ page: 1, pageSize: 1, type: "Public" }),
+  });
+
+  const { data: privateCountData } = useQuery({
+    queryKey: ["college-count-private"],
+    queryFn: () =>
+      apiService.getColleges({ page: 1, pageSize: 1, type: "Private" }),
+  });
+
+  const publicCount = publicCountData?.data?.pagination?.total ?? 0;
+  const privateCount = privateCountData?.data?.pagination?.total ?? 0;
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden font-jakarta">
-      <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/30">
-        <div className="flex items-center gap-3">
-          <i className="fa-solid fa-sliders text-primary-600"></i>
-          <h3 className="font-black text-xl text-slate-900 tracking-tight">
-            Filters
-          </h3>
+    <>
+      {/* Quick Filters Header */}
+      <div className="mb-4">
+        <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
+          Quick Filters
+        </h3>
+        <div className="flex flex-wrap gap-2 pb-4 border-b border-slate-100">
+          <button
+            onClick={() => setFilters(p => ({ ...p, verified: !p.verified }))}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border transition ${filters.verified
+                ? "bg-green-200 text-green-800 border-green-300"
+                : "bg-green-50 text-green-700 border-green-100 hover:bg-green-100"
+              }`}
+          >
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            Verified
+          </button>
+          <button
+            onClick={() => setFilters(p => ({ ...p, popular: !p.popular }))}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-md border transition ${filters.popular
+                ? "bg-amber-200 text-amber-800 border-amber-300"
+                : "bg-orange-50 text-orange-700 border-orange-100 hover:bg-orange-100"
+              }`}>
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+            Popular
+          </button>
         </div>
-        <button className="text-[10px] font-black text-slate-300 uppercase tracking-widest hover:text-primary-600 transition-colors">
-          Reset
-        </button>
       </div>
 
-      <div className="p-6 space-y-8">
-        {/* Quick Filters */}
-        <div>
-          <h4 className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-4">
-            Quick Search
-          </h4>
-          <div className="flex flex-wrap gap-2">
-            <FilterBadge
-              icon="fa-circle-check"
-              color="bg-emerald-50 text-emerald-600"
-              label="Verified"
-            />
-            <FilterBadge
-              icon="fa-bolt"
-              color="bg-blue-50 text-blue-600"
-              label="New"
-            />
-            <FilterBadge
-              icon="fa-hourglass-half"
-              color="bg-rose-50 text-rose-600"
-              label="Closing"
+      {/* Filter Categories Container */}
+      <div className="space-y-1">
+
+        {/* Academic Level */}
+        <CollapsibleSection id="academic" title="Academic Level / Program" isOpen={openSections.has("academic")} onToggle={toggleSection}>
+          <FilterCheckbox label="+2 / Higher Secondary" checked={filters.academic.includes("+2")} onChange={() => toggleAcademic("+2")} />
+          <FilterCheckbox label="Bachelor" checked={filters.academic.includes("Bachelor")} onChange={() => toggleAcademic("Bachelor")} />
+          <FilterCheckbox label="Master" checked={filters.academic.includes("Master")} onChange={() => toggleAcademic("Master")} />
+          <FilterCheckbox label="Diploma / CTEVT" checked={filters.academic.includes("Diploma") || filters.academic.includes("CTEVT")} onChange={() => toggleAcademic("CTEVT")} />
+          <FilterCheckbox label="Other" checked={filters.academic.includes("Other")} onChange={() => toggleAcademic("Other")} />
+        </CollapsibleSection>
+
+        {/* Stream / Faculty */}
+        <CollapsibleSection id="stream" title="Stream / Faculty" isOpen={openSections.has("stream")} onToggle={toggleSection}>
+          <div className="flex items-center bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 mb-3">
+            <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(event) =>
+                setFilters((prev) => ({ ...prev, search: event.target.value }))
+              }
+              placeholder="Filter Fields..."
+              className="bg-transparent border-none text-xs w-full ml-2 text-slate-600 focus:outline-none placeholder-slate-400"
             />
           </div>
-        </div>
+          <FilterCheckbox label="Science" checked={filters.stream.includes("Science")} onChange={() => toggleStream("Science")} />
+          <FilterCheckbox label="Management" checked={filters.stream.includes("Management")} onChange={() => toggleStream("Management")} />
+          <FilterCheckbox label="Medical" checked={filters.stream.includes("Medical")} onChange={() => toggleStream("Medical")} />
+          <FilterCheckbox label="Computer Science" checked={filters.stream.includes("Computer Science")} onChange={() => toggleStream("Computer Science")} />
+        </CollapsibleSection>
 
-        {/* Collapsible Sections */}
-        <div className="space-y-4">
-          <CollapsibleSection
-            id="academic"
-            title="Academic Level"
-            isOpen={true}
-            onToggle={() => {}}
+        {/* Location */}
+        <CollapsibleSection id="location" title="Location" isOpen={openSections.has("location")} onToggle={toggleSection}>
+          <select
+            className="w-full text-sm text-slate-600 bg-white border border-slate-200 rounded-md px-3 py-2 outline-none focus:border-blue-400 mb-3"
+            value={filters.location}
+            onChange={(e) => setFilters(p => ({ ...p, location: e.target.value === "All Provinces" ? "" : e.target.value }))}
           >
-            <FilterOption label="+2 / High School" count="210" />
-            <FilterOption label="Bachelor" count="540" />
-            <FilterOption label="Master" count="120" />
-            <FilterOption label="Diploma" count="85" />
-          </CollapsibleSection>
+            <option value="">All Provinces</option>
+            <option value="Bagmati Province">Bagmati Province</option>
+            <option value="Koshi Province">Koshi Province</option>
+            <option value="Gandaki Province">Gandaki Province</option>
+            <option value="Lumbini Province">Lumbini Province</option>
+          </select>
+          <FilterCheckbox
+            label="National Wide"
+            checked={filters.nationalWide}
+            onChange={() =>
+              setFilters((prev) => ({
+                ...prev,
+                nationalWide: !prev.nationalWide,
+                location: !prev.nationalWide ? "" : prev.location,
+              }))
+            }
+          />
+        </CollapsibleSection>
 
-          <CollapsibleSection
-            id="stream"
-            title="Stream / Faculty"
-            isOpen={true}
-            onToggle={() => {}}
-          >
-            <div className="relative mb-4">
-              <input
-                type="text"
-                placeholder="Search Faculty..."
-                className="w-full bg-slate-50 border border-slate-100 rounded-xl py-2 pl-9 pr-4 text-xs font-bold outline-none focus:border-primary-500 transition-all"
-              />
-              <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-300 text-[10px]"></i>
-            </div>
-            <FilterOption label="Science" count="150" />
-            <FilterOption label="Management" count="200" />
-            <FilterOption label="IT & Computing" count="180" />
-            <FilterOption label="Humanities" count="70" />
-          </CollapsibleSection>
+        {/* Colleges Type */}
+        <CollapsibleSection id="type" title="Colleges Type" isOpen={openSections.has("type")} onToggle={toggleSection}>
+          <FilterCheckbox label="Government College" sublabel={`${publicCount} Colleges`} checked={filters.type.includes("Public")} onChange={() => toggleType("Public")} />
+          <FilterCheckbox label="Private College" sublabel={`${privateCount} Colleges`} checked={filters.type.includes("Private")} onChange={() => toggleType("Private")} />
+          <FilterCheckbox label="University-affiliated" checked={filters.type.includes("Affiliated")} onChange={() => toggleType("Affiliated")} />
+          <FilterCheckbox label="Community" checked={filters.type.includes("Community")} onChange={() => toggleType("Community")} />
+          <FilterCheckbox label="CTEVT / Gov. Training Center" checked={filters.type.includes("CTEVT")} onChange={() => toggleType("CTEVT")} />
+        </CollapsibleSection>
 
-          <CollapsibleSection
-            id="location"
-            title="Location"
-            isOpen={true}
-            onToggle={() => {}}
-          >
-            <select className="w-full p-3 bg-slate-50 border border-slate-100 rounded-xl outline-none focus:ring-4 focus:ring-primary-50 font-bold text-xs appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1em] bg-[right_1rem_center] bg-no-repeat">
-              <option>All Provinces</option>
-              <option>Bagmati Province</option>
-              <option>Gandaki Province</option>
-            </select>
-          </CollapsibleSection>
+        {/* Total Fee Range */}
+        <CollapsibleSection id="fee" title="Total Fee Range (NPR)" isOpen={openSections.has("fee")} onToggle={toggleSection}>
+          <FilterCheckbox label="Free / Government Funded" />
+          <FilterCheckbox label="Under NPR 50,000" />
+          <FilterCheckbox label="NPR 50,000 - 1,00,000" />
+          <FilterCheckbox label="NPR 1,00,000 - 2,00,000" />
+          <FilterCheckbox label="Above NPR 2,00,000" />
+        </CollapsibleSection>
 
-          <CollapsibleSection
-            id="type"
-            title="College Type"
-            isOpen={true}
-            onToggle={() => {}}
-          >
-            <FilterOption label="Government" count="45" />
-            <FilterOption label="Private" count="320" />
-            <FilterOption label="University Affiliated" count="180" />
-          </CollapsibleSection>
-
-          <CollapsibleSection
-            id="fee"
-            title="Total Fee Range"
-            isOpen={true}
-            onToggle={() => {}}
-          >
-            <FilterOption label="Free / Funded" />
-            <FilterOption label="Under 1 Lakh" />
-            <FilterOption label="1L - 3L NPR" />
-            <FilterOption label="Above 3 Lakh" />
-          </CollapsibleSection>
-        </div>
       </div>
-    </div>
+
+      <style>{`
+        .filter-checkbox {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            background-color: white;
+            flex-shrink: 0;
+        }
+        .filter-checkbox:checked {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        .filter-checkbox:checked::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 5px;
+            width: 4px;
+            height: 8px;
+            border: solid white;
+            border-width: 0 2px 2px 0;
+            transform: rotate(45deg);
+        }
+      `}</style>
+    </>
   );
 };
-
-const FilterBadge: React.FC<{ icon: string; color: string; label: string }> = ({
-  icon,
-  color,
-  label,
-}) => (
-  <div
-    className={`flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-100 text-[10px] font-black uppercase tracking-wider cursor-pointer hover:shadow-sm transition-all ${color}`}
-  >
-    <i className={`fa-solid ${icon}`}></i>
-    {label}
-  </div>
-);
 
 const CollapsibleSection: React.FC<{
   id: string;
@@ -146,43 +210,34 @@ const CollapsibleSection: React.FC<{
   onToggle: (id: string) => void;
   children: React.ReactNode;
 }> = ({ id, title, isOpen, onToggle, children }) => (
-  <div className="border-b border-slate-50 last:border-0 pb-2">
+  <div className="border-b border-slate-100 pb-2 pt-1">
     <button
       onClick={() => onToggle(id)}
-      className="flex justify-between items-center w-full py-2 group"
+      className="flex justify-between items-center w-full py-3 text-sm font-bold text-slate-700 hover:text-blue-600 outline-none"
     >
-      <span
-        className={`text-sm font-black uppercase tracking-widest transition-colors ${isOpen ? "text-slate-900" : "text-slate-400 group-hover:text-slate-600"}`}
-      >
-        {title}
-      </span>
-      <i
-        className={`fa-solid fa-chevron-down text-[10px] text-slate-300 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-      ></i>
+      <span>{title}</span>
+      <svg className={`w-4 h-4 text-slate-400 transition-transform duration-300 ${isOpen ? "" : "-rotate-90"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
     </button>
-    {isOpen && (
-      <div className="pt-4 space-y-3 animate-fadeInDown">{children}</div>
-    )}
+    <div className={`space-y-2.5 overflow-hidden transition-all duration-300 ${isOpen ? "max-h-[1000px] opacity-100 pb-2" : "max-h-0 opacity-0"}`}>
+      {children}
+    </div>
   </div>
 );
 
-const FilterOption: React.FC<{ label: string; count?: string }> = ({
-  label,
-  count,
-}) => (
-  <label className="flex items-center justify-between group cursor-pointer">
-    <div className="flex items-center gap-3">
-      <input
-        type="checkbox"
-        className="w-5 h-5 rounded border-2 border-slate-200 text-primary-600 focus:ring-primary-500 transition-all cursor-pointer"
-      />
-      <span className="text-xs font-bold text-slate-500 group-hover:text-slate-800 transition-colors">
-        {label}
-      </span>
-    </div>
-    {count && (
-      <span className="text-[10px] font-black text-primary-600 bg-primary-50 px-2 py-0.5 rounded-lg border border-primary-100">
-        {count}
+const FilterCheckbox: React.FC<{
+  label: string;
+  sublabel?: string;
+  checked?: boolean;
+  onChange?: () => void;
+}> = ({ label, sublabel, checked, onChange }) => (
+  <label className="flex items-center cursor-pointer group">
+    <input type="checkbox" className="filter-checkbox" checked={checked} onChange={onChange} />
+    <span className="ml-2.5 text-sm text-slate-600 group-hover:text-slate-900 leading-tight">
+      {label}
+    </span>
+    {sublabel && (
+      <span className="ml-auto text-[10px] font-semibold bg-blue-50 text-blue-500 px-2 py-0.5 rounded">
+        {sublabel}
       </span>
     )}
   </label>

@@ -10,7 +10,7 @@ const Hero: React.FC<HeroProps> = ({ onStart }) => {
     <div className="relative w-full h-screen min-h-[700px] overflow-hidden flex flex-col justify-start items-center bg-slate-900">
       {/* Text Content Layer */}
       <div className="relative z-10 text-center px-4 mt-[15vh] md:mt-[20vh] animate-fadeInDown">
-        <h1 className="text-3xl sm:text-4xl md:text-7xl font-bold text-white mb-6 tracking-tight drop-shadow-lg leading-tight max-w-4xl mx-auto font-jakarta">
+        <h1 className="text-3xl sm:text-4xl md:text-7xl font-bold text-white mb-6 tracking-tight drop-shadow-lg leading-tight max-w-4xl mx-auto font-sans">
           Connecting You to Your Future
         </h1>
         <p className="text-base sm:text-lg md:text-2xl text-blue-300 font-medium max-w-2xl mx-auto drop-shadow-md px-4 opacity-90">

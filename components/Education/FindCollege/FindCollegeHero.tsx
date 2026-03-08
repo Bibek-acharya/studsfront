@@ -1,7 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const FindCollegeHero: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+interface FindCollegeHeroProps {
+  searchQuery: string;
+  onSearchChange: (value: string) => void;
+}
+
+const FindCollegeHero: React.FC<FindCollegeHeroProps> = ({
+  searchQuery,
+  onSearchChange,
+}) => {
   const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
   // Fixed: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> to resolve namespace issue in browser environment
@@ -17,9 +24,6 @@ const FindCollegeHero: React.FC = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      alert(`Searching for: ${searchQuery}`);
-    }
   };
 
   const resetInactivityTimer = () => {
@@ -96,7 +100,7 @@ const FindCollegeHero: React.FC = () => {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Search scholarship name, college or keywords..."
                 className="flex-1 py-4 px-4 text-slate-800 text-lg border-0 outline-none placeholder-slate-400 font-bold"
               />

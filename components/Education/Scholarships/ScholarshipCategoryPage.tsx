@@ -1,5 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "react-router-dom";
 import { apiService } from "../../../services/api";
 
 interface Scholarship {
@@ -132,27 +133,126 @@ interface ScholarshipCategoryPageProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
+const categoryAliases: Record<string, string[]> = {
+  college: ["college", "college-based", "college based"],
+  school: ["school", "school-based", "school based"],
+  institutional: ["institutional", "institutional merit", "merit"],
+  need: ["need", "institutional need", "need based", "need-based"],
+  entrance: ["entrance"],
+  ngo: ["ngo", "ingo", "ngo / ingo", "ngo/ingo"],
+  departmental: ["departmental", "department"],
+  "fee-waiver": ["fee-waiver", "fee waiver", "waiver", "tuition waiver"],
+  research: ["research"],
+};
+
+const resolveCategoryId = (rawCategory?: string): string | null => {
+  if (!rawCategory) return null;
+  const normalized = rawCategory.trim().toLowerCase();
+  if (!normalized) return null;
+
+  if (categoryAliases[normalized]) {
+    return normalized;
+  }
+
+  for (const [id, aliases] of Object.entries(categoryAliases)) {
+    if (aliases.some((alias) => normalized === alias || normalized.includes(alias))) {
+      return id;
+    }
+  }
+
+  return null;
+};
+
 const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
   onNavigate,
 }) => {
-  const [selectedCategory, setSelectedCategory] = useState("college");
+  const location = useLocation();
+  const preselectedCategory = useMemo(
+    () => resolveCategoryId((location.state as { category?: string } | null)?.category),
+    [location.state],
+  );
+
+  const [selectedCategory, setSelectedCategory] = useState(preselectedCategory || "college");
   const [likedScholarships, setLikedScholarships] = useState<number[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
+  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
+  const [locationSearch, setLocationSearch] = useState("");
+  const [sortBy, setSortBy] = useState("deadline");
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (preselectedCategory) {
+      setSelectedCategory(preselectedCategory);
+    }
+  }, [preselectedCategory]);
+
+  const toggleSelection = (
+    value: string,
+    setter: React.Dispatch<React.SetStateAction<string[]>>,
+  ) => {
+    setter((prev) =>
+      prev.includes(value) ? prev.filter((item) => item !== value) : [...prev, value],
+    );
+  };
+
+  const resetFilters = () => {
+    setSelectedTypes([]);
+    setSelectedLocations([]);
+    setSelectedLevels([]);
+    setLocationSearch("");
+    setSortBy("deadline");
+    setSelectedCategory("college");
+  };
+
   const { data: scholarshipsResponse } = useQuery({
-    queryKey: ["education-scholarships"],
-    queryFn: () => apiService.getEducationScholarships(),
+    queryKey: [
+      "education-scholarships",
+      selectedCategory,
+      selectedTypes,
+      selectedLocations,
+      selectedLevels,
+      sortBy,
+    ],
+    queryFn: () =>
+      apiService.getEducationScholarships({
+        category: selectedCategory,
+        type: selectedTypes.join(","),
+        location: selectedLocations.join(","),
+        level: selectedLevels.join(","),
+        sort: sortBy,
+      }),
   });
 
-  const scholarshipList =
-    scholarshipsResponse?.data?.scholarships?.length
-      ? (scholarshipsResponse.data.scholarships.map((scholarship: any) => ({
-          ...scholarship,
-          logoText: scholarship.logoText || scholarship.initials || "SC",
-          logoBg: scholarship.logoBg || scholarship.logoColor || "bg-blue-600",
-          tags: scholarship.tags || [scholarship.category],
-        })) as Scholarship[])
-      : defaultScholarshipList;
+  const scholarshipList = useMemo(() => {
+    if (!scholarshipsResponse?.data?.scholarships?.length) {
+      return defaultScholarshipList;
+    }
+
+    return scholarshipsResponse.data.scholarships.map((scholarship: any) => ({
+      id: scholarship.id,
+      title: scholarship.title,
+      provider: scholarship.provider,
+      logoText: scholarship.logoText || scholarship.initials || "SC",
+      logoBg: scholarship.logoBg || scholarship.logoColor || "bg-blue-600",
+      location: scholarship.location || "Nepal",
+      type: scholarship.type || scholarship.funding_type || "Scholarship",
+      amount: scholarship.amount || scholarship.value || "TBD",
+      deadline: scholarship.deadline || "TBD",
+      status: scholarship.status || "OPEN",
+      category: scholarship.category || scholarship.scholarship_type || "General",
+      image:
+        scholarship.image ||
+        scholarship.image_url ||
+        "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
+      tags:
+        scholarship.tags ||
+        [
+          scholarship.category || scholarship.scholarship_type || "General",
+          scholarship.degree_level || scholarship.eligibility || "All Levels",
+        ],
+    })) as Scholarship[];
+  }, [scholarshipsResponse]);
 
   const categories =
     scholarshipsResponse?.data?.categories?.length
@@ -162,6 +262,54 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
           count: category.count || 0,
         }))
       : defaultCategories;
+
+  const scholarshipTypes = [
+    "Fully Funded",
+    "Partial Tuition",
+    "Fee Waiver",
+    "Need Based",
+    "Merit Scholarship",
+    "Grant",
+  ];
+
+  const availableLocations = useMemo(() => {
+    const unique = Array.from(new Set(scholarshipList.map((s) => s.location))).filter(Boolean);
+    return unique.sort();
+  }, [scholarshipList]);
+
+  const filteredLocations = useMemo(() => {
+    if (!locationSearch.trim()) return availableLocations;
+    const q = locationSearch.toLowerCase();
+    return availableLocations.filter((location) => location.toLowerCase().includes(q));
+  }, [availableLocations, locationSearch]);
+
+  const displayedScholarships = useMemo(() => {
+    let list = [...scholarshipList];
+
+    if (selectedTypes.length) {
+      list = list.filter((item) =>
+        selectedTypes.some((type) => item.type.toLowerCase().includes(type.toLowerCase())),
+      );
+    }
+
+    if (selectedLocations.length) {
+      list = list.filter((item) =>
+        selectedLocations.some((location) =>
+          item.location.toLowerCase().includes(location.toLowerCase()),
+        ),
+      );
+    }
+
+    if (selectedLevels.length) {
+      list = list.filter((item) =>
+        selectedLevels.some((level) =>
+          item.tags.some((tag) => tag.toLowerCase().includes(level.toLowerCase())),
+        ),
+      );
+    }
+
+    return list;
+  }, [scholarshipList, selectedTypes, selectedLocations, selectedLevels]);
 
   const scroll = (direction: "left" | "right") => {
     if (scrollContainerRef.current) {
@@ -182,7 +330,7 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
   return (
     <div className="bg-gray-50 min-h-screen font-sans text-gray-900 pt-20">
       {/* HERO SECTION: CAROUSEL */}
-      <div className="w-full max-w-6xl mx-auto mt-8 md:mt-12 px-4">
+      <div className="w-full max-w-[1400px] mx-auto mt-8 md:mt-12 px-4">
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4 pl-1 tracking-tight">
           Scholarships actively opening
         </h2>
@@ -245,16 +393,20 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
       </div>
 
       {/* MAIN LISTING SECTION */}
-      <div className="w-full max-w-6xl mx-auto mt-8 px-4 pb-16">
+      <div className="w-full max-w-[1400px] mx-auto mt-8 px-4 pb-16">
         <div className="flex flex-col md:flex-row gap-6">
           {/* LEFT COLUMN: FILTERS */}
           <aside className="w-full md:w-1/4 flex-shrink-0">
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5 sticky top-24">
               <div className="flex justify-between items-center mb-6 pb-4 border-b border-gray-100">
                 <h3 className="font-bold text-lg text-gray-900">Filters</h3>
-                <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full cursor-pointer hover:bg-blue-100 transition-colors">
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-1 rounded-full cursor-pointer hover:bg-blue-100 transition-colors"
+                >
                   Reset
-                </span>
+                </button>
               </div>
 
               {/* Scholarship Type */}
@@ -264,9 +416,9 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
                 </h4>
                 <div className="space-y-2">
                   {[
-                    "Full Ride",
-                    "Partial Funding",
-                    "Tuition Waiver",
+                    "Fully Funded",
+                    "Partial Tuition",
+                    "Fee Waiver",
                     "Need Based",
                   ].map((type) => (
                     <label
@@ -276,6 +428,8 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
                       <div className="relative flex items-center">
                         <input
                           type="checkbox"
+                          checked={selectedTypes.includes(type)}
+                          onChange={() => toggleSelection(type, setSelectedTypes)}
                           className="peer appearance-none w-4 h-4 border border-gray-300 rounded checked:bg-blue-600 checked:border-blue-600 transition-all"
                         />
                         <i className="fa-solid fa-check absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none left-0.5 top-0.5 text-[10px]"></i>
@@ -296,19 +450,15 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
                 <div className="relative mb-3">
                   <input
                     type="text"
+                    value={locationSearch}
+                    onChange={(e) => setLocationSearch(e.target.value)}
                     placeholder="Search city..."
                     className="w-full pl-8 pr-3 py-2 text-xs border border-gray-200 rounded-lg focus:outline-none focus:border-blue-600 transition-all"
                   />
                   <i className="fa-solid fa-magnifying-glass w-3.5 h-3.5 text-gray-400 absolute left-2.5 top-2.5"></i>
                 </div>
                 <div className="space-y-2 max-h-40 overflow-y-auto no-scrollbar">
-                  {[
-                    "Kathmandu",
-                    "Lalitpur",
-                    "Pokhara",
-                    "Chitwan",
-                    "Biratnagar",
-                  ].map((city) => (
+                  {filteredLocations.map((city) => (
                     <label
                       key={city}
                       className="flex items-center space-x-3 cursor-pointer group"
@@ -316,6 +466,10 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
                       <div className="relative flex items-center">
                         <input
                           type="checkbox"
+                          checked={selectedLocations.includes(city)}
+                          onChange={() =>
+                            toggleSelection(city, setSelectedLocations)
+                          }
                           className="peer appearance-none w-4 h-4 border border-gray-300 rounded checked:bg-blue-600 checked:border-blue-600 transition-all"
                         />
                         <i className="fa-solid fa-check absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none left-0.5 top-0.5 text-[10px]"></i>
@@ -344,6 +498,10 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
                         <div className="relative flex items-center">
                           <input
                             type="checkbox"
+                            checked={selectedLevels.includes(level)}
+                            onChange={() =>
+                              toggleSelection(level, setSelectedLevels)
+                            }
                             className="peer appearance-none w-4 h-4 border border-gray-300 rounded checked:bg-blue-600 checked:border-blue-600 transition-all"
                           />
                           <i className="fa-solid fa-check absolute w-3 h-3 text-white opacity-0 peer-checked:opacity-100 pointer-events-none left-0.5 top-0.5 text-[10px]"></i>
@@ -363,61 +521,65 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
           <main className="w-full md:w-3/4">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-gray-600 font-medium">
-                Showing <span className="font-bold text-gray-900">124</span>{" "}
+                Showing <span className="font-bold text-gray-900">{displayedScholarships.length}</span>{" "}
                 scholarships
               </h3>
               <div className="hidden md:flex items-center space-x-2 text-sm text-gray-500">
                 <span>Sort by:</span>
-                <select className="border-none bg-transparent font-medium text-gray-900 focus:ring-0 cursor-pointer p-0 pr-2">
-                  <option>Deadline (Soonest)</option>
-                  <option>Amount (High to Low)</option>
-                  <option>Latest Posted</option>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="border-none bg-transparent font-medium text-gray-900 focus:ring-0 cursor-pointer p-0 pr-2"
+                >
+                  <option value="deadline">Deadline (Soonest)</option>
+                  <option value="latest">Latest Posted</option>
+                  <option value="title">Alphabetical</option>
                 </select>
               </div>
             </div>
 
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              {scholarshipList.map((item) => (
+              {displayedScholarships.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col h-full group"
+                  className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full group border border-slate-100 hover:border-blue-500/20"
                 >
-                  <div className="h-44 w-full bg-gray-100 relative overflow-hidden">
+                  <div className="h-56 w-full bg-gray-100 relative overflow-hidden">
                     <img
                       src={item.image}
                       alt={item.title}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
                     />
                     <div className="absolute top-4 left-4">
-                      <span className="bg-white/95 backdrop-blur-sm text-gray-800 text-[10px] font-bold px-3 py-1.5 rounded-full shadow-sm tracking-wide uppercase">
+                      <span className="inline-block bg-white/95 backdrop-blur-md text-slate-800 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-[0.1em] shadow-lg">
                         {item.type}
                       </span>
                     </div>
                   </div>
 
-                  <div className="p-5 flex flex-col flex-grow">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-3">
+                  <div className="p-7 flex flex-col flex-grow">
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-4">
                         <div
-                          className={`w-8 h-8 rounded-lg ${item.logoBg} flex items-center justify-center text-white text-[10px] font-bold shadow-sm`}
+                          className={`w-12 h-12 rounded-2xl ${item.logoBg} flex items-center justify-center text-white text-sm font-black shadow-lg`}
                         >
                           {item.logoText}
                         </div>
                         <div>
-                          <h5 className="text-xs font-bold text-gray-900 flex items-center gap-1">
+                          <h5 className="font-black text-base text-slate-900 flex items-center gap-2 leading-tight uppercase tracking-tight">
                             {item.provider}
-                            <i className="fa-solid fa-circle-check text-blue-500 text-[10px]"></i>
+                            <i className="fa-solid fa-circle-check text-primary-500 text-xs"></i>
                           </h5>
-                          <p className="text-[10px] text-gray-500 flex items-center gap-1">
+                          <p className="text-[10px] text-slate-400 mt-1 font-black uppercase tracking-[0.2em] flex items-center gap-2">
                             <i className="fa-solid fa-location-dot"></i>{" "}
                             {item.location}
                           </p>
                         </div>
                       </div>
                       <span
-                        className={`flex items-center text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
                           item.status === "OPEN"
-                            ? "bg-green-50 text-green-600"
+                            ? "bg-emerald-50 text-emerald-600"
                             : item.status === "CLOSING SOON"
                               ? "bg-orange-50 text-orange-600"
                               : item.status === "SOON"
@@ -440,35 +602,35 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
                       </span>
                     </div>
 
-                    <h3 className="text-lg font-bold text-gray-900 mb-3 leading-tight group-hover:text-blue-600 transition-colors">
+                    <h3 className="text-xl font-bold text-slate-900 mb-5 leading-tight uppercase tracking-tight group-hover:text-blue-600 transition-colors">
                       {item.title}
                     </h3>
 
-                    <div className="flex flex-wrap gap-2 mb-6">
+                    <div className="flex flex-wrap gap-2 mb-8">
                       {item.tags.map((tag, idx) => (
                         <span
                           key={idx}
-                          className="px-2.5 py-1 bg-blue-50 text-blue-600 text-[10px] font-bold rounded-md uppercase tracking-wider"
+                          className="px-3 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-black rounded-lg uppercase tracking-widest border border-blue-100/50"
                         >
                           {tag}
                         </span>
                       ))}
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4 mb-6 pt-4 border-t border-dashed border-gray-100 mt-auto">
+                    <div className="grid grid-cols-2 gap-4 mb-8 pt-6 border-t border-slate-50 mt-auto">
                       <div>
-                        <p className="text-[10px] uppercase text-gray-400 font-bold tracking-wider mb-0.5">
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1.5">
                           Award
                         </p>
-                        <p className="text-lg font-bold text-blue-600 tracking-tight">
+                        <p className="text-2xl font-black text-blue-600 tracking-tighter">
                           {item.amount}
                         </p>
                       </div>
                       <div>
-                        <p className="text-[10px] uppercase text-gray-400 font-bold tracking-wider mb-0.5">
+                        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1.5">
                           Deadline
                         </p>
-                        <p className="text-sm font-bold text-gray-800 mt-1">
+                        <p className="text-sm font-black text-slate-900 uppercase tracking-tight mt-1">
                           {item.deadline}
                         </p>
                       </div>
@@ -481,30 +643,32 @@ const ScholarshipCategoryPage: React.FC<ScholarshipCategoryPageProps> = ({
                             id: item.id.toString(),
                           })
                         }
-                        className="flex-1 py-2.5 px-4 rounded-lg border border-gray-200 text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                        className="flex-1 py-4 rounded-xl bg-slate-50 text-[11px] font-black text-slate-700 hover:bg-slate-100 transition-all uppercase tracking-widest"
                       >
                         Details
                       </button>
                       <button
                         onClick={() =>
-                          onNavigate("scholarshipApplication", {
+                          onNavigate("scholarshipInquiry", {
                             id: item.id.toString(),
+                            scholarshipName: item.title,
+                            scholarshipType: item.type,
                           })
                         }
-                        className="flex-1 py-2.5 px-4 rounded-lg bg-[#0F172A] text-white text-sm font-semibold hover:bg-slate-800 transition-colors"
+                        className="flex-1 py-4 rounded-xl bg-slate-900 text-[11px] font-black text-white hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 uppercase tracking-widest"
                       >
                         Apply Now
                       </button>
                       <button
                         onClick={() => toggleLike(item.id)}
-                        className={`w-10 flex items-center justify-center rounded-lg border transition-colors ${
+                        className={`p-4 rounded-2xl transition-all ${
                           likedScholarships.includes(item.id)
-                            ? "bg-red-50 border-red-200 text-red-500"
-                            : "border-gray-200 text-gray-400 hover:text-red-500"
+                            ? "bg-red-50 text-red-500 shadow-inner"
+                            : "bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500"
                         }`}
                       >
                         <i
-                          className={`${likedScholarships.includes(item.id) ? "fa-solid" : "fa-regular"} fa-heart`}
+                          className={`${likedScholarships.includes(item.id) ? "fa-solid" : "fa-regular"} fa-heart text-base`}
                         ></i>
                       </button>
                     </div>

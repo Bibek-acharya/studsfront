@@ -235,13 +235,13 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
           colleges: old.data.colleges.map((college) =>
             college.id === editingCollegeId
               ? {
-                  ...college,
-                  ...form,
-                  type: form.type || college.type,
-                  affiliation:
-                    universities.find((university) => university.id === form.university_id)
-                      ?.name || college.affiliation,
-                }
+                ...college,
+                ...form,
+                type: form.type || college.type,
+                affiliation:
+                  universities.find((university) => university.id === form.university_id)
+                    ?.name || college.affiliation,
+              }
               : college,
           ),
         },
@@ -334,22 +334,20 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 pt-24 px-6 pb-16 font-jakarta">
+    <div className="min-h-screen bg-slate-50 pt-24 px-6 pb-16 font-sans">
       {toast.show && (
         <div className="fixed top-24 right-6 z-[220] animate-fadeInDown">
           <div
-            className={`min-w-[320px] max-w-[420px] rounded-2xl shadow-2xl border px-4 py-3 flex items-start gap-3 ${
-              toast.type === "success"
+            className={`min-w-[320px] max-w-[420px] rounded-2xl shadow-2xl border px-4 py-3 flex items-start gap-3 ${toast.type === "success"
                 ? "bg-emerald-50 border-emerald-100"
                 : "bg-rose-50 border-rose-100"
-            }`}
+              }`}
           >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
-                toast.type === "success"
+              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${toast.type === "success"
                   ? "bg-emerald-500 text-white"
                   : "bg-rose-500 text-white"
-              }`}
+                }`}
             >
               <i
                 className={`fa-solid ${toast.type === "success" ? "fa-check" : "fa-xmark"}`}

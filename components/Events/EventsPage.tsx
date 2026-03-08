@@ -17,7 +17,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
   }, [activeCategory, allEvents]);
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-24 font-jakarta pb-20">
+    <div className="bg-slate-50 min-h-screen pt-24 font-sans pb-20">
       {/* Dynamic Hero Section */}
       <section className="max-w-7xl mx-auto px-4 md:px-8 py-10">
         <div className="bg-slate-900 rounded-3xl p-10 md:p-20 text-white relative overflow-hidden shadow-2xl group border border-white/5">
@@ -78,11 +78,10 @@ const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
               <button
                 key={cat}
                 onClick={() => setActiveCategory(cat)}
-                className={`whitespace-nowrap px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest border transition-all ${
-                  activeCategory === cat
+                className={`whitespace-nowrap px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest border transition-all ${activeCategory === cat
                     ? "bg-slate-900 text-white border-slate-900 shadow-xl"
                     : "bg-white border-slate-100 text-slate-400 hover:bg-slate-50"
-                }`}
+                  }`}
               >
                 {cat}
               </button>

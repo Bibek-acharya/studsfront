@@ -47,7 +47,7 @@ const ResourcesPage: React.FC<ResourcesPageProps> = ({ onNavigate }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white font-jakarta">
+    <div className="min-h-screen bg-white font-sans">
       <ResourcesHero
         onUploadClick={() => setIsUploadModalOpen(true)}
         onBrowseClick={handleBrowseClick}
@@ -71,10 +71,9 @@ const ResourcesPage: React.FC<ResourcesPageProps> = ({ onNavigate }) => {
                   key={tab.value}
                   onClick={() => setActiveTab(tab.value)}
                   className={`px-4 py-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all active:scale-95 shadow-sm
-                    ${
-                      activeTab === tab.value
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
-                        : "bg-white text-slate-500 hover:bg-slate-100"
+                    ${activeTab === tab.value
+                      ? "bg-blue-600 text-white shadow-lg shadow-blue-500/20"
+                      : "bg-white text-slate-500 hover:bg-slate-100"
                     }`}
                 >
                   {tab.label}

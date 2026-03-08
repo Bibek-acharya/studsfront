@@ -1,54 +1,30 @@
-import React, { lazy, Suspense, useState } from "react";
-import { useAuth } from "./services/AuthContext";
-import Navbar from "./components/Navbar";
-import JobNavbar from "./components/Jobs/JobNavbar";
-import HomeView from "./components/Home/HomeView";
-import Footer from "./components/Footer";
 import EducationNavbar from "./components/Education/EducationNavbar";
+import React, { lazy, Suspense, useEffect } from "react";
+import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
+import { useAuth } from "./services/AuthContext";
+import Footer from "./components/Footer";
 
-const AboutPage = lazy(() => import("./components/About/AboutPage"));
-const OnboardingFlow = lazy(
-  () => import("./components/Onboarding/OnboardingFlow"),
-);
-const AuthContainer = lazy(() => import("./components/Auth/AuthContainer"));
-const ContactPage = lazy(() => import("./components/Contact/ContactPage"));
-const RewardsPage = lazy(() => import("./components/Rewards/RewardsPage"));
-const RewardStore = lazy(() => import("./components/Rewards/RewardStore"));
-const PartnerPage = lazy(() => import("./components/Partner/PartnerPage"));
-const AdvertisePage = lazy(() => import("./components/Advertise/AdvertisePage"));
-const ServicesPage = lazy(() => import("./components/Services/ServicesPage"));
-const JobsPage = lazy(() => import("./components/Jobs/JobsPage"));
-const JobFeedPage = lazy(() => import("./components/Jobs/JobFeedPage"));
-const JobRecommendations = lazy(
-  () => import("./components/Jobs/JobRecommendations"),
-);
-const SphereInvites = lazy(() => import("./components/Jobs/SphereInvites"));
-const ApplicationTracker = lazy(
-  () => import("./components/Jobs/ApplicationTracker"),
-);
-const JobAlerts = lazy(() => import("./components/Jobs/JobAlerts"));
-const SavedJobs = lazy(() => import("./components/Jobs/SavedJobs"));
-const CompaniesPage = lazy(() => import("./components/Jobs/CompaniesPage"));
-const CompanyDetailsPage = lazy(
-  () => import("./components/Jobs/CompanyDetailsPage"),
-);
-const JobDetailsPage = lazy(() => import("./components/Jobs/JobDetailsPage"));
-const ResumeBuilder = lazy(() => import("./components/Resume/ResumeBuilder"));
-const ResumeChecker = lazy(() => import("./components/Resume/ResumeChecker"));
-const CoverLetterBuilder = lazy(
-  () => import("./components/Resume/CoverLetterBuilder"),
-);
-const CareerBlogs = lazy(() => import("./components/Resume/CareerBlogs"));
-const EmployerZone = lazy(() => import("./components/Partner/EmployerZone"));
-const InstitutionZone = lazy(
-  () => import("./components/Partner/InstitutionZone"),
-);
+// ScrollToTop component to reset scroll on route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 const EducationPage = lazy(() => import("./components/Education/EducationPage"));
 const AdminCollegesPage = lazy(
   () => import("./components/Education/Admin/AdminCollegesPage"),
 );
 const FindCollegePage = lazy(
   () => import("./components/Education/FindCollege/FindCollegePage"),
+);
+const CompareCollegesPage = lazy(
+  () => import("./components/Education/CompareColleges/CompareCollegesPage"),
+);
+const CollegeComparisonResultPage = lazy(
+  () => import("./components/Education/CompareColleges/CollegeComparisonResultPage"),
 );
 const CourseFinderPage = lazy(
   () => import("./components/Education/CourseFinder/CourseFinderPage"),
@@ -81,6 +57,12 @@ const EntranceDiscoveryPage = lazy(
 const CampusForumPage = lazy(
   () => import("./components/Education/Forum/CampusForumPage"),
 );
+const BookCounsellingPage = lazy(
+  () => import("./components/Education/Counselling/BookCounsellingPage"),
+);
+const WriteReviewPage = lazy(
+  () => import("./components/Education/Reviews/WriteReviewPage"),
+);
 const ScholarshipMainPage = lazy(
   () => import("./components/Education/Scholarships/ScholarshipMainPage"),
 );
@@ -99,6 +81,12 @@ const ScholarshipApplicationPage = lazy(
 const ScholarshipFinderPage = lazy(
   () => import("./components/Education/Scholarships/ScholarshipFinderPage"),
 );
+const ScholarshipFinderToolPage = lazy(
+  () => import("./components/Education/Tools/ScholarshipFinderToolPage"),
+);
+const CollegeRecommenderToolPage = lazy(
+  () => import("./components/Education/Tools/CollegeRecommenderToolPage"),
+);
 const ScholarshipDetailsPage = lazy(
   () => import("./components/Education/Scholarships/ScholarshipDetailsPage"),
 );
@@ -116,232 +104,27 @@ const EventDetailsPage = lazy(
 const StudentDashboard = lazy(
   () => import("./components/Dashboard/StudentDashboard"),
 );
+const InstitutionZone = lazy(
+  () => import("./components/Partner/InstitutionZone"),
+);
+const AuthContainer = lazy(() => import("./components/Auth/AuthContainer"));
+const OnboardingFlow = lazy(
+  () => import("./components/Onboarding/OnboardingFlow"),
+);
 
-type currentView =
-  | "home"
-  | "about"
-  | "onboarding"
-  | "login"
-  | "signup"
-  | "contact"
-  | "rewards"
-  | "rewardStore"
-  | "partner"
-  | "advertise"
-  | "services"
-  | "jobsPage"
-  | "jobFeed"
-  | "jobRecommendations"
-  | "sphereInvites"
-  | "applicationTracker"
-  | "jobAlerts"
-  | "savedJobs"
-  | "companiesPage"
-  | "companyDetails"
-  | "jobDetails"
-  | "resumeBuilder"
-  | "resumeChecker"
-  | "coverLetterBuilder"
-  | "careerBlogs"
-  | "employerZone"
-  | "institutionZone"
-  | "educationPage"
-  | "adminColleges"
-  | "findCollege"
-  | "courseFinder"
-  | "courseDetails"
-  | "collegeDetails"
-  | "examsPage"
-  | "examDetails"
-  | "universitiesPage"
-  | "universityDetails"
-  | "rankingsPage"
-  | "admissionsDiscovery"
-  | "entranceDiscovery"
-  | "campusForum"
-  | "scholarshipMain"
-  | "scholarshipHubDetails"
-  | "scholarshipCategory"
-  | "scholarshipInquiry"
-  | "scholarshipApplication"
-  | "scholarshipsPage"
-  | "scholarshipDetails"
-  | "resourcesPage"
-  | "newsPage"
-  | "newsDetails"
-  | "blogPage"
-  | "blogDetails"
-  | "eventsPage"
-  | "eventDetails"
-  | "studentDashboard"
-  | "scholarshipFinder"
-  | "studyResources";
+const GoogleCallbackHandler = lazy(
+  () => import("./components/Auth/GoogleCallbackHandler"),
+);
 
 const App: React.FC = () => {
   const { user, logout } = useAuth();
-  const [currentView, setCurrentView] = useState<
-    | "home"
-    | "about"
-    | "onboarding"
-    | "login"
-    | "signup"
-    | "contact"
-    | "rewards"
-    | "rewardStore"
-    | "partner"
-    | "advertise"
-    | "services"
-    | "jobsPage"
-    | "jobFeed"
-    | "jobRecommendations"
-    | "sphereInvites"
-    | "applicationTracker"
-    | "jobAlerts"
-    | "savedJobs"
-    | "companiesPage"
-    | "companyDetails"
-    | "jobDetails"
-    | "resumeBuilder"
-    | "resumeChecker"
-    | "coverLetterBuilder"
-    | "careerBlogs"
-    | "employerZone"
-    | "institutionZone"
-    | "educationPage"
-    | "adminColleges"
-    | "findCollege"
-    | "courseFinder"
-    | "courseDetails"
-    | "collegeDetails"
-    | "examsPage"
-    | "examDetails"
-    | "universitiesPage"
-    | "universityDetails"
-    | "rankingsPage"
-    | "admissionsDiscovery"
-    | "entranceDiscovery"
-    | "campusForum"
-    | "scholarshipMain"
-    | "scholarshipHubDetails"
-    | "scholarshipCategory"
-    | "scholarshipInquiry"
-    | "scholarshipApplication"
-    | "scholarshipFinder"
-    | "scholarshipDetails"
-    | "studyResources"
-    | "newsPage"
-    | "newsDetails"
-    | "blogPage"
-    | "blogDetails"
-    | "eventsPage"
-    | "eventDetails"
-  >("home");
-  const [selectedJobId, setSelectedJobId] = useState<number | null>(null);
-  const [selectedCourseId, setSelectedCourseId] = useState<number | null>(null);
-  const [selectedCollegeId, setSelectedCollegeId] = useState<number | null>(
-    null,
-  );
-  const [selectedExamId, setSelectedExamId] = useState<string | null>(null);
-  const [selectedUniversityId, setSelectedUniversityId] = useState<
-    number | null
-  >(null);
-  const [selectedScholarshipId, setSelectedScholarshipId] = useState<
-    string | null
-  >(null);
-  const [selectedNewsId, setSelectedNewsId] = useState<string | null>(null);
-  const [selectedBlogId, setSelectedBlogId] = useState<string | null>(null);
-  const [selectedEventId, setSelectedEventId] = useState<string | null>(null);
-
-  const navigateTo = (view: any, data?: any) => {
-    if (view === "jobDetails" && data) setSelectedJobId(data.id);
-    if (view === "courseDetails" && data) setSelectedCourseId(data.id);
-    if (view === "collegeDetails" && data) setSelectedCollegeId(data.id);
-    if (view === "examDetails" && data) setSelectedExamId(data.id);
-    if (view === "universityDetails" && data) setSelectedUniversityId(data.id);
-    if (view === "scholarshipDetails" && data)
-      setSelectedScholarshipId(data.id);
-    if (view === "scholarshipHubDetails" && data)
-      setSelectedScholarshipId(data.id);
-    if (view === "scholarshipInquiry" && data)
-      setSelectedScholarshipId(data.id);
-    if (view === "scholarshipApplication" && data)
-      setSelectedScholarshipId(data.id);
-    if (view === "newsDetails" && data) setSelectedNewsId(data.id);
-    if (view === "blogDetails" && data) setSelectedBlogId(data.id);
-    if (view === "eventDetails" && data) setSelectedEventId(data.id);
-    setCurrentView(view);
-    window.scrollTo(0, 0);
-  };
-
-  const handleLoginSuccess = () => {
-    navigateTo("home");
-  };
-
-  const handleSignupSuccess = () => {
-    navigateTo("onboarding");
-  };
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const handleLogout = () => {
     logout();
-    navigateTo("home");
+    navigate("/");
   };
-
-  const userData = user
-    ? {
-        name: `${user.first_name} ${user.last_name}`,
-        email: user.email,
-        role: user.role,
-      }
-    : null;
-
-  const isAuthView = currentView === "login" || currentView === "signup";
-  const isJobView = [
-    "jobsPage",
-    "jobFeed",
-    "jobRecommendations",
-    "sphereInvites",
-    "applicationTracker",
-    "jobAlerts",
-    "savedJobs",
-    "companiesPage",
-    "companyDetails",
-    "jobDetails",
-    "resumeBuilder",
-    "resumeChecker",
-    "coverLetterBuilder",
-    "careerBlogs",
-    "employerZone",
-  ].includes(currentView);
-  const isEducationView = [
-    "educationPage",
-    "adminColleges",
-    "institutionZone",
-    "findCollege",
-    "courseFinder",
-    "courseDetails",
-    "collegeDetails",
-    "examsPage",
-    "examDetails",
-    "universitiesPage",
-    "universityDetails",
-    "rankingsPage",
-    "admissionsDiscovery",
-    "entranceDiscovery",
-    "campusForum",
-    "scholarshipMain",
-    "scholarshipHubDetails",
-    "scholarshipCategory",
-    "scholarshipInquiry",
-    "scholarshipFinder",
-    "scholarshipDetails",
-    "studyResources",
-    "newsPage",
-    "newsDetails",
-    "blogPage",
-    "blogDetails",
-    "eventsPage",
-    "eventDetails",
-  ].includes(currentView);
 
   const routeFallback = (
     <div className="min-h-[40vh] flex items-center justify-center text-slate-500 font-semibold">
@@ -349,217 +132,90 @@ const App: React.FC = () => {
     </div>
   );
 
+  const hideNavFooter = ["/login", "/signup", "/onboarding", "/studentDashboard", "/auth/google-callback"].some(path => location.pathname.startsWith(path));
+
   return (
-    <div
-      className={`min-h-screen font-sans selection:bg-blue-500 selection:text-white overflow-x-hidden ${currentView !== "home" ? "bg-slate-50" : "bg-white"}`}
-    >
-      {!isAuthView &&
-        currentView !== "onboarding" &&
-        currentView !== "studentDashboard" && (
-          <>
-            {isJobView ? (
-              <JobNavbar onNavigate={navigateTo} user={user} />
-            ) : isEducationView ? (
-              <EducationNavbar onNavigate={navigateTo} user={user} />
-            ) : (
-              <Navbar
-                onNavigate={navigateTo}
-                currentView={currentView as any}
-                user={user}
-                onLogout={handleLogout}
-              />
-            )}
-          </>
-        )}
+    <div className="min-h-screen font-sans selection:bg-blue-500 selection:text-white overflow-x-hidden bg-white">
+      <ScrollToTop />
+      {!hideNavFooter && <EducationNavbar onNavigate={(view) => navigate(view === 'educationPage' ? '/' : `/${view}`)} user={user} onLogout={handleLogout} />}
 
-      <Suspense fallback={routeFallback}>
-        {currentView === "studentDashboard" && (
-          <StudentDashboard onLogout={handleLogout} />
-        )}
+      <div className={!hideNavFooter ? "pt-[106px] md:pt-[110px]" : ""}>
+        <Suspense fallback={routeFallback}>
+          <Routes>
+            {/* Main Education Page */}
+            <Route path="/" element={<EducationPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
 
-        {currentView === "home" && (
-          <HomeView onNavigate={navigateTo} user={userData} />
-        )}
+            {/* Auth & Onboarding */}
+            <Route path="/login" element={<AuthContainer type="login" onAuthSuccess={() => navigate("/")} />} />
+            <Route path="/signup" element={<AuthContainer type="signup" onAuthSuccess={() => navigate("/")} />} />
+            <Route path="/onboarding" element={<OnboardingFlow onComplete={() => navigate("/")} />} />
+            <Route path="/auth/google-callback" element={<GoogleCallbackHandler />} />
+            <Route path="/studentDashboard" element={<StudentDashboard onLogout={handleLogout} />} />
 
-        {currentView === "educationPage" && (
-          <EducationPage onNavigate={navigateTo} />
-        )}
-        {currentView === "adminColleges" && (
-          <AdminCollegesPage onNavigate={navigateTo} />
-        )}
-        {currentView === "findCollege" && (
-          <FindCollegePage onNavigate={navigateTo} />
-        )}
-        {currentView === "courseFinder" && (
-          <CourseFinderPage onNavigate={navigateTo} />
-        )}
-        {currentView === "courseDetails" && (
-          <CourseDetailsPage
-            id={selectedCourseId || 1}
-            onNavigate={navigateTo}
-          />
-        )}
-        {currentView === "collegeDetails" && (
-          <CollegeDetailsPage
-            id={selectedCollegeId || 1}
-            onNavigate={navigateTo}
-          />
-        )}
-        {currentView === "examsPage" && <ExamsPage onNavigate={navigateTo} />}
-        {currentView === "examDetails" && (
-          <ExamDetailsPage
-            id={selectedExamId || "neb-class-12"}
-            onNavigate={navigateTo}
-          />
-        )}
-        {currentView === "universitiesPage" && (
-          <UniversitiesPage onNavigate={navigateTo} />
-        )}
-        {currentView === "universityDetails" && (
-          <UniversityDetailsPage
-            id={selectedUniversityId || 1}
-            onNavigate={navigateTo}
-          />
-        )}
-        {currentView === "rankingsPage" && (
-          <RankingsPage onNavigate={navigateTo} />
-        )}
-        {currentView === "admissionsDiscovery" && (
-          <AdmissionsDiscoveryPage onNavigate={navigateTo} />
-        )}
-        {currentView === "entranceDiscovery" && (
-          <EntranceDiscoveryPage onNavigate={navigateTo} />
-        )}
-        {currentView === "campusForum" && (
-          <CampusForumPage onNavigate={navigateTo} />
-        )}
-        {currentView === "scholarshipMain" && (
-          <ScholarshipMainPage onNavigate={navigateTo} />
-        )}
-        {currentView === "scholarshipHubDetails" && (
-          <ScholarshipHubDetailsPage
-            id={selectedScholarshipId || "1"}
-            onNavigate={navigateTo}
-          />
-        )}
-        {currentView === "scholarshipCategory" && (
-          <ScholarshipCategoryPage onNavigate={navigateTo} />
-        )}
-        {currentView === "scholarshipInquiry" && (
-          <ScholarshipInquiryForm
-            scholarshipName={
-              selectedScholarshipId
-                ? "Scholarship ID: " + selectedScholarshipId
-                : undefined
-            }
-            onClose={() => navigateTo("scholarshipMain")}
-          />
-        )}
-        {currentView === "scholarshipApplication" && (
-          <ScholarshipApplicationPage
-            scholarshipId={selectedScholarshipId}
-            onNavigate={navigateTo}
-          />
-        )}
-        {currentView === "scholarshipFinder" && (
-          <ScholarshipFinderPage onNavigate={navigateTo} />
-        )}
-        {currentView === "scholarshipDetails" && (
-          <ScholarshipDetailsPage
-            id={selectedScholarshipId || "1"}
-            onNavigate={navigateTo}
-          />
-        )}
-        {currentView === "studyResources" && (
-          <ResourcesPage onNavigate={navigateTo} />
-        )}
+            {/* Core Education Pages */}
+            <Route path="/educationPage" element={<EducationPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/findCollege" element={<FindCollegePage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/compareColleges" element={<CompareCollegesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/compareCollegesResult" element={<CollegeComparisonResultPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/collegeDetails" element={<CollegeDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/courseFinder" element={<CourseFinderPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/courseDetails" element={<CourseDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
 
-        {currentView === "newsPage" && <NewsPage onNavigate={navigateTo} />}
-        {currentView === "newsDetails" && (
-          <NewsDetailsPage
-            id={selectedNewsId || "1"}
-            onNavigate={navigateTo}
-          />
-        )}
-        {currentView === "blogPage" && <BlogPage onNavigate={navigateTo} />}
-        {currentView === "blogDetails" && (
-          <BlogDetailsPage
-            id={selectedBlogId || "1"}
-            onNavigate={navigateTo}
-          />
-        )}
+            {/* Exams & Universities */}
+            <Route path="/examsPage" element={<ExamsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/examDetails" element={<ExamDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/universitiesPage" element={<UniversitiesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/universityDetails" element={<UniversityDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/rankingsPage" element={<RankingsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
 
-        {currentView === "eventsPage" && <EventsPage onNavigate={navigateTo} />}
-        {currentView === "eventDetails" && (
-          <EventDetailsPage
-            id={selectedEventId || "1"}
-            onNavigate={navigateTo}
-          />
-        )}
+            {/* Scholarships */}
+            <Route path="/scholarshipMain" element={<ScholarshipMainPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/scholarshipFinder" element={<ScholarshipFinderPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/scholarshipFinderTool" element={<ScholarshipFinderToolPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/collegeRecommenderTool" element={<CollegeRecommenderToolPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/scholarshipDetails" element={<ScholarshipDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/scholarshipHubDetails" element={<ScholarshipHubDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/scholarshipCategory" element={<ScholarshipCategoryPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/scholarshipInquiry" element={<ScholarshipInquiryForm onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/scholarshipApplication" element={<ScholarshipApplicationPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
 
-        {currentView === "about" && <AboutPage />}
-        {currentView === "contact" && <ContactPage />}
-        {currentView === "rewards" && <RewardsPage />}
-        {currentView === "rewardStore" && <RewardStore />}
-        {currentView === "partner" && <PartnerPage />}
-        {currentView === "advertise" && <AdvertisePage />}
-        {currentView === "services" && <ServicesPage />}
-        {currentView === "jobsPage" && <JobsPage onNavigate={navigateTo} />}
-        {currentView === "jobFeed" && <JobFeedPage onNavigate={navigateTo} />}
-        {currentView === "jobRecommendations" && (
-          <JobRecommendations onNavigate={navigateTo} />
-        )}
-        {currentView === "sphereInvites" && <SphereInvites />}
-        {currentView === "applicationTracker" && <ApplicationTracker />}
-        {currentView === "jobAlerts" && <JobAlerts />}
-        {currentView === "savedJobs" && <SavedJobs />}
-        {currentView === "companiesPage" && (
-          <CompaniesPage onNavigate={navigateTo} />
-        )}
-        {currentView === "companyDetails" && (
-          <CompanyDetailsPage onNavigate={navigateTo} />
-        )}
-        {currentView === "jobDetails" && (
-          <JobDetailsPage id={selectedJobId || 1} onNavigate={navigateTo} />
-        )}
-        {currentView === "resumeBuilder" && <ResumeBuilder />}
-        {currentView === "resumeChecker" && <ResumeChecker />}
-        {currentView === "coverLetterBuilder" && <CoverLetterBuilder />}
-        {currentView === "careerBlogs" && <CareerBlogs />}
-        {currentView === "employerZone" && <EmployerZone />}
-        {currentView === "institutionZone" && <InstitutionZone />}
-
-        {currentView === "onboarding" && (
-          <div className="min-h-[100dvh] flex items-center justify-center bg-slate-50 p-4">
-            <OnboardingFlow
-              initialRole={user?.role as any}
-              onComplete={() => navigateTo("home")}
+            {/* Others */}
+            <Route path="/admissionsDiscovery" element={<AdmissionsDiscoveryPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/entranceDiscovery" element={<EntranceDiscoveryPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/campusForum" element={<CampusForumPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route
+              path="/bookCounselling"
+              element={
+                user ? (
+                  <BookCounsellingPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
             />
-          </div>
-        )}
+            <Route
+              path="/writeReview"
+              element={
+                user ? (
+                  <WriteReviewPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route path="/studyResources" element={<ResourcesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/newsPage" element={<NewsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/newsDetails" element={<NewsDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/eventsPage" element={<EventsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/eventDetails" element={<EventDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/institutionZone" element={<InstitutionZone onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/adminColleges" element={<AdminCollegesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+          </Routes>
+        </Suspense>
 
-        {isAuthView && (
-          <AuthContainer
-            type={currentView as "login" | "signup"}
-            onSwitch={() =>
-              navigateTo(currentView === "login" ? "signup" : "login")
-            }
-            onSuccess={
-              currentView === "login"
-                ? handleLoginSuccess
-                : handleSignupSuccess
-            }
-            onClose={() => navigateTo("home")}
-          />
-        )}
-      </Suspense>
+      </div>
 
-      {!isAuthView &&
-        currentView !== "onboarding" &&
-        currentView !== "studentDashboard" &&
-        currentView !== "scholarshipApplication" && (
-          <Footer onNavigate={navigateTo} />
-        )}
+      {!hideNavFooter && <Footer onNavigate={(view) => navigate(`/${view}`)} />}
     </div>
   );
 };

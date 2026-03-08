@@ -134,8 +134,64 @@ interface ScholarshipMainPageProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
+const scholarshipLogoPalette = [
+  "bg-blue-600",
+  "bg-pink-600",
+  "bg-emerald-600",
+  "bg-purple-600",
+  "bg-orange-600",
+  "bg-red-600",
+  "bg-cyan-600",
+  "bg-indigo-600",
+];
+
+const categoryColorClasses: Record<string, { text: string; badge: string }> = {
+  blue: { text: "text-blue-600", badge: "bg-blue-50 text-blue-700" },
+  indigo: { text: "text-indigo-600", badge: "bg-indigo-50 text-indigo-700" },
+  emerald: { text: "text-emerald-600", badge: "bg-emerald-50 text-emerald-700" },
+  amber: { text: "text-amber-600", badge: "bg-amber-50 text-amber-700" },
+  purple: { text: "text-purple-600", badge: "bg-purple-50 text-purple-700" },
+  rose: { text: "text-rose-600", badge: "bg-rose-50 text-rose-700" },
+  cyan: { text: "text-cyan-600", badge: "bg-cyan-50 text-cyan-700" },
+  teal: { text: "text-teal-600", badge: "bg-teal-50 text-teal-700" },
+};
+
+const testimonialColorClasses: Record<string, string> = {
+  blue: "bg-blue-50 text-blue-500",
+  emerald: "bg-emerald-50 text-emerald-500",
+  amber: "bg-amber-50 text-amber-500",
+  rose: "bg-rose-50 text-rose-500",
+};
+
+const toInitials = (value: string) => {
+  const parts = value
+    .split(" ")
+    .map((p) => p.trim())
+    .filter(Boolean);
+  if (parts.length === 0) return "SS";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+};
+
+const formatDeadline = (value?: string) => {
+  if (!value) return "TBD";
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return value;
+  return parsed.toLocaleDateString("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  });
+};
+
+const inferStatus = (value?: string) => {
+  if (value) return value;
+  return "OPEN";
+};
+
 const defaultCategories = [
   {
+    id: "college",
     title: "College-Based",
     subtitle: "12 Scholarships Open",
     desc: "Direct aid from universities for enrolled students.",
@@ -143,6 +199,7 @@ const defaultCategories = [
     color: "blue",
   },
   {
+    id: "school",
     title: "School-Based",
     subtitle: "25 Scholarships Open",
     desc: "For students excelling in secondary education.",
@@ -150,6 +207,7 @@ const defaultCategories = [
     color: "indigo",
   },
   {
+    id: "institutional",
     title: "Institutional Merit",
     subtitle: "50+ Awards Available",
     desc: "Awarded to students with outstanding academic achievements.",
@@ -157,6 +215,7 @@ const defaultCategories = [
     color: "emerald",
   },
   {
+    id: "need",
     title: "Institutional Need",
     subtitle: "100+ Grants Open",
     desc: "Financial aid for students demonstrating significant financial need.",
@@ -164,6 +223,7 @@ const defaultCategories = [
     color: "amber",
   },
   {
+    id: "entrance",
     title: "Entrance",
     subtitle: "10 Top Ranker Awards",
     desc: "Scholarships for top rankers in IOE, IOM, and exams.",
@@ -171,6 +231,7 @@ const defaultCategories = [
     color: "purple",
   },
   {
+    id: "ngo",
     title: "NGO / INGO",
     subtitle: "8 Partner Programs",
     desc: "Supported by international and national organizations.",
@@ -178,6 +239,7 @@ const defaultCategories = [
     color: "rose",
   },
   {
+    id: "departmental",
     title: "Departmental",
     subtitle: "45 Specific Grants",
     desc: "Specific to faculties like Engineering, Medicine, and IT.",
@@ -185,6 +247,7 @@ const defaultCategories = [
     color: "cyan",
   },
   {
+    id: "fee-waiver",
     title: "Fee Waiver",
     subtitle: "Financial Aid Available",
     desc: "Full or partial tuition fee waivers for deserving candidates.",
@@ -210,9 +273,39 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
     queryFn: () => apiService.getEducationScholarships(),
   });
 
-  const scholarships =
-    (scholarshipsResponse?.data?.scholarships as Scholarship[]) ||
-    defaultScholarships;
+  const scholarships = useMemo<Scholarship[]>(() => {
+    const apiScholarships = scholarshipsResponse?.data?.scholarships as
+      | Record<string, any>[]
+      | undefined;
+
+    if (!apiScholarships?.length) {
+      return defaultScholarships;
+    }
+
+    return apiScholarships.map((item, index) => {
+      const fallbackTitle = item?.title || "Scholarship Opportunity";
+      const fallbackProvider = item?.provider || "Scholarship Provider";
+      return {
+        id: Number(item?.id) || index + 1,
+        title: fallbackTitle,
+        provider: fallbackProvider,
+        logoColor: item?.logoColor || scholarshipLogoPalette[index % scholarshipLogoPalette.length],
+        initials: item?.initials || toInitials(fallbackProvider),
+        location: item?.location || "Nepal",
+        type: item?.type || item?.funding_type || "MERIT-BASED",
+        amount: item?.amount || item?.value || "TBD",
+        deadline: formatDeadline(item?.deadline),
+        status: inferStatus(item?.status),
+        category: item?.category || item?.scholarship_type || "General",
+        description: item?.description || "Scholarship details are available.",
+        image:
+          item?.image ||
+          item?.image_url ||
+          "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
+        eligibility: item?.eligibility || item?.degree_level || "Eligible students",
+      };
+    });
+  }, [scholarshipsResponse]);
 
   const categories = useMemo(() => {
     const apiCategories = scholarshipsResponse?.data?.categories;
@@ -221,6 +314,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
     }
 
     return apiCategories.map((category: any) => ({
+      id: category.id,
       title: category.title || category.name,
       subtitle: category.subtitle || `${category.count}+ Scholarships Open`,
       desc: category.desc || "Scholarship opportunities available.",
@@ -266,7 +360,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
   };
 
   const openCategoryModal = (category: any) => {
-    onNavigate("scholarshipCategory", { category: category.title });
+    onNavigate("scholarshipCategory", { category: category.id || category.title });
   };
 
   const openDetails = (scholarship: Scholarship) => {
@@ -443,7 +537,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
 
       {/* Categories Section */}
       <section className="w-full bg-white py-16 px-4 md:px-8 lg:px-16 font-inter relative z-10 border-y border-slate-100">
-        <div className="max-w-[95%] xl:max-w-[90rem] mx-auto">
+        <div className="max-w-[1400px] w-full mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 uppercase tracking-tight">
               Scholarship Categories
@@ -462,7 +556,9 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
                 onClick={() => openCategoryModal(cat)}
               >
                 <div
-                  className={`w-16 h-16 rounded-2xl flex items-center justify-center text-${cat.color}-600 bg-white shadow-sm group-hover:bg-primary-600 group-hover:text-white transition-all duration-500 shrink-0`}
+                  className={`w-16 h-16 rounded-2xl flex items-center justify-center bg-white shadow-sm group-hover:bg-primary-600 group-hover:text-white transition-all duration-500 shrink-0 ${
+                    categoryColorClasses[cat.color]?.text || "text-blue-600"
+                  }`}
                 >
                   <i className={`fa-solid ${cat.icon} text-2xl`}></i>
                 </div>
@@ -520,7 +616,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
                 <div className="flex justify-between items-start mb-5">
                   <div className="flex gap-4">
                     <div
-                      className={`w-12 h-12 rounded-2xl ${item.logoColor} text-white flex items-center justify-center text-sm font-black shadow-lg shadow-${item.logoColor.split("-")[1]}-200/50`}
+                      className={`w-12 h-12 rounded-2xl ${item.logoColor} text-white flex items-center justify-center text-sm font-black shadow-lg`}
                     >
                       {item.initials}
                     </div>
@@ -588,8 +684,10 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
                   </button>
                   <button
                     onClick={() =>
-                      onNavigate("scholarshipApplication", {
+                      onNavigate("scholarshipInquiry", {
                         id: item.id.toString(),
+                        scholarshipName: item.title,
+                        scholarshipType: item.type,
                       })
                     }
                     className="flex-2 py-4 px-6 rounded-xl bg-slate-900 text-[11px] font-black text-white hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 uppercase tracking-widest"
@@ -733,7 +831,9 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
               >
                 <div className="flex justify-between items-start mb-6">
                   <div
-                    className={`w-12 h-12 bg-${t.color}-50 rounded-xl flex items-center justify-center text-${t.color}-500 shadow-sm shadow-${t.color}-500/10`}
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${
+                      testimonialColorClasses[t.color] || "bg-blue-50 text-blue-500"
+                    }`}
                   >
                     <i className="fa-solid fa-quote-left text-xl opacity-40"></i>
                   </div>
@@ -768,7 +868,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
       </section>
 
       {/* FAQ Section */}
-      <section className="max-w-3xl mx-auto px-6 py-12">
+      <section className="max-w-[1400px] w-full mx-auto px-6 py-12">
         <div className="text-center mb-10">
           <span className="text-blue-600 font-black tracking-[0.3em] uppercase text-xs mb-3 block">
             Help Center
@@ -833,7 +933,9 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
             </button>
             <div className="text-center">
               <div
-                className={`w-24 h-24 rounded-2xl bg-slate-50 flex items-center justify-center text-${selectedCategory.color}-600 mx-auto mb-10 shadow-inner`}
+                className={`w-24 h-24 rounded-2xl bg-slate-50 flex items-center justify-center mx-auto mb-10 shadow-inner ${
+                  categoryColorClasses[selectedCategory.color]?.text || "text-blue-600"
+                }`}
               >
                 <i className={`fa-solid ${selectedCategory.icon} text-4xl`}></i>
               </div>
@@ -841,7 +943,9 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
                 {selectedCategory.title}
               </h3>
               <span
-                className={`inline-block px-4 py-2 bg-${selectedCategory.color}-50 text-${selectedCategory.color}-700 rounded-full text-[10px] font-black uppercase tracking-widest mb-6`}
+                className={`inline-block px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest mb-6 ${
+                  categoryColorClasses[selectedCategory.color]?.badge || "bg-blue-50 text-blue-700"
+                }`}
               >
                 {selectedCategory.subtitle}
               </span>
@@ -953,8 +1057,10 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
               <div className="flex gap-5">
                 <button
                   onClick={() =>
-                    onNavigate("scholarshipApplication", {
+                    onNavigate("scholarshipInquiry", {
                       id: selectedScholarship.id.toString(),
+                      scholarshipName: selectedScholarship.title,
+                      scholarshipType: selectedScholarship.type,
                     })
                   }
                   className="flex-[2] bg-primary-600 text-white font-black py-6 rounded-2xl hover:bg-primary-700 transition-all shadow-[0_25px_50px_rgba(37,99,235,0.3)] uppercase tracking-[0.3em] text-xs flex items-center justify-center gap-4 active:scale-95"
@@ -976,7 +1082,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
 
       {/* Newsletter (Already implemented in Footer but I can add a specific one or just rely on footer) */}
 
-      <style jsx>{`
+      <style>{`
         @keyframes scroll {
           0% {
             transform: translateX(0);
