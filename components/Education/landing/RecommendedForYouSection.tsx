@@ -1,5 +1,25 @@
-const RecommendedForYouSection = ({ onNavigate }: any) => (
-  <div className="max-w-[1380px] mx-auto w-full mt-16">
+import { useRef } from "react";
+
+const RecommendedForYouSection = ({ onNavigate }: any) => {
+  const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const scrollByCard = (direction: -1 | 1) => {
+    const container = containerRef.current;
+    if (!container) {
+      return;
+    }
+
+    const card = container.querySelector("[data-recommended-card]") as HTMLDivElement | null;
+    const amount = card ? card.offsetWidth + 24 : 364;
+
+    container.scrollBy({
+      left: amount * direction,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+  <div className="max-w-[1400px] mx-auto w-full mt-16">
   {/* Header Section */}
   <div className="flex items-end justify-between mb-8">
     <div>
@@ -13,7 +33,9 @@ const RecommendedForYouSection = ({ onNavigate }: any) => (
     {/* Navigation Arrows */}
     <div className="flex gap-2">
       <button
-        id="btn-prev"
+        type="button"
+        onClick={() => scrollByCard(-1)}
+        aria-label="Previous recommended colleges"
         className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm active:scale-95"
       >
         <svg
@@ -31,7 +53,9 @@ const RecommendedForYouSection = ({ onNavigate }: any) => (
         </svg>
       </button>
       <button
-        id="btn-next"
+        type="button"
+        onClick={() => scrollByCard(1)}
+        aria-label="Next recommended colleges"
         className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-gray-50 hover:text-blue-600 hover:border-blue-200 transition-all shadow-sm active:scale-95"
       >
         <svg
@@ -52,11 +76,11 @@ const RecommendedForYouSection = ({ onNavigate }: any) => (
   </div>
   {/* Scrollable Cards Container */}
   <div
-    id="scroll-container"
+    ref={containerRef}
     className="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8"
   >
     {/* Card 1: KIST */}
-    <div className="min-w-[340px] snap-start bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
+    <div data-recommended-card className="min-w-[340px] snap-start bg-white rounded-2xl border border-gray-100 shadow-sm p-5 group hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col">
       <div className="flex items-start gap-4">
         <div className="w-16 h-16 shrink-0 rounded-xl border border-gray-100 overflow-hidden bg-white flex items-center justify-center p-1.5 shadow-sm">
           <img
@@ -718,6 +742,7 @@ const RecommendedForYouSection = ({ onNavigate }: any) => (
 </div>
 
 );
+};
 
 
 export default RecommendedForYouSection;

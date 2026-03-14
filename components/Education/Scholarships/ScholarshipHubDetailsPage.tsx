@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiService } from "../../../services/api";
@@ -175,10 +175,39 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isSaved, setIsSaved] = useState(false);
   const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+  const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
+  const [copyLabel, setCopyLabel] = useState("Copy link");
+  const shareMenuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [resolvedId]);
+
+  useEffect(() => {
+    const handleOutsideClick = (event: MouseEvent) => {
+      if (!shareMenuRef.current) {
+        return;
+      }
+
+      if (!shareMenuRef.current.contains(event.target as Node)) {
+        setIsShareMenuOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsShareMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   const { data } = useQuery({
     queryKey: ["education-scholarship-details", resolvedId],
@@ -216,24 +245,92 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
     return (similarData?.data?.scholarships || []).slice(0, 3);
   }, [similarData]);
 
+  const shareUrl = useMemo(() => {
+    if (typeof window === "undefined") {
+      return "";
+    }
+
+    return window.location.href;
+  }, [resolvedId]);
+
+  const shareText = useMemo(() => {
+    return `${scholarshipData.title} by ${scholarshipData.provider}`;
+  }, [scholarshipData.provider, scholarshipData.title]);
+
+  const encodedShareUrl = encodeURIComponent(shareUrl);
+  const encodedShareText = encodeURIComponent(shareText);
+
+  const shareTargets = [
+    {
+      label: "Facebook",
+      icon: "fa-facebook-f",
+      iconClass: "fa-brands",
+      color: "bg-blue-50 text-blue-600",
+      href: `https://www.facebook.com/sharer/sharer.php?u=${encodedShareUrl}`,
+    },
+    {
+      label: "X",
+      icon: "fa-x-twitter",
+      iconClass: "fa-brands",
+      color: "bg-slate-100 text-slate-900",
+      href: `https://twitter.com/intent/tweet?url=${encodedShareUrl}&text=${encodedShareText}`,
+    },
+    {
+      label: "LinkedIn",
+      icon: "fa-linkedin-in",
+      iconClass: "fa-brands",
+      color: "bg-blue-50 text-blue-700",
+      href: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedShareUrl}`,
+    },
+    {
+      label: "WhatsApp",
+      icon: "fa-whatsapp",
+      iconClass: "fa-brands",
+      color: "bg-green-50 text-green-600",
+      href: `https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`,
+    },
+    {
+      label: "Telegram",
+      icon: "fa-telegram",
+      iconClass: "fa-brands",
+      color: "bg-cyan-50 text-cyan-600",
+      href: `https://t.me/share/url?url=${encodedShareUrl}&text=${encodedShareText}`,
+    },
+    {
+      label: "Email",
+      icon: "fa-envelope",
+      iconClass: "fa-solid",
+      color: "bg-amber-50 text-amber-600",
+      href: `mailto:?subject=${encodedShareText}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`,
+    },
+  ];
+
+  const handleCopyLink = async () => {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+      } else {
+        const textArea = document.createElement("textarea");
+        textArea.value = shareUrl;
+        textArea.setAttribute("readonly", "true");
+        textArea.style.position = "absolute";
+        textArea.style.left = "-9999px";
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+      }
+
+      setCopyLabel("Copied!");
+      window.setTimeout(() => setCopyLabel("Copy link"), 2000);
+    } catch {
+      setCopyLabel("Copy failed");
+      window.setTimeout(() => setCopyLabel("Copy link"), 2000);
+    }
+  };
+
   return (
     <div className="bg-slate-50 min-h-screen text-slate-800 antialiased font-sans pb-12 pt-16">
-      <div className="bg-white border-b border-slate-100">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-3">
-          <div className="flex items-center text-sm text-slate-500">
-            <button className="hover:text-blue-600" onClick={() => onNavigate("scholarshipMain")}>
-              Home
-            </button>
-            <i className="fa-solid fa-chevron-right w-4 h-4 mx-2 text-[10px]"></i>
-            <button className="hover:text-blue-600" onClick={() => onNavigate("scholarshipCategory")}>
-              International
-            </button>
-            <i className="fa-solid fa-chevron-right w-4 h-4 mx-2 text-[10px]"></i>
-            <span className="text-slate-900 font-medium">{scholarshipData.title}</span>
-          </div>
-        </div>
-      </div>
-
       <main className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
@@ -255,9 +352,47 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
               </p>
             </div>
             <div className="flex gap-3 mt-4 md:mt-0">
-              <button className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors bg-white shadow-sm">
-                <i className="fa-solid fa-share-nodes w-4 h-4"></i> Share
-              </button>
+              <div className="relative" ref={shareMenuRef}>
+                <button
+                  onClick={() => setIsShareMenuOpen((prev) => !prev)}
+                  className="flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 transition-colors bg-white shadow-sm"
+                >
+                  <i className="fa-solid fa-share-nodes w-4 h-4"></i> Share
+                </button>
+
+                {isShareMenuOpen && (
+                  <div className="absolute right-0 top-full mt-3 w-72 rounded-2xl border border-slate-200 bg-white shadow-2xl p-3 z-30">
+                    <p className="px-2 pb-2 text-xs font-bold uppercase tracking-[0.16em] text-slate-400">
+                      Share Scholarship
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {shareTargets.map((target) => (
+                        <a
+                          key={target.label}
+                          href={target.href}
+                          target={target.label === "Email" ? undefined : "_blank"}
+                          rel={target.label === "Email" ? undefined : "noreferrer"}
+                          className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                          <span className={`flex h-9 w-9 items-center justify-center rounded-full ${target.color}`}>
+                            <i className={`${target.iconClass} ${target.icon}`}></i>
+                          </span>
+                          <span>{target.label}</span>
+                        </a>
+                      ))}
+                    </div>
+                    <button
+                      onClick={handleCopyLink}
+                      className="mt-2 flex w-full items-center gap-2 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
+                    >
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 text-slate-700">
+                        <i className="fa-solid fa-link"></i>
+                      </span>
+                      <span>{copyLabel}</span>
+                    </button>
+                  </div>
+                )}
+              </div>
               <button
                 onClick={() => setIsSaved((prev) => !prev)}
                 className={`flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg transition-colors bg-white shadow-sm ${

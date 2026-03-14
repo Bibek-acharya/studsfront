@@ -50,7 +50,7 @@ const featuredColleges = [
 ];
 
 const FeaturedInstitutionsSection = ({ onNavigate }: any) => (
-  <div className="w-full max-w-[1380px] mx-auto mt-24">
+  <div className="w-full max-w-[1400px] mx-auto mt-24">
     <div className="mb-10 text-center">
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
         Explore Featured Colleges &amp; Universities

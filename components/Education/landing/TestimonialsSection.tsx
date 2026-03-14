@@ -94,12 +94,12 @@ const TestimonialsSection = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto mt-8">
+    <div className="max-w-[1400px] mx-auto mt-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div className="max-w-2xl">
-          <h2 className="text-indigo-600 font-semibold tracking-wide uppercase text-sm mb-2">
+          {/* <h2 className="text-indigo-600 font-semibold tracking-wide uppercase text-sm mb-2">
             Success Stories
-          </h2>
+          </h2> */}
           <h1 className="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl mb-4">
             What Our Students Say
           </h1>
@@ -155,7 +155,7 @@ const TestimonialsSection = () => {
 
       <div
         ref={containerRef}
-        className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory hide-scrollbar"
+        className="flex overflow-x-auto gap-6 pb-8 snap-x snap-mandatory no-scrollbar"
       >
         {testimonials.map((testimonial) => (
           <div

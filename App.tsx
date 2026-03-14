@@ -135,7 +135,7 @@ const App: React.FC = () => {
     </div>
   );
 
-  const hideNavFooter = ["/login", "/signup", "/onboarding", "/studentDashboard", "/auth/google-callback"].some(path => location.pathname.startsWith(path));
+  const hideNavFooter = ["/login", "/signup", "/onboarding", "/studentDashboard", "/auth/google-callback", "/institutionZone"].some(path => location.pathname.startsWith(path));
 
   return (
     <div className="min-h-screen font-sans selection:bg-blue-500 selection:text-white overflow-x-hidden bg-white">

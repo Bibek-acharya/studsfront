@@ -10,6 +10,13 @@ export default defineConfig(({ mode }) => {
       host: "0.0.0.0",
       cors: true,
       middlewareMode: false,
+      proxy: {
+        "/api": {
+          target: env.VITE_BACKEND_URL || "http://localhost:8080",
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
     plugins: [react()],
     resolve: {

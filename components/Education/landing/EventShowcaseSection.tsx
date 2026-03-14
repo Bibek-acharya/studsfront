@@ -65,7 +65,7 @@ const EventShowcaseSection = ({ onNavigate }: any) => {
   };
 
   return (
-    <section className="relative w-full max-w-[1380px] mx-auto md:px-10">
+    <section className="relative w-full max-w-[1400px] mx-auto md:px-10">
       <button
         type="button"
         onClick={previousSlide}

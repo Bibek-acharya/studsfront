@@ -10,16 +10,11 @@ interface CollegeGridProps {
 }
 
 type ActiveFilterTag =
-  | {
-      key: "search";
-      label: string;
-      value: string;
-    }
-  | {
-      key: Exclude<keyof CollegeFilters, "search">;
-      label: string;
-      value: string;
-    };
+  {
+    key: Exclude<keyof CollegeFilters, "search">;
+    label: string;
+    value: string;
+  };
 
 const SEARCHABLE_FILTER_KEYS: Array<keyof CollegeFilters> = [
   "academic",
@@ -56,10 +51,6 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
   const activeTags = useMemo<ActiveFilterTag[]>(() => {
     const tags: ActiveFilterTag[] = [];
 
-    if (filters.search.trim()) {
-      tags.push({ key: "search", label: filters.search.trim(), value: filters.search.trim() });
-    }
-
     FILTER_KEYS_FOR_TAGS.forEach((key) => {
       filters[key].forEach((value) => {
         tags.push({ key, label: value, value });
@@ -92,6 +83,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
 
       return apiService.getColleges(params);
     },
+    placeholderData: (previousData) => previousData,
   });
 
   const colleges = data?.data?.colleges || [];
@@ -100,10 +92,6 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
 
   const removeFilter = (tag: ActiveFilterTag) => {
     setFilters((prev) => {
-      if (tag.key === "search") {
-        return { ...prev, search: "" };
-      }
-
       return {
         ...prev,
         [tag.key]: prev[tag.key].filter((item) => item !== tag.value),
@@ -134,20 +122,6 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <svg className="animate-spin h-8 w-8 text-blue-600 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-          </svg>
-          <p className="font-semibold text-slate-600">Loading colleges...</p>
-        </div>
-      </div>
-    );
-  }
-
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
@@ -168,6 +142,16 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
               Explore and compare the best colleges tailored for you.
             </p>
           </div>
+
+          {isLoading && (
+            <div className="inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[12px] font-medium text-blue-700">
+              <svg className="h-3.5 w-3.5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              Updating results...
+            </div>
+          )}
 
           <div className="relative w-full shrink-0 sm:w-[320px]">
             <i className="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-sm text-gray-400"></i>
@@ -211,6 +195,12 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
       </div>
 
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-3" id="card-grid">
+        {isLoading && colleges.length === 0 && (
+          <div className="col-span-1 rounded-[16px] border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
+            Loading colleges...
+          </div>
+        )}
+
         {colleges.map((college: College) => (
           <ProgramCard
             key={college.id}
@@ -221,7 +211,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
           />
         ))}
 
-        {colleges.length === 0 && (
+        {!isLoading && colleges.length === 0 && (
           <div className="col-span-1 rounded-[16px] border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
             No colleges found matching your filters.
           </div>

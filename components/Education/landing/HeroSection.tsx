@@ -4,12 +4,44 @@ const HeroSection = ({ onNavigate }: any) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const heroSlides = [
-    { image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80", alt: "College Campus 1" },
-    { image: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80", alt: "College Campus 2" },
-    { image: "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80", alt: "Library" },
-    { image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80", alt: "Graduation" },
-    { image: "https://images.unsplash.com/photo-1592280771190-3e2e4d571952?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80", alt: "Students" }
+    {
+      image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80",
+      alt: "College Campus 1",
+      collegeLabel: "kist.edu.np",
+      collegeSearch: "KIST College",
+      collegeHref: "https://kist.edu.np",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80",
+      alt: "College Campus 2",
+      collegeLabel: "trinity.edu.np",
+      collegeSearch: "Trinity International College",
+      collegeHref: "https://trinity.edu.np",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80",
+      alt: "Library",
+      collegeLabel: "sxj.edu.np",
+      collegeSearch: "St. Xavier's College",
+      collegeHref: "https://sxj.edu.np",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80",
+      alt: "Graduation",
+      collegeLabel: "kcm.edu.np",
+      collegeSearch: "Kathmandu College of Management",
+      collegeHref: "https://kcm.edu.np",
+    },
+    {
+      image: "https://images.unsplash.com/photo-1592280771190-3e2e4d571952?ixlib=rb-1.2.1&auto=format&fit=crop&w=1380&q=80",
+      alt: "Students",
+      collegeLabel: "goldengate.edu.np",
+      collegeSearch: "GoldenGate International College",
+      collegeHref: "https://goldengate.edu.np",
+    }
   ];
+
+  const activeSlide = heroSlides[currentSlide];
 
   useEffect(() => {
     const interval = setInterval(() => setCurrentSlide(prev => (prev + 1) % heroSlides.length), 5000);
@@ -17,7 +49,7 @@ const HeroSection = ({ onNavigate }: any) => {
   }, [heroSlides.length]);
 
   return (
-    <main className="max-w-[1380px] w-full h-[580px] mx-auto relative overflow-hidden mt-6 rounded-[20px] shadow-lg group">
+    <main className="max-w-[1400px] w-full h-[580px] mx-auto relative overflow-hidden mt-6 rounded-[20px] shadow-lg group">
       <div
         id="slider-track"
         className="absolute inset-0 flex w-full h-full slider-track"
@@ -116,9 +148,10 @@ const HeroSection = ({ onNavigate }: any) => {
           ))}
         </div>
 
-        <button
-          type="button"
-          onClick={() => onNavigate("findCollege")}
+        <a
+          href={activeSlide.collegeHref}
+          target="_blank"
+          rel="noreferrer"
           className="w-40 flex justify-end"
         >
           <span className="bg-white hover:bg-gray-50 text-[#4965F6] px-5 py-2.5 rounded-full flex items-center shadow-md transition-colors text-sm font-semibold">
@@ -136,9 +169,9 @@ const HeroSection = ({ onNavigate }: any) => {
                 d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"
               />
             </svg>
-            goldengate.com
+            {activeSlide.collegeLabel}
           </span>
-        </button>
+        </a>
       </div>
     </main>
   );

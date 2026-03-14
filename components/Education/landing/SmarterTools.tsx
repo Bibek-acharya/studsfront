@@ -1,7 +1,5 @@
-import ToolCard from "./ToolCard";
-
 const SmarterToolsSection = ({ onNavigate }: any) => (
-<section className="max-w-[1380px] mx-auto mt-20 mb-24 px-4 sm:px-0">
+<section className="max-w-[1400px] mx-auto mt-20 mb-24 px-4 sm:px-0">
   {/* Section Header */}
   <div className="text-center mb-12">
     <h2 className="text-[34px] font-extrabold text-[#0F172A] mb-3 tracking-tight">
@@ -14,7 +12,18 @@ const SmarterToolsSection = ({ onNavigate }: any) => (
   {/* Tools Grid */}
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
     {/* Card 1: College Finder */}
-    <div className="bg-white rounded-[24px] p-7 shadow-[0_4px_24px_rgb(0,0,0,0.02)] border border-gray-100/80 flex flex-col hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300">
+    <div
+      className="bg-white rounded-[24px] p-7 shadow-[0_4px_24px_rgb(0,0,0,0.02)] border border-gray-100/80 flex flex-col hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300"
+      role="button"
+      tabIndex={0}
+      onClick={() => onNavigate("collegeRecommenderTool")}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onNavigate("collegeRecommenderTool");
+        }
+      }}
+    >
       {/* Icon container with light green background */}
       <div className="w-[60px] h-[60px] rounded-[18px] bg-[#E1F7E7] flex items-center justify-center mb-6">
         <svg
@@ -39,12 +48,30 @@ const SmarterToolsSection = ({ onNavigate }: any) => (
         Filter thousands of institutions by location, major, tuition, and
         ranking to find your perfect match.
       </p>
-      <button className="w-full py-3.5 bg-[#22C55E] hover:bg-[#16A34A] text-white text-[15px] font-semibold rounded-xl transition-colors">
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onNavigate("collegeRecommenderTool");
+        }}
+        className="w-full py-3.5 bg-[#22C55E] hover:bg-[#16A34A] text-white text-[15px] font-semibold rounded-xl transition-colors"
+      >
         Find My Match
       </button>
     </div>
     {/* Card 2: Compare College */}
-    <div className="bg-white rounded-[24px] p-7 shadow-[0_4px_24px_rgb(0,0,0,0.02)] border border-gray-100/80 flex flex-col hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300">
+    <div
+      className="bg-white rounded-[24px] p-7 shadow-[0_4px_24px_rgb(0,0,0,0.02)] border border-gray-100/80 flex flex-col hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300"
+      role="button"
+      tabIndex={0}
+      onClick={() => onNavigate("compareColleges")}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onNavigate("compareColleges");
+        }
+      }}
+    >
       {/* Icon container with light blue background */}
       <div className="w-[60px] h-[60px] rounded-[18px] bg-[#E3EFFF] flex items-center justify-center mb-6">
         <svg
@@ -69,12 +96,30 @@ const SmarterToolsSection = ({ onNavigate }: any) => (
         Filter thousands of institutions by location, major, tuition, and
         ranking to find your perfect match.
       </p>
-      <button className="w-full py-3.5 bg-[#4A8BFF] hover:bg-blue-600 text-white text-[15px] font-semibold rounded-xl transition-colors">
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onNavigate("compareColleges");
+        }}
+        className="w-full py-3.5 bg-[#4A8BFF] hover:bg-blue-600 text-white text-[15px] font-semibold rounded-xl transition-colors"
+      >
         Start Comparison
       </button>
     </div>
     {/* Card 3: Scholarship Finder */}
-    <div className="bg-white rounded-[24px] p-7 shadow-[0_4px_24px_rgb(0,0,0,0.02)] border border-gray-100/80 flex flex-col hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300">
+    <div
+      className="bg-white rounded-[24px] p-7 shadow-[0_4px_24px_rgb(0,0,0,0.02)] border border-gray-100/80 flex flex-col hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300"
+      role="button"
+      tabIndex={0}
+      onClick={() => onNavigate("scholarshipFinderTool")}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onNavigate("scholarshipFinderTool");
+        }
+      }}
+    >
       {/* Icon container with light yellow background */}
       <div className="w-[60px] h-[60px] rounded-[18px] bg-[#FFF8DB] flex items-center justify-center mb-6">
         <svg
@@ -99,12 +144,30 @@ const SmarterToolsSection = ({ onNavigate }: any) => (
         Filter thousands of institutions by location, major, tuition, and
         ranking to find your perfect match.
       </p>
-      <button className="w-full py-3.5 bg-[#EAB308] hover:bg-yellow-600 text-white text-[15px] font-semibold rounded-xl transition-colors">
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onNavigate("scholarshipFinderTool");
+        }}
+        className="w-full py-3.5 bg-[#EAB308] hover:bg-yellow-600 text-white text-[15px] font-semibold rounded-xl transition-colors"
+      >
         Search Funding
       </button>
     </div>
     {/* Card 4: Courses Finder */}
-    <div className="bg-white rounded-[24px] p-7 shadow-[0_4px_24px_rgb(0,0,0,0.02)] border border-gray-100/80 flex flex-col hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300">
+    <div
+      className="bg-white rounded-[24px] p-7 shadow-[0_4px_24px_rgb(0,0,0,0.02)] border border-gray-100/80 flex flex-col hover:shadow-[0_8px_30px_rgb(0,0,0,0.06)] hover:-translate-y-1 transition-all duration-300"
+      role="button"
+      tabIndex={0}
+      onClick={() => onNavigate("courseFinder")}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          onNavigate("courseFinder");
+        }
+      }}
+    >
       {/* Icon container with light red background */}
       <div className="w-[60px] h-[60px] rounded-[18px] bg-[#FDE2E2] flex items-center justify-center mb-6">
         <svg
@@ -129,7 +192,14 @@ const SmarterToolsSection = ({ onNavigate }: any) => (
         Filter thousands of institutions by location, major, tuition, and
         ranking to find your perfect match.
       </p>
-      <button className="w-full py-3.5 bg-[#F04C4C] hover:bg-red-600 text-white text-[15px] font-semibold rounded-xl transition-colors">
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          onNavigate("courseFinder");
+        }}
+        className="w-full py-3.5 bg-[#F04C4C] hover:bg-red-600 text-white text-[15px] font-semibold rounded-xl transition-colors"
+      >
         Explore Courses
       </button>
     </div>

@@ -67,7 +67,7 @@ const CampusEventsSection = ({ onNavigate }: any) => {
   };
 
   return (
-    <div className="w-full max-w-[1380px] mx-auto mt-12">
+    <div className="w-full max-w-[1400px] mx-auto mt-12">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-8 gap-4">
         <div>
           <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">

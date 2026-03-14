@@ -11,7 +11,7 @@ interface OtpViewProps {
 
 const OtpView: React.FC<OtpViewProps> = ({
   identifier,
-  type = "phone",
+  type = "email",
   onVerified,
   onBack,
 }) => {
@@ -33,7 +33,6 @@ const OtpView: React.FC<OtpViewProps> = ({
     newOtp[index] = val;
     setOtp(newOtp);
     setError("");
-
     if (val && index < 5) {
       inputsRef.current[index + 1]?.focus();
     }
@@ -48,7 +47,6 @@ const OtpView: React.FC<OtpViewProps> = ({
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otp.some((v) => !v)) return;
-
     setLoading(true);
     setError("");
     try {
@@ -78,95 +76,86 @@ const OtpView: React.FC<OtpViewProps> = ({
   };
 
   return (
-    <div className="animate-fadeInUp text-center">
-      <div className="inline-flex items-center gap-2 mb-8">
-        <img src="/logo-blue.png" alt="StudSphere" className="h-10 w-auto" />
+    <div className="w-full max-w-[360px] mx-auto flex flex-col py-4">
+      {/* Back Button */}
+      {onBack && (
+        <button
+          onClick={onBack}
+          className="mb-6 text-gray-500 hover:text-gray-800 self-start flex items-center text-sm font-medium transition-colors focus:outline-none"
+        >
+          <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Back
+        </button>
+      )}
+
+      {/* Icon */}
+      <div className="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center mb-5 border border-blue-100">
+        <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
       </div>
 
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">
-          {type === "phone" ? "Verify Phone" : "Verify Email"}
-        </h1>
-        <p className="text-slate-500 font-medium text-sm">
-          We've sent a 6-digit code to{" "}
-          <strong className="text-slate-900">
-            {type === "phone"
-              ? `+977 ${identifier.slice(0, 3)}...${identifier.slice(-3)}`
-              : identifier}
-          </strong>
-        </p>
-      </div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Check your email</h1>
+      <p className="text-gray-500 text-sm mb-6 leading-relaxed">
+        We've sent a 6-digit verification code to{" "}
+        <span className="font-medium text-gray-900">{identifier}</span>.
+      </p>
 
       {error && (
-        <div className="mb-6 p-3 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-bold uppercase tracking-wider">
-          <i className="fa-solid fa-circle-exclamation mr-2"></i>
-          {error}
+        <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+          <p className="text-red-700 text-sm">{error}</p>
         </div>
       )}
 
       {success && (
-        <div className="mb-6 p-3 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-600 text-xs font-bold uppercase tracking-wider">
-          <i className="fa-solid fa-circle-check mr-2"></i>
-          {success}
+        <div className="mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-lg">
+          <p className="text-emerald-700 text-sm">{success}</p>
         </div>
       )}
 
-      <form onSubmit={handleVerify} className="space-y-8">
-        <div className="flex justify-between gap-2 max-w-[340px] mx-auto">
+      <form onSubmit={handleVerify} className="flex flex-col gap-5">
+        {/* 6 OTP boxes */}
+        <div className="flex justify-between gap-2">
           {otp.map((digit, idx) => (
             <input
               key={idx}
-              ref={(el) => {
-                inputsRef.current[idx] = el;
-              }}
+              ref={(el) => { inputsRef.current[idx] = el; }}
               type="text"
               maxLength={1}
               value={digit}
               onChange={(e) => handleChange(e.target.value, idx)}
               onKeyDown={(e) => handleKeyDown(e, idx)}
-              className="w-12 h-14 bg-slate-50 border border-slate-200 rounded-xl text-center text-2xl font-bold focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all"
+              className="w-12 h-12 bg-white border border-gray-300 rounded-lg text-center text-xl font-bold text-gray-900 focus:border-blue-600 focus:ring-2 focus:ring-blue-600/20 outline-none transition-all"
             />
           ))}
         </div>
 
-        <div className="space-y-4">
-          <button
-            type="submit"
-            disabled={loading || otp.some((v) => !v)}
-            className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 text-white font-bold rounded-xl shadow-xl shadow-blue-500/20 transition-all active:scale-[0.98] flex items-center justify-center gap-2"
-          >
-            {loading ? (
-              <i className="fa-solid fa-spinner animate-spin"></i>
-            ) : (
-              "Verify & Continue"
-            )}
-          </button>
-
-          {onBack && (
-            <button
-              type="button"
-              onClick={onBack}
-              className="w-full py-4 bg-white border border-slate-200 text-slate-500 font-bold rounded-xl hover:bg-slate-50 transition-all text-sm"
-            >
-              Change Email
-            </button>
+        <button
+          type="submit"
+          disabled={loading || otp.some((v) => !v)}
+          className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-medium rounded-lg py-2.5 transition-colors duration-200 shadow-md shadow-blue-600/30 flex items-center justify-center gap-2 mt-2"
+        >
+          {loading ? (
+            <i className="fa-solid fa-spinner animate-spin"></i>
+          ) : (
+            "Verify Account"
           )}
-        </div>
-
-        <div className="space-y-4">
-          <p className="text-sm text-slate-500 font-medium">
-            Didn't receive the code?{" "}
-            <button
-              type="button"
-              onClick={handleResend}
-              disabled={resending}
-              className="text-blue-600 font-bold hover:underline disabled:opacity-50"
-            >
-              {resending ? "Sending..." : "Resend Code"}
-            </button>
-          </p>
-        </div>
+        </button>
       </form>
+
+      <p className="text-center text-sm text-gray-500 mt-6">
+        Didn't receive the email?{" "}
+        <br />
+        <button
+          onClick={handleResend}
+          disabled={resending}
+          className="font-medium text-blue-600 hover:underline inline-block mt-1 disabled:opacity-50"
+        >
+          {resending ? "Sending..." : "Click to resend"}
+        </button>
+      </p>
     </div>
   );
 };

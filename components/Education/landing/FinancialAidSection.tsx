@@ -1,5 +1,5 @@
 const FinancialAidSection = ({ onNavigate }: any) => (
- <div className="max-w-[1380px] mx-auto w-full mt-16">
+ <div className="max-w-[1400px] mx-auto w-full mt-16">
   {/* ========================================== */}
   {/* FINANCIAL AID SECTION                      */}
   {/* ========================================== */}

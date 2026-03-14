@@ -99,12 +99,12 @@ const NewsStoriesSection = ({ onNavigate }: any) => {
   };
 
   return (
-    <section className="max-w-[1380px] mx-auto relative">
+    <section className="max-w-[1400px] mx-auto relative">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
         <div className="text-left max-w-2xl">
-          <span className="text-indigo-600 font-bold tracking-wider uppercase text-sm mb-3 block">
+          {/* <span className="text-indigo-600 font-bold tracking-wider uppercase text-sm mb-3 block">
             Latest Updates
-          </span>
+          </span> */}
           <h2 className="text-4xl md:text-[42px] font-extrabold text-slate-900 mb-4 tracking-tight">
             Latest News &amp; Stories
           </h2>
@@ -113,7 +113,7 @@ const NewsStoriesSection = ({ onNavigate }: any) => {
           </p>
         </div>
 
-        <div className="flex gap-4 md:pb-2">
+          <div className="flex gap-4 md:pb-2">
           <button
             type="button"
             onClick={() => scrollByWidth(-1)}
@@ -238,28 +238,28 @@ const NewsStoriesSection = ({ onNavigate }: any) => {
         ))}
       </div>
 
-      <div className="text-center mt-12">
-        <button
-          type="button"
-          onClick={() => onNavigate("newsPage")}
-          className="inline-flex items-center gap-1 font-bold text-gray-900 hover:text-gray-600 transition-colors text-sm"
-        >
-          View All
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={16}
-            height={16}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+        <div className="text-center mb-12">
+          <button
+            type="button"
+            onClick={() => onNavigate("newsPage")}
+            className="inline-flex items-center gap-1 font-bold text-gray-900 hover:text-gray-600 transition-colors text-sm"
           >
-            <path d="m9 18 6-6-6-6" />
-          </svg>
-        </button>
-      </div>
+            View All
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width={16}
+              height={16}
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="m9 18 6-6-6-6" />
+            </svg>
+          </button>
+        </div>
     </section>
   );
 };

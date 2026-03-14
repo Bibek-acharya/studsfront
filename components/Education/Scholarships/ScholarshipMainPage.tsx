@@ -3,6 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { apiService } from "../../../services/api";
 import ScholarshipListCard from "./ScholarshipListCard";
 import ScholarshipApplicationPage from "./ScholarshipApplicationPage";
+import TestimonialsSection from "../landing/TestimonialsSection";
 
 interface Scholarship {
   id: number;
@@ -162,13 +163,6 @@ const categoryColorClasses: Record<string, { text: string; badge: string }> = {
   rose: { text: "text-rose-600", badge: "bg-rose-50 text-rose-700" },
   cyan: { text: "text-cyan-600", badge: "bg-cyan-50 text-cyan-700" },
   teal: { text: "text-teal-600", badge: "bg-teal-50 text-teal-700" },
-};
-
-const testimonialColorClasses: Record<string, string> = {
-  blue: "bg-blue-50 text-blue-500",
-  emerald: "bg-emerald-50 text-emerald-500",
-  amber: "bg-amber-50 text-amber-500",
-  rose: "bg-rose-50 text-rose-500",
 };
 
 const toInitials = (value: string) => {
@@ -333,8 +327,6 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
     }));
   }, [scholarshipsResponse]);
 
-  const testimonialsRef = useRef<HTMLDivElement>(null);
-
   const heroSlides = [
     {
       img: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
@@ -386,16 +378,6 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
   const openApplicationModal = (selection: ApplicationSelection) => {
     setApplicationSelection(selection);
     setIsApplicationModalOpen(true);
-  };
-
-  const scrollTestimonials = (direction: "left" | "right") => {
-    if (testimonialsRef.current) {
-      const scrollAmount = 450;
-      testimonialsRef.current.scrollBy({
-        left: direction === "left" ? -scrollAmount : scrollAmount,
-        behavior: "smooth",
-      });
-    }
   };
 
   return (
@@ -554,7 +536,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
       <section className="w-full bg-white py-16 px-4 md:px-8 lg:px-16 font-inter relative z-10 border-y border-slate-100">
         <div className="max-w-[1400px] w-full mx-auto">
           <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 uppercase tracking-tight">
+            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
               Scholarship Categories
             </h2>
             <p className="text-gray-500 text-lg max-w-2xl mx-auto">
@@ -578,10 +560,10 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
                   <i className={`fa-solid ${cat.icon} text-2xl`}></i>
                 </div>
                 <div className="ml-5 flex-grow">
-                  <h3 className="font-black text-slate-900 text-base group-hover:text-primary-600 transition-colors uppercase tracking-tight">
+                  <h3 className="font-black text-slate-900 text-base group-hover:text-primary-600 transition-colors tracking-tight">
                     {cat.title}
                   </h3>
-                  <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em]">
+                  <span className="text-[10px] text-slate-400 font-black tracking-[0.12em]">
                     {cat.subtitle}
                   </span>
                 </div>
@@ -608,8 +590,8 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {scholarships.slice(0, 6).map((item) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          {scholarships.slice(0, 8).map((item) => (
             <ScholarshipListCard
               key={item.id}
               item={{
@@ -694,117 +676,17 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
         </div>
       </section>
 
-      {/* Success Stories */}
       <section className="w-full bg-white py-16 relative overflow-hidden border-y border-slate-100">
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-10 gap-8 text-center md:text-left">
-            <div className="max-w-2xl">
-              <span className="text-blue-600 font-black tracking-[0.2em] uppercase text-xs mb-3 block">
-                Success Stories
-              </span>
-              <h2 className="text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-tight">
-                What students say
-              </h2>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={() => scrollTestimonials("left")}
-                className="p-2.5 rounded-full bg-slate-50 hover:bg-white text-slate-700 transition-all shadow-md border border-slate-100 hover:shadow-xl group"
-              >
-                <i className="fa-solid fa-arrow-left text-base group-hover:-translate-x-1 transition-transform"></i>
-              </button>
-              <button
-                onClick={() => scrollTestimonials("right")}
-                className="p-2.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white transition-all shadow-lg group"
-              >
-                <i className="fa-solid fa-arrow-right text-base group-hover:translate-x-1 transition-transform"></i>
-              </button>
-            </div>
-          </div>
-
-          <div
-            ref={testimonialsRef}
-            className="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-8 px-2"
-          >
-            {[
-              {
-                name: "Sarah Jenkins",
-                school: "Stanford University",
-                text: "The AI matching is a game-changer. I was struggling to find grants relevant to my niche in Marine Biology, but UniPath found three perfect matches instantly.",
-                img: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80",
-                color: "blue",
-              },
-              {
-                name: "David Chen",
-                school: "MIT",
-                text: "I didn't think I qualified for any scholarships until I used this platform. The filtering system is incredible and saved me weeks of tedious research.",
-                img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80",
-                color: "emerald",
-              },
-              {
-                name: "Emily Watson",
-                school: "Yale University",
-                text: "The application tracking dashboard helped me organize deadlines for 15 different applications. I landed a full-ride scholarship thanks to staying organized!",
-                img: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80",
-                color: "amber",
-              },
-              {
-                name: "Aisha Patel",
-                school: "Oxford University",
-                text: "As an international student, funding was my biggest worry. UniPath connected me with global grants I had never heard of. Highly recommended!",
-                img: "https://images.unsplash.com/photo-1531123897727-8f129e1688ce?auto=format&fit=crop&w=150&q=80",
-                color: "rose",
-              },
-            ].map((t, i) => (
-              <div
-                key={i}
-                className="min-w-[320px] md:min-w-[400px] bg-slate-50 rounded-2xl p-8 snap-center flex flex-col border border-slate-100 transition-all duration-700 hover:shadow-xl hover:bg-white group"
-              >
-                <div className="flex justify-between items-start mb-6">
-                  <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-sm ${
-                      testimonialColorClasses[t.color] || "bg-blue-50 text-blue-500"
-                    }`}
-                  >
-                    <i className="fa-solid fa-quote-left text-xl opacity-40"></i>
-                  </div>
-                  <div className="flex gap-1 text-amber-400">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <i key={s} className="fa-solid fa-star text-xs"></i>
-                    ))}
-                  </div>
-                </div>
-                <p className="text-lg text-slate-600 font-medium leading-relaxed mb-8 flex-grow italic">
-                  "{t.text}"
-                </p>
-                <div className="flex items-center gap-4 pt-6 border-t border-slate-200/60">
-                  <img
-                    src={t.img}
-                    alt={t.name}
-                    className="w-12 h-12 rounded-xl object-cover shadow-md border-2 border-white"
-                  />
-                  <div>
-                    <h4 className="font-black text-base text-slate-900 uppercase tracking-tight">
-                      {t.name}
-                    </h4>
-                    <p className="text-[9px] text-blue-600 font-black uppercase tracking-[0.2em]">
-                      {t.school}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <TestimonialsSection />
       </section>
 
       {/* FAQ Section */}
-      <section className="max-w-[1400px] w-full mx-auto px-6 py-12">
-        <div className="text-center mb-10">
+      <section className="max-w-4xl w-full mx-auto px-6 py-10">
+        <div className="text-center mb-8">
           <span className="text-blue-600 font-black tracking-[0.3em] uppercase text-xs mb-3 block">
             Help Center
           </span>
-          <h2 className="text-3xl md:text-4xl font-black text-slate-900 uppercase tracking-tight">
+          <h2 className="text-xl md:text-2xl font-black text-slate-900 uppercase tracking-tight">
             Frequently Asked Questions
           </h2>
         </div>
@@ -832,7 +714,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
               key={i}
               className="group bg-white rounded-2xl border border-slate-100 overflow-hidden transition-all duration-500 open:shadow-[0_40px_80px_rgba(0,0,0,0.06)] open:bg-white"
             >
-              <summary className="flex justify-between items-center font-black cursor-pointer list-none p-6 text-slate-800 text-lg hover:bg-slate-50 transition-colors uppercase tracking-tight select-none">
+              <summary className="flex justify-between items-center font-black cursor-pointer list-none p-5 text-slate-800 text-base hover:bg-slate-50 transition-colors uppercase tracking-tight select-none">
                 <span className="group-open:text-primary-600 transition-colors">
                   {faq.q}
                 </span>
@@ -840,7 +722,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
                   <i className="fa-solid fa-chevron-down text-base"></i>
                 </span>
               </summary>
-              <div className="text-slate-500 px-6 pb-8 pt-1 leading-relaxed font-medium text-base">
+              <div className="text-slate-500 px-5 pb-6 pt-1 leading-relaxed font-medium text-sm">
                 {faq.a}
               </div>
             </details>

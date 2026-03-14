@@ -1,5 +1,5 @@
 const ExamAnnouncementsSection = ({ onNavigate }: any) => (
-<main className="max-w-[1380px] mx-auto py-12 md:py-16">
+<main className="max-w-[1400px] mx-auto py-12 md:py-16">
   {/* Header Section */}
   <div className="mb-12 flex flex-col items-center text-center">
     <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">

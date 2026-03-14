@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import SignupView from "./SignupView";
 import LoginView from "./LoginView";
 import OtpView from "./OtpView";
@@ -15,42 +15,15 @@ const AuthContainer: React.FC<AuthContainerProps> = ({
   onAuthSuccess,
   onClose,
 }) => {
+  const [view, setView] = useState<"login" | "signup">(type);
   const [phase, setPhase] = useState<"form" | "otp" | "forgotPassword">("form");
   const [pendingEmail, setPendingEmail] = useState<string>("");
-  const [currentSlide, setCurrentSlide] = useState(0);
 
-  const carouselItems = [
-    {
-      title: "Your bridge to a brighter future",
-      description:
-        "Connecting you to top-tier academic and professional opportunities worldwide.",
-    },
-    {
-      title: "Access world-class career tools",
-      description:
-        "Build a professional resume, prepare for exams, and find your next big opportunity.",
-    },
-    {
-      title: "Skills for the Modern Workforce",
-      description:
-        "Bridging the gap between graduation and employment with direct employer connections.",
-    },
-  ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % carouselItems.length);
-    }, 5000);
-    return () => clearInterval(timer);
-  }, []);
-
-  // Called by SignupView after successful registration API call
   const handleSignupSuccess = (email: string) => {
     setPendingEmail(email);
     setPhase("otp");
   };
 
-  // Called by OtpView after successful OTP verification (JWT is returned and stored)
   const handleOtpVerified = () => {
     onAuthSuccess();
   };
@@ -61,20 +34,22 @@ const AuthContainer: React.FC<AuthContainerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex bg-white font-sans overflow-hidden">
-      {/* LEFT PANEL: CONTENT */}
-      <section className="flex-1 flex flex-col items-center justify-center p-6 md:p-12 overflow-y-auto relative no-scrollbar">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4 sm:p-8 font-sans antialiased">
+      <div className="bg-white w-full max-w-[450px] relative rounded-2xl shadow-2xl overflow-hidden">
+        {/* Close Button */}
         {onClose && (
           <button
             onClick={onClose}
-            className="absolute top-8 left-8 text-slate-400 hover:text-slate-900 transition flex items-center gap-2 text-sm font-semibold group"
+            className="absolute top-4 right-4 z-50 p-2 text-gray-500 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors focus:outline-none"
+            aria-label="Close"
           >
-            <i className="fa-solid fa-arrow-left transition-transform group-hover:-translate-x-1"></i>{" "}
-            Back to Site
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
           </button>
         )}
 
-        <div className="w-full max-w-[480px]">
+        <div className="p-6 sm:p-8 lg:p-10 overflow-y-auto no-scrollbar" style={{ maxHeight: '95vh' }}>
           {phase === "forgotPassword" ? (
             <ForgotPasswordView
               onBack={() => setPhase("form")}
@@ -83,73 +58,27 @@ const AuthContainer: React.FC<AuthContainerProps> = ({
                 setPhase("otp");
               }}
             />
-          ) : type === "login" ? (
-            <LoginView
-              onSwitch={() => window.location.href = "/signup"}
-              onSuccess={onAuthSuccess}
-              onForgotPassword={() => setPhase("forgotPassword")}
-            />
-          ) : phase === "form" ? (
-            <SignupView
-              onSwitch={() => window.location.href = "/login"}
-              onSignupSuccess={handleSignupSuccess}
-            />
-          ) : (
+          ) : phase === "otp" ? (
             <OtpView
               identifier={pendingEmail}
               type="email"
               onVerified={handleOtpVerified}
               onBack={handleOtpBack}
             />
+          ) : view === "login" ? (
+            <LoginView
+              onSwitch={() => setView("signup")}
+              onSuccess={onAuthSuccess}
+              onForgotPassword={() => setPhase("forgotPassword")}
+            />
+          ) : (
+            <SignupView
+              onSwitch={() => setView("login")}
+              onSignupSuccess={handleSignupSuccess}
+            />
           )}
         </div>
-      </section>
-
-      {/* RIGHT PANEL: ILLUSTRATION */}
-      <section className="hidden lg:flex flex-1 bg-primary-600 flex-col justify-center items-center p-12 relative overflow-hidden text-white">
-        <div className="absolute top-[-50px] right-[-50px] w-[300px] h-[300px] rounded-full bg-white/10 blur-[80px]"></div>
-        <div className="absolute bottom-[10%] left-[5%] w-[150px] h-[150px] rounded-2xl bg-white/10 rotate-45 blur-[40px]"></div>
-
-        <div className="relative z-10 text-center max-w-[450px]">
-          <div className="mb-12">
-            <svg
-              className="w-full max-w-[400px] h-auto drop-shadow-2xl mx-auto"
-              viewBox="0 0 400 300"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <circle cx="200" cy="150" r="130" fill="white" opacity="0.1" />
-              <rect x="50" y="80" width="30" height="30" rx="4" fill="#F59E0B" opacity="0.5" className="animate-float" />
-              <circle cx="350" cy="200" r="20" fill="#F59E0B" opacity="0.5" className="animate-float" style={{ animationDelay: "1s" }} />
-              <path d="M140,280 C140,220 260,220 260,280 L260,300 L140,300 Z" fill="#1E40AF" />
-              <rect x="185" y="190" width="30" height="40" fill="#FDBA74" />
-              <circle cx="200" cy="160" r="45" fill="#FDBA74" />
-              <path d="M150,150 C150,100 250,100 250,150 C250,180 240,160 200,160 C160,160 150,180 150,150 Z" fill="#1E293B" />
-              <rect x="220" y="230" width="60" height="40" rx="4" fill="white" transform="rotate(-10 220 230)" />
-              <rect x="225" y="235" width="50" height="30" rx="2" fill="#E2E8F0" transform="rotate(-10 220 230)" />
-              <circle cx="215" cy="240" r="12" fill="#FDBA74" />
-              <path d="M280,100 L290,90 L310,110 L280,100 Z" fill="#F59E0B" className="animate-float" />
-            </svg>
-          </div>
-
-          <div className="h-[200px] flex flex-col justify-center transition-all duration-500">
-            <h2 className="text-3xl font-bold mb-6 leading-tight animate-fadeIn">
-              {carouselItems[currentSlide].title}
-            </h2>
-            <p className="text-lg opacity-90 leading-relaxed mb-8 h-[60px] animate-fadeIn">
-              {carouselItems[currentSlide].description}
-            </p>
-          </div>
-
-          <div className="flex gap-2 justify-center">
-            {carouselItems.map((_, idx) => (
-              <span
-                key={idx}
-                className={`transition-all duration-300 rounded-full h-2 ${idx === currentSlide ? "w-8 bg-white" : "w-2 bg-white/40"}`}
-              ></span>
-            ))}
-          </div>
-        </div>
-      </section>
+      </div>
     </div>
   );
 };
