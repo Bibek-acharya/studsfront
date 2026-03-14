@@ -362,21 +362,21 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 color="text-blue-500"
                 title="High School (+2)"
                 desc="Explore top high schools for Science, Management, and Humanities."
-                onClick={() => onNavigate("admissionsDiscovery")}
+                onClick={() => onNavigate("admissionsDiscovery", { level: "high-school" })}
               />
               <DropdownCard
                 icon="fa-user-graduate"
                 color="text-purple-600"
                 title="Bachelor Degrees"
                 desc="Find undergraduate programs including B.Tech, B.Sc, BBA, and more."
-                onClick={() => onNavigate("admissionsDiscovery")}
+                onClick={() => onNavigate("admissionsDiscovery", { level: "bachelor" })}
               />
               <DropdownCard
                 icon="fa-book-open"
                 color="text-pink-600"
                 title="Master Degrees"
                 desc="Advance your career with postgraduate degrees like MBA and M.Tech."
-                onClick={() => onNavigate("admissionsDiscovery")}
+                onClick={() => onNavigate("admissionsDiscovery", { level: "master" })}
               />
             </DesktopDropdown>
 
@@ -421,7 +421,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 color="text-purple-600"
                 title="Contact Us"
                 desc="Reach out to our support team for any assistance."
-                onClick={() => onNavigate("educationPage")}
+                onClick={() => onNavigate("contact")}
               />
             </DesktopDropdown>
           </nav>
@@ -462,8 +462,12 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           <MobileSection title="Quick Explore">
             <MobileItem label="Find College" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "findCollege")} icon="fa-building-columns" />
             <MobileItem label="Campus Feed" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "campusForum")} icon="fa-comments" />
+            <MobileItem label="Blogs" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "blogPage")} icon="fa-pen" />
             <MobileItem label="Scholarships" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "scholarshipMain")} icon="fa-hand-holding-dollar" />
             <MobileItem label="Write Review" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "writeReview")} icon="fa-pen-to-square" />
+            <MobileItem label="High School (+2)" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "admissionsDiscovery", { level: "high-school" })} icon="fa-school" />
+            <MobileItem label="Bachelors" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "admissionsDiscovery", { level: "bachelor" })} icon="fa-user-graduate" />
+            <MobileItem label="Masters" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "admissionsDiscovery", { level: "master" })} icon="fa-book-open" />
           </MobileSection>
 
           <MobileSection title="Tools">
@@ -502,8 +506,9 @@ const routeAndClose = (
   onNavigate: (view: any, data?: any) => void,
   setIsMobileOpen: React.Dispatch<React.SetStateAction<boolean>>,
   route: string,
+  data?: any,
 ) => {
-  onNavigate(route);
+  onNavigate(route, data);
   setIsMobileOpen(false);
 };
 

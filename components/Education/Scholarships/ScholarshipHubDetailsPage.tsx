@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { apiService } from "../../../services/api";
+import ScholarshipApplicationPage from "./ScholarshipApplicationPage";
 
 interface ScholarshipHubDetailsPageProps {
   onNavigate: (view: any, data?: any) => void;
@@ -173,6 +174,7 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
   >("overview");
   const [openFaq, setOpenFaq] = useState<number | null>(null);
   const [isSaved, setIsSaved] = useState(false);
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -475,13 +477,7 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
                   </ol>
                   <div className="mt-8">
                     <button
-                      onClick={() =>
-                        onNavigate("scholarshipInquiry", {
-                          id: scholarshipData.id,
-                          scholarshipName: scholarshipData.title,
-                          scholarshipType: scholarshipData.funding_type || scholarshipData.scholarship_type,
-                        })
-                      }
+                      onClick={() => setIsApplicationModalOpen(true)}
                       className="inline-flex items-center justify-center w-full px-5 py-3 text-base font-medium text-white transition-colors duration-150 bg-blue-600 border border-transparent rounded-lg hover:bg-blue-700"
                     >
                       Open Application Form
@@ -558,13 +554,7 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
               </div>
 
               <button
-                onClick={() =>
-                  onNavigate("scholarshipInquiry", {
-                    id: scholarshipData.id,
-                    scholarshipName: scholarshipData.title,
-                    scholarshipType: scholarshipData.funding_type || scholarshipData.scholarship_type,
-                  })
-                }
+                onClick={() => setIsApplicationModalOpen(true)}
                 className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center font-semibold py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
               >
                 Apply Now
@@ -600,6 +590,15 @@ const ScholarshipHubDetailsPage: React.FC<ScholarshipHubDetailsPageProps> = ({
           </div>
         </div>
       </main>
+
+      {isApplicationModalOpen && (
+        <ScholarshipApplicationPage
+          onClose={() => setIsApplicationModalOpen(false)}
+          scholarshipId={String(scholarshipData.id)}
+          scholarshipName={scholarshipData.title}
+          onNavigate={onNavigate}
+        />
+      )}
     </div>
   );
 };

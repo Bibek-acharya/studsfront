@@ -1,6 +1,8 @@
 import React, { useMemo, useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiService } from "../../../services/api";
+import ScholarshipListCard from "./ScholarshipListCard";
+import ScholarshipApplicationPage from "./ScholarshipApplicationPage";
 
 interface Scholarship {
   id: number;
@@ -134,6 +136,12 @@ interface ScholarshipMainPageProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
+type ApplicationSelection = {
+  id: string;
+  scholarshipName: string;
+  scholarshipType: string;
+};
+
 const scholarshipLogoPalette = [
   "bg-blue-600",
   "bg-pink-600",
@@ -265,6 +273,8 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
   const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
   const [selectedScholarship, setSelectedScholarship] =
     useState<Scholarship | null>(null);
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
+  const [applicationSelection, setApplicationSelection] = useState<ApplicationSelection | null>(null);
   const [likedScholarships, setLikedScholarships] = useState<number[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -371,6 +381,11 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
     setLikedScholarships((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
+  };
+
+  const openApplicationModal = (selection: ApplicationSelection) => {
+    setApplicationSelection(selection);
+    setIsApplicationModalOpen(true);
   };
 
   const scrollTestimonials = (direction: "left" | "right") => {
@@ -594,117 +609,33 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {scholarships.map((item) => (
-            <div
+          {scholarships.slice(0, 6).map((item) => (
+            <ScholarshipListCard
               key={item.id}
-              className="bg-white rounded-2xl overflow-hidden hover:shadow-2xl transition-all duration-500 flex flex-col h-full group border border-slate-100 hover:border-blue-500/20"
-            >
-              <div className="relative h-56 overflow-hidden">
-                <img
-                  src={item.image}
-                  alt={item.title}
-                  className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-1000"
-                />
-                <div className="absolute top-5 left-5">
-                  <span className="inline-block bg-white/95 backdrop-blur-md text-slate-800 text-[10px] font-black px-4 py-2 rounded-full uppercase tracking-[0.1em] shadow-lg">
-                    {item.type}
-                  </span>
-                </div>
-              </div>
-
-              <div className="p-7 flex flex-col flex-grow">
-                <div className="flex justify-between items-start mb-5">
-                  <div className="flex gap-4">
-                    <div
-                      className={`w-12 h-12 rounded-2xl ${item.logoColor} text-white flex items-center justify-center text-sm font-black shadow-lg`}
-                    >
-                      {item.initials}
-                    </div>
-                    <div>
-                      <h4 className="font-black text-base text-slate-900 flex items-center gap-2 leading-tight uppercase tracking-tight">
-                        {item.provider}
-                        <i className="fa-solid fa-circle-check text-primary-500 text-xs"></i>
-                      </h4>
-                      <p className="text-[10px] text-slate-400 mt-1 font-black uppercase tracking-[0.2em] flex items-center gap-2">
-                        <i className="fa-solid fa-location-dot"></i>{" "}
-                        {item.location}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0">
-                    <span
-                      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${item.status === "OPEN" ? "bg-emerald-50 text-emerald-600" : "bg-orange-50 text-orange-600"}`}
-                    >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full ${item.status === "OPEN" ? "bg-emerald-500" : "bg-orange-500"}`}
-                      />
-                      {item.status}
-                    </span>
-                  </div>
-                </div>
-
-                <h3 className="text-xl font-bold text-slate-900 mb-5 leading-tight uppercase tracking-tight">
-                  {item.title}
-                </h3>
-
-                <div className="flex flex-wrap gap-2 mb-8">
-                  <span className="px-3 py-1.5 bg-blue-50 text-blue-600 text-[10px] font-black rounded-lg uppercase tracking-widest border border-blue-100/50">
-                    {item.category}
-                  </span>
-                  <span className="px-3 py-1.5 bg-slate-50 text-slate-500 text-[10px] font-black rounded-lg uppercase tracking-widest border border-slate-100">
-                    {item.eligibility}
-                  </span>
-                </div>
-
-                <div className="flex justify-between items-end mt-auto mb-8 pt-6 border-t border-slate-50">
-                  <div>
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1.5">
-                      Award Amount
-                    </p>
-                    <p className="text-2xl font-black text-blue-600 tracking-tighter">
-                      {item.amount}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1.5">
-                      Deadline
-                    </p>
-                    <p className="text-sm font-black text-slate-900 uppercase tracking-tight">
-                      {item.deadline}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => openDetails(item)}
-                    className="flex-1 py-4 rounded-xl bg-slate-50 text-[11px] font-black text-slate-700 hover:bg-slate-100 transition-all uppercase tracking-widest"
-                  >
-                    Details
-                  </button>
-                  <button
-                    onClick={() =>
-                      onNavigate("scholarshipInquiry", {
-                        id: item.id.toString(),
-                        scholarshipName: item.title,
-                        scholarshipType: item.type,
-                      })
-                    }
-                    className="flex-2 py-4 px-6 rounded-xl bg-slate-900 text-[11px] font-black text-white hover:bg-slate-800 transition-all shadow-xl shadow-slate-900/10 uppercase tracking-widest"
-                  >
-                    Apply Now
-                  </button>
-                  <button
-                    onClick={() => toggleLike(item.id)}
-                    className={`p-4.5 rounded-2xl transition-all ${likedScholarships.includes(item.id) ? "bg-red-50 text-red-500 shadow-inner" : "bg-slate-50 text-slate-400 hover:bg-red-50 hover:text-red-500"}`}
-                  >
-                    <i
-                      className={`fa-solid fa-star text-lg ${likedScholarships.includes(item.id) ? "text-red-500" : ""}`}
-                    ></i>
-                  </button>
-                </div>
-              </div>
-            </div>
+              item={{
+                id: item.id,
+                title: item.title,
+                provider: item.provider,
+                type: item.type,
+                status: item.status,
+                amount: item.amount,
+                location: item.location,
+                eligibility: item.eligibility,
+                deadline: item.deadline,
+                image: item.image,
+                verified: true,
+              }}
+              isBookmarked={likedScholarships.includes(item.id)}
+              onToggleBookmark={toggleLike}
+              onDetails={() => openDetails(item)}
+              onApply={(id, title, type) =>
+                openApplicationModal({
+                  id: id.toString(),
+                  scholarshipName: title,
+                  scholarshipType: type,
+                })
+              }
+            />
           ))}
         </div>
       </main>
@@ -1057,7 +988,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
               <div className="flex gap-5">
                 <button
                   onClick={() =>
-                    onNavigate("scholarshipInquiry", {
+                    openApplicationModal({
                       id: selectedScholarship.id.toString(),
                       scholarshipName: selectedScholarship.title,
                       scholarshipType: selectedScholarship.type,
@@ -1078,6 +1009,15 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {isApplicationModalOpen && applicationSelection && (
+        <ScholarshipApplicationPage
+          onClose={() => setIsApplicationModalOpen(false)}
+          scholarshipId={applicationSelection.id}
+          scholarshipName={applicationSelection.scholarshipName}
+          onNavigate={onNavigate}
+        />
       )}
 
       {/* Newsletter (Already implemented in Footer but I can add a specific one or just rely on footer) */}

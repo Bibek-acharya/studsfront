@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { apiService } from "../../../services/api";
@@ -7,1035 +7,1008 @@ interface CollegeDetailsPageProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
-const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = ({ onNavigate }) => {
+type TabKey =
+  | "about"
+  | "courses"
+  | "admissions"
+  | "offered"
+  | "facilities"
+  | "events"
+  | "scholarship"
+  | "alumni"
+  | "gallery"
+  | "review"
+  | "news"
+  | "download";
+
+type LevelFilter = "all" | "+2" | "Bachelor" | "Master";
+
+const fallbackCollege = {
+  name: "GoldenGate International College",
+  location: "Kamalpokhari, Kathmandu",
+  rating: 4.5,
+  reviewsCount: "1,024",
+  website: "www.goldengate.edu.np",
+  logo: "https://goldengateintl.com/wp-content/uploads/2023/05/Untitled-design-1.png",
+  banner:
+    "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop",
+  description:
+    "The B.Sc. in Data Science & Artificial Intelligence is designed to bridge the gap between theoretical mathematics and practical engineering. Students will dive deep into machine learning algorithms, big data analytics, and neural networks.",
+  secondDescription:
+    "This program is suitable for analytical thinkers who want to shape the future of automation. By the end of this course, you will be proficient in Python, R, TensorFlow, and cloud computing platforms.",
+};
+
+const courses = [
+  {
+    level: "+2" as LevelFilter,
+    name: "+2 Science (Biology)",
+    specialization: "Bio",
+    duration: "2 Year",
+    type: "Full Time",
+    fees: "Rs. 75,000",
+    eligibility: "SEE with GPA 3.0",
+    seats: "240 Seats",
+  },
+  {
+    level: "+2" as LevelFilter,
+    name: "+2 Management",
+    specialization: "Finance",
+    duration: "2 Year",
+    type: "Full Time",
+    fees: "Rs. 65,000",
+    eligibility: "SEE with GPA 2.5",
+    seats: "200 Seats",
+  },
+  {
+    level: "Bachelor" as LevelFilter,
+    name: "B.Sc. Computer Science",
+    specialization: "AI, Data Science",
+    duration: "4 Year",
+    type: "Full Time",
+    fees: "Rs. 1,50,000",
+    eligibility: "10+2 with 60% (Science)",
+    seats: "120 Seats",
+  },
+  {
+    level: "Bachelor" as LevelFilter,
+    name: "BBA Finance",
+    specialization: "Corporate Finance",
+    duration: "4 Year",
+    type: "Full Time",
+    fees: "Rs. 1,20,000",
+    eligibility: "10+2 with 50% (Any)",
+    seats: "80 Seats",
+  },
+  {
+    level: "Master" as LevelFilter,
+    name: "MBA",
+    specialization: "General",
+    duration: "2 Year",
+    type: "Full Time",
+    fees: "Rs. 2,50,000",
+    eligibility: "Bachelor with 55%",
+    seats: "60 Seats",
+  },
+  {
+    level: "Master" as LevelFilter,
+    name: "M.Sc. Data Science",
+    specialization: "AI",
+    duration: "2 Year",
+    type: "Full Time",
+    fees: "Rs. 2,20,000",
+    eligibility: "B.Sc. CSIT/BCA 60%",
+    seats: "40 Seats",
+  },
+];
+
+const admissions = [
+  {
+    level: "+2" as LevelFilter,
+    status: "Ongoing",
+    title: "+2 Science (Biology)",
+    affiliation: "NEB",
+    openDate: "1st June, 2025",
+    deadline: "30th July, 2025",
+    image:
+      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop",
+  },
+  {
+    level: "Bachelor" as LevelFilter,
+    status: "Ongoing",
+    title: "Bachelor In Information Technology",
+    affiliation: "Tribhuvan University",
+    openDate: "20th Dec, 2025",
+    deadline: "20th Jan, 2026",
+    image:
+      "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop",
+  },
+  {
+    level: "Master" as LevelFilter,
+    status: "Closed",
+    title: "Master in Business Administration",
+    affiliation: "Tribhuvan University",
+    openDate: "--",
+    deadline: "Passed",
+    image:
+      "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?q=80&w=2070&auto=format&fit=crop",
+  },
+];
+
+const offeredPrograms = [
+  { level: "+2" as LevelFilter, name: "Science (Biology)", affiliation: "NEB", status: "Ongoing" },
+  { level: "+2" as LevelFilter, name: "Management", affiliation: "NEB", status: "Closed" },
+  {
+    level: "Bachelor" as LevelFilter,
+    name: "B.Sc. CSIT",
+    affiliation: "Tribhuvan University",
+    status: "Ongoing",
+  },
+  {
+    level: "Bachelor" as LevelFilter,
+    name: "BBA Finance",
+    affiliation: "Purwanchal University",
+    status: "Closed",
+  },
+  { level: "Master" as LevelFilter, name: "MBA", affiliation: "Tribhuvan University", status: "Ongoing" },
+  {
+    level: "Master" as LevelFilter,
+    name: "M.Sc. Data Science",
+    affiliation: "Kathmandu University",
+    status: "Closed",
+  },
+];
+
+const scholarships = [
+  {
+    level: "+2" as LevelFilter,
+    program: "+2 Science",
+    scholarship: "Merit Scholarship",
+    benefit: "Up to 100% waiver",
+    audience: "Top 5% in SEE",
+  },
+  {
+    level: "+2" as LevelFilter,
+    program: "+2 Management",
+    scholarship: "Need-Based Grant",
+    benefit: "Variable",
+    audience: "Low income families",
+  },
+  {
+    level: "Bachelor" as LevelFilter,
+    program: "B.Sc. CSIT",
+    scholarship: "Merit Scholarship",
+    benefit: "Up to 100% waiver",
+    audience: "60%+ in +2",
+  },
+  {
+    level: "Bachelor" as LevelFilter,
+    program: "BBA Finance",
+    scholarship: "Need-Based Grant",
+    benefit: "Variable",
+    audience: "Economically weak",
+  },
+  {
+    level: "Master" as LevelFilter,
+    program: "MBA",
+    scholarship: "Merit Scholarship",
+    benefit: "50% waiver",
+    audience: "70% in Bachelor",
+  },
+  {
+    level: "Master" as LevelFilter,
+    program: "M.Sc. Data Science",
+    scholarship: "Research Assistantship",
+    benefit: "Stipend + tuition",
+    audience: "Strong academic record",
+  },
+];
+
+const facilities = [
+  { icon: "fa-book-open", title: "Central Library", desc: "50,000+ books, digital resources, 24/7 reading hall." },
+  { icon: "fa-flask", title: "Science Labs", desc: "Physics, Chemistry, CS labs with modern equipment." },
+  {
+    icon: "fa-dumbbell",
+    title: "Sports Complex",
+    desc: "Indoor basketball, badminton, gymnasium and football field.",
+  },
+  { icon: "fa-wifi", title: "High-Speed WiFi", desc: "Campus-wide gigabit connectivity and smart classrooms." },
+  { icon: "fa-bus", title: "Transportation", desc: "Fleet of buses covering all major city routes." },
+  { icon: "fa-utensils", title: "Cafeteria", desc: "Multi-cuisine, hygienic, and student-friendly prices." },
+];
+
+const events = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1523580494863-6f3031224c94?q=80&w=800&auto=format&fit=crop",
+    title: "Technika 2025",
+    date: "15-17 May 2025 | Main Auditorium",
+    desc: "Annual tech symposium with hackathons, workshops, and robotics.",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?q=80&w=800&auto=format&fit=crop",
+    title: "Unity Day Celebration",
+    date: "10 June 2025 | Open Air Theatre",
+    desc: "Cultural performances, food stalls, and charity drive.",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1557804506-669a67965ba0?q=80&w=800&auto=format&fit=crop",
+    title: "Inter-college Basketball",
+    date: "22-25 June 2025 | Sports Complex",
+    desc: "Teams from 10+ colleges competing for the championship.",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1527529482837-4698179dc6ce?q=80&w=800&auto=format&fit=crop",
+    title: "Guest Lecture: AI Ethics",
+    date: "5 July 2025 | Seminar Hall",
+    desc: "By Dr. Anil Gupta, lead researcher at Google AI.",
+  },
+];
+
+const alumni = [
+  {
+    image:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=100&auto=format&fit=crop",
+    name: "Bikash Sharma",
+    role: "Software Engineer at Google",
+    batch: "B.Sc. CSIT, 2018",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=100&auto=format&fit=crop",
+    name: "Anjali Thapa",
+    role: "Investment Banker at J.P. Morgan",
+    batch: "BBA, 2017",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=100&auto=format&fit=crop",
+    name: "Ramesh KC",
+    role: "Data Scientist at Amazon",
+    batch: "B.Sc. CSIT, 2019",
+  },
+  {
+    image:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=100&auto=format&fit=crop",
+    name: "Sushma Shrestha",
+    role: "HR Manager at Ncell",
+    batch: "MBA, 2016",
+  },
+];
+
+const galleryImages = [
+  "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1571260899304-425dea4cf861?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1509062522246-3755977927d7?q=80&w=800&auto=format&fit=crop",
+  "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?q=80&w=800&auto=format&fit=crop",
+];
+
+const newsCards = [
+  {
+    badge: "Exam",
+    badgeClass: "bg-orange-50 text-orange-500",
+    image:
+      "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?q=80&w=800&auto=format&fit=crop",
+    title: "JEE Main 2025: Registration Extended",
+    desc: "NTA extends JEE Main 2025 deadline due to high volume of applications.",
+    time: "90 Days ago",
+  },
+  {
+    badge: "Admission",
+    badgeClass: "bg-blue-50 text-blue-500",
+    image:
+      "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop",
+    title: "MBA Admission Open 2025",
+    desc: "Apply for MBA at GoldenGate, last date 30th June.",
+    time: "30 Days ago",
+  },
+  {
+    badge: "Scholarship",
+    badgeClass: "bg-green-50 text-green-600",
+    image:
+      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
+    title: "Merit Scholarship 2025",
+    desc: "Applications open for merit-based scholarships for +2 & Bachelor.",
+    time: "15 Days ago",
+  },
+];
+
+const downloads = [
+  { title: "Prospectus 2025", size: "PDF, 8.2 MB", color: "bg-blue-50 text-blue-600", btn: "bg-blue-600 hover:bg-blue-700" },
+  {
+    title: "Application Form",
+    size: "PDF, 2.1 MB",
+    color: "bg-green-50 text-green-600",
+    btn: "bg-green-600 hover:bg-green-700",
+  },
+  {
+    title: "Scholarship Guidelines",
+    size: "PDF, 1.5 MB",
+    color: "bg-purple-50 text-purple-600",
+    btn: "bg-purple-600 hover:bg-purple-700",
+  },
+  {
+    title: "Course Catalogue 2025",
+    size: "PDF, 12.0 MB",
+    color: "bg-amber-50 text-amber-600",
+    btn: "bg-amber-600 hover:bg-amber-700",
+  },
+];
+
+const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = () => {
   const location = useLocation();
   const routeState = (location.state || {}) as { id?: number | string };
   const parsedCollegeId = Number(routeState.id);
-  const collegeId = Number.isFinite(parsedCollegeId) && parsedCollegeId > 0
-    ? parsedCollegeId
-    : null;
-  const hasInvalidCollegeId = routeState.id !== undefined && collegeId === null;
+  const collegeId = Number.isFinite(parsedCollegeId) && parsedCollegeId > 0 ? parsedCollegeId : null;
 
-  const [activeTab, setActiveTab] = useState("about");
-  const { data, isLoading, error } = useQuery({
+  const [activeTab, setActiveTab] = useState<TabKey>("about");
+  const [courseFilter, setCourseFilter] = useState<LevelFilter>("all");
+  const [admissionFilter, setAdmissionFilter] = useState<LevelFilter>("all");
+  const [programFilter, setProgramFilter] = useState<LevelFilter>("all");
+  const [scholarshipFilter, setScholarshipFilter] = useState<LevelFilter>("all");
+
+  const { data } = useQuery({
     queryKey: ["college", collegeId],
     queryFn: () => apiService.getCollegeById(collegeId as number),
     enabled: collegeId !== null,
   });
 
-  const college = data?.data || null;
+  const college = data?.data;
 
-  const collegeData = {
-    name: "Goldenagete International College",
-    fullName: "Studsphere Education",
-    location: "KamalPokari,Kathmandu",
-    rating: "4.5",
-    reviewsCount: "1,024",
-    website: "WWW.Studsphere.Com",
-    established: "2005",
-    type: "Private Engineering College",
-    students: "15k+",
-  };
+  const name = college?.name || fallbackCollege.name;
+  const locationText = college?.location || fallbackCollege.location;
+  const rating = college?.rating ?? fallbackCollege.rating;
+  const reviewsCount =
+    college?.reviews !== undefined ? Number(college.reviews || 0).toLocaleString() : fallbackCollege.reviewsCount;
+  const website = college?.website || fallbackCollege.website;
+  const websiteHref = website.startsWith("http://") || website.startsWith("https://") ? website : `https://${website}`;
+  const banner = college?.image_url || fallbackCollege.banner;
+  const description = college?.description || fallbackCollege.description;
 
-  const courses = [
-    {
-      name: "B.Tech computer Science",
-      specialization: "AI, Data Science",
-      duration: "4 Year",
-      type: "Full Time",
-      fees: "Rs. 4,50,000",
-      seats: "120 Seats",
-      eligibility: "10 +2 with 75% (PCM)",
-    },
-    {
-      name: "B.Tech computer Science",
-      specialization: "AI, Data Science",
-      duration: "4 Year",
-      type: "Full Time",
-      fees: "Rs. 4,50,000",
-      seats: "120 Seats",
-      eligibility: "10 +2 with 75% (PCM)",
-    },
-    {
-      name: "B.Tech computer Science",
-      specialization: "AI, Data Science",
-      duration: "4 Year",
-      type: "Full Time",
-      fees: "Rs. 4,50,000",
-      seats: "120 Seats",
-      eligibility: "10 +2 with 75% (PCM)",
-    },
-    {
-      name: "B.Tech computer Science",
-      specialization: "AI, Data Science",
-      duration: "4 Year",
-      type: "Full Time",
-      fees: "Rs. 4,50,000",
-      seats: "120 Seats",
-      eligibility: "10 +2 with 75% (PCM)",
-    },
-  ];
-
-  const admissions = [
-    {
-      id: 1,
-      name: "Bachelor In Information Technology",
-      university: "Tribhuvan University",
-      faculty: "Faculty of Education",
-      status: "Ongoing",
-      openDate: "20th, Dec, 2025",
-      deadline: "20th, Dec, 2025",
-      image:
-        "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    },
-    {
-      id: 2,
-      name: "Bachelor In Information Technology",
-      university: "Tribhuvan University",
-      faculty: "Faculty of Education",
-      status: "Closed",
-      openDate: "20th, Dec, 2025",
-      deadline: "20th, Dec, 2025",
-      image:
-        "https://images.unsplash.com/photo-1454165833767-027eeef1596e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    },
-    {
-      id: 3,
-      name: "Bachelor In Information Technology",
-      university: "Tribhuvan University",
-      faculty: "Faculty of Education",
-      status: "Ongoing",
-      openDate: "20th, Dec, 2025",
-      deadline: "20th, Dec, 2025",
-      image:
-        "https://images.unsplash.com/photo-1523240715627-5d0b5114233c?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    },
-    {
-      id: 4,
-      name: "Bachelor In Information Technology",
-      university: "Tribhuvan University",
-      faculty: "Faculty of Education",
-      status: "Closed",
-      openDate: "20th, Dec, 2025",
-      deadline: "20th, Dec, 2025",
-      image:
-        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-    },
-  ];
-
-  const offeredPrograms = [
-    {
-      id: "undergrad",
-      title: "Undergraduate",
-      icon: "fa-graduation-cap",
-      count: "3 Programs",
-      programs: [
-        {
-          name: "BE Computer Engineering",
-          level: "Bachelor",
-          status: "Ongoing",
-        },
-        {
-          name: "BE Computer Engineering",
-          level: "Bachelor",
-          status: "Closed",
-        },
-        {
-          name: "BE Computer Engineering",
-          level: "Bachelor",
-          status: "Ongoing",
-        },
-        {
-          name: "BE Computer Engineering",
-          level: "Bachelor",
-          status: "Ongoing",
-        },
-      ],
-    },
-    {
-      id: "postgrad",
-      title: "Postgraduate",
-      icon: "fa-building-columns",
-      count: "3 Programs",
-      programs: [
-        {
-          name: "BE Computer Engineering",
-          level: "Bachelor",
-          status: "Ongoing",
-        },
-        {
-          name: "BE Computer Engineering",
-          level: "Bachelor",
-          status: "Closed",
-        },
-        {
-          name: "BE Computer Engineering",
-          level: "Bachelor",
-          status: "Ongoing",
-        },
-        {
-          name: "BE Computer Engineering",
-          level: "Bachelor",
-          status: "Ongoing",
-        },
-      ],
-    },
-  ];
-
-  const alumni = [
-    {
-      name: "Sita Sharma",
-      role: "Product Manger @ Google",
-      batch: "Batch of 2015",
-      image:
-        "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-    },
-    {
-      name: "Sita Sharma",
-      role: "Product Manger @ Google",
-      batch: "Batch of 2015",
-      image:
-        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-    },
-    {
-      name: "Sita Sharma",
-      role: "Product Manger @ Google",
-      batch: "Batch of 2015",
-      image:
-        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-    },
-    {
-      name: "Sita Sharma",
-      role: "Product Manger @ Google",
-      batch: "Batch of 2015",
-      image:
-        "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?ixlib=rb-1.2.1&auto=format&fit=crop&w=200&q=80",
-    },
-  ];
-
-  const scholarships = [
-    {
-      title: "Merti Scholarship",
-      icon: "fa-medal",
-      color: "amber",
-      desc: "Up to 100% Wavier For Top Rankers",
-    },
-    {
-      title: "Need Based",
-      icon: "fa-hand-holding-heart",
-      color: "emerald",
-      desc: "Up to 100% Wavier For Top Rankers",
-    },
-    {
-      title: "Sport Quota",
-      icon: "fa-person-running",
-      color: "rose",
-      desc: "Up to 100% Wavier For Top Rankers",
-    },
-  ];
-
-  const reviews = [
-    {
-      name: "Sushil Adhikari",
-      initials: "SA",
-      role: "BBA Student",
-      time: "2 months ago",
-      rating: 5,
-      comment:
-        "The faculty here is extremely supportive. The blend of practical workshops and theory really helped me land my internship at a top bank. Highly recommend for Management students!",
-      avatarColor: "bg-indigo-100 text-indigo-600",
-    },
-    {
-      name: "Priya Rana",
-      initials: "PR",
-      role: "CSIT Alumni",
-      time: "5 months ago",
-      rating: 4,
-      comment:
-        "Great computer labs and internet facilities. The curriculum is updated regularly. Canteen food could be better, but overall a fantastic learning environment.",
-      avatarColor: "bg-pink-100 text-pink-600",
-    },
-    {
-      name: "Anish Tamang",
-      initials: "AT",
-      role: "BIM Student",
-      time: "1 year ago",
-      rating: 5,
-      comment:
-        "The extracurricular activities and clubs are the best part. I joined the Robotics club and we won the national competition. It really balances study and fun.",
-      avatarColor: "bg-emerald-100 text-emerald-600",
-    },
-  ];
-
-  const galleryImages = [
-    {
-      url: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-      caption: "Graduation Day 2023",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-      caption: "Modern Classrooms",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1599689018596-3d237199276e?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-      caption: "E-Library Facility",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-      caption: "IT Lab Session",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-      caption: "Annual Sports Meet",
-    },
-    {
-      url: "https://images.unsplash.com/photo-1523580494863-6f3031224c94?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60",
-      caption: "Guest Lecture Series",
-    },
-  ];
-
-  const collegeDataResolved = {
-    name: college?.name || collegeData.name,
-    fullName: college?.full_name || collegeData.fullName,
-    location: college?.location || collegeData.location,
-    rating: String(college?.rating ?? collegeData.rating),
-    reviewsCount:
-      college?.reviews !== undefined
-        ? Number(college.reviews || 0).toLocaleString()
-        : collegeData.reviewsCount,
-    website: college?.website || collegeData.website,
-    established: college?.established || collegeData.established,
-    type: college?.type || collegeData.type,
-    students: college?.students || collegeData.students,
-  };
-
-  const aboutDataResolved = {
-    vision:
-      college?.about?.vision ||
-      "To become a leading institution that shapes globally competent graduates.",
-    mission:
-      college?.about?.mission ||
-      "Deliver quality, practical, and inclusive education for lifelong success.",
-    campusLife:
-      college?.about?.campus_life ||
-      "A vibrant campus with clubs, mentorship, and student-led innovation.",
-    principalName: college?.about?.principal_name || "Principal Office",
-    principalTitle:
-      college?.about?.principal_title || "Academic Leadership Team",
-    principalMessage:
-      college?.about?.principal_message ||
-      "We are committed to helping each learner grow academically and personally.",
-  };
-
-  const coursesData =
-    Array.isArray(college?.courses) && college.courses.length > 0
-      ? college.courses.map((course: any) => ({
-        name: course.name || "N/A",
-        specialization: course.specialization || course.focus || "General",
-        duration: course.duration || "N/A",
-        type: course.type || "Full Time",
-        fees: course.fees || "N/A",
-        seats: course.seats || "Seats N/A",
-        eligibility: course.eligibility || "Eligibility details available on request",
-      }))
-      : courses;
-
-  const admissionsData =
-    Array.isArray(college?.admission_cards) && college.admission_cards.length > 0
-      ? college.admission_cards
-      : admissions;
-
-  const offeredProgramsData =
-    Array.isArray(college?.offered_programs) && college.offered_programs.length > 0
-      ? college.offered_programs
-      : offeredPrograms;
-
-  const alumniData =
-    Array.isArray(college?.alumni) && college.alumni.length > 0
-      ? college.alumni
-      : alumni;
-
-  const scholarshipsData =
-    Array.isArray(college?.scholarships) && college.scholarships.length > 0
-      ? college.scholarships.map((scholarship: any) => ({
-        title: scholarship.title || "Scholarship",
-        icon: scholarship.icon || "fa-medal",
-        color:
-          scholarship.color === "yellow"
-            ? "amber"
-            : scholarship.color === "green"
-              ? "emerald"
-              : scholarship.color === "blue"
-                ? "emerald"
-                : scholarship.color || "amber",
-        desc: scholarship.desc || scholarship.description || "Apply for scholarship support",
-      }))
-      : scholarships;
-
-  const reviewsData =
-    Array.isArray(college?.college_reviews) && college.college_reviews.length > 0
-      ? college.college_reviews
-      : reviews;
-
-  const galleryImagesData =
-    Array.isArray(college?.gallery) && college.gallery.length > 0
-      ? college.gallery
-      : galleryImages;
-
-  const bannerImage = college?.image_url || galleryImagesData[0]?.url || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80";
-  const normalizedWebsite = String(collegeDataResolved.website || "").trim();
-  const websiteHref = normalizedWebsite.startsWith("http://") || normalizedWebsite.startsWith("https://")
-    ? normalizedWebsite
-    : `https://${normalizedWebsite}`;
-  const contactEmail = college?.email || "N/A";
-  const contactPhone = college?.phone || "N/A";
-  const contactWebsiteDisplay = normalizedWebsite ? normalizedWebsite.toUpperCase() : "N/A";
+  const filteredCourses = useMemo(
+    () => courses.filter((item) => courseFilter === "all" || item.level === courseFilter),
+    [courseFilter],
+  );
+  const filteredAdmissions = useMemo(
+    () => admissions.filter((item) => admissionFilter === "all" || item.level === admissionFilter),
+    [admissionFilter],
+  );
+  const filteredPrograms = useMemo(
+    () => offeredPrograms.filter((item) => programFilter === "all" || item.level === programFilter),
+    [programFilter],
+  );
+  const filteredScholarships = useMemo(
+    () => scholarships.filter((item) => scholarshipFilter === "all" || item.level === scholarshipFilter),
+    [scholarshipFilter],
+  );
 
   return (
-    <div className="bg-white min-h-screen font-sans">
-      {isLoading && (
-        <div className="w-full px-6 lg:px-12 py-4 bg-blue-50 border-b border-blue-100 text-blue-700 text-xs font-black uppercase tracking-widest">
-          Loading college details...
+    <div className="w-full bg-white font-[Plus_Jakarta_Sans,sans-serif]">
+      <div
+        className="relative h-[220px] w-full bg-cover bg-center md:h-[360px]"
+        style={{ backgroundImage: `url('${banner}')` }}
+      >
+        <div className="absolute bottom-4 right-4 z-20 md:bottom-6 md:right-6">
+          <button className="flex items-center gap-2 rounded-full bg-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg transition-all duration-300 hover:bg-blue-700 md:px-6 md:py-3 md:text-base">
+            <i className="fa-regular fa-comments"></i>
+            <span>Open Counselling</span>
+          </button>
         </div>
-      )}
-      {hasInvalidCollegeId && (
-        <div className="w-full px-6 lg:px-12 py-4 bg-amber-50 border-b border-amber-100 text-amber-700 text-xs font-black uppercase tracking-widest">
-          Invalid college id in navigation state
-        </div>
-      )}
-      {error && (
-        <div className="w-full px-6 lg:px-12 py-4 bg-rose-50 border-b border-rose-100 text-rose-700 text-xs font-black uppercase tracking-widest">
-          {(error as Error).message}
-        </div>
-      )}
-
-      {/* Hero Banner */}
-      <div className="relative h-96 w-full overflow-hidden">
-        <img
-          src={bannerImage}
-          className="w-full h-full object-cover"
-          alt="Banner"
-        />
-        <div className="absolute inset-0 bg-black/10"></div>
       </div>
 
-      {/* College Profile Header */}
-      <div className="w-full bg-white border-b border-slate-100">
-        <div className="px-6 lg:px-12 py-8">
-          <div className="flex flex-col lg:flex-row items-center lg:items-center justify-between gap-8">
-            <div className="flex flex-col lg:flex-row items-center lg:items-start gap-8">
-              {/* Logo */}
-              <div className="shrink-0">
-                <div className="w-32 h-32 bg-white border border-slate-50 rounded-lg shadow-lg flex flex-col items-center justify-center p-4">
-                  <div className="w-12 h-12 bg-blue-600 rounded-md flex items-center justify-center mb-1">
-                    <i className="fa-solid fa-layer-group text-white text-xl"></i>
-                  </div>
-                  <div className="text-center leading-tight">
-                    <p className="text-[10px] font-bold text-blue-600">
-                      Studsphere
-                    </p>
-                    <p className="text-[10px] font-bold text-blue-600">
-                      Education
-                    </p>
-                  </div>
-                </div>
+      <div className="relative bg-white">
+        <div className="relative px-6 pb-8 md:px-12 lg:px-24 xl:px-32">
+          <div className="absolute -top-2 left-6 z-10 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-white p-2 shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1)] md:-top-4 md:left-12 md:h-[150px] md:w-[150px] lg:left-24 xl:left-32">
+            <img src={fallbackCollege.logo} alt="College Logo" className="h-full w-full object-contain" />
+          </div>
+
+          <div className="flex flex-col items-start justify-between pt-6 lg:flex-row lg:items-end lg:pl-[170px]">
+            <div className="w-full space-y-3 lg:w-auto">
+              <div className="flex items-center gap-2">
+                <h1 className="text-[24px] font-bold tracking-tight text-gray-900 md:text-3xl">{name}</h1>
+                <i className="fa-solid fa-circle-check text-blue-500"></i>
               </div>
-
-              {/* Main Info */}
-              <div className="text-center lg:text-left pt-2 space-y-2">
-                <div className="flex items-center justify-center lg:justify-start gap-2 h-8">
-                  <h1 className="text-2xl md:text-2xl font-bold text-slate-900 tracking-tight">
-                    {collegeDataResolved.name}
-                  </h1>
-                  <i className="fa-solid fa-circle-check text-blue-500 text-lg"></i>
+              <div className="flex items-center gap-1.5 text-[14px] font-medium text-gray-600 md:text-[15px]">
+                <i className="fa-solid fa-location-dot text-gray-500"></i>
+                <span>{locationText}</span>
+              </div>
+              <div className="flex items-center gap-5 pt-1 text-[14px] font-medium">
+                <div className="flex items-center gap-1.5">
+                  <i className="fa-solid fa-star text-yellow-400"></i>
+                  <span className="font-bold text-gray-900">{rating}</span>
+                  <span className="text-gray-500">({reviewsCount} Reviews)</span>
                 </div>
-
-                <div className="flex items-center justify-center lg:justify-start gap-2 text-slate-500">
-                  <i className="fa-solid fa-location-dot"></i>
-                  <span className="text-sm font-medium">
-                    {collegeDataResolved.location}
-                  </span>
-                </div>
-
-                <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4">
-                  <div className="flex items-center gap-1.5">
-                    <i className="fa-solid fa-star text-blue-600"></i>
-                    <span className="text-sm font-bold text-slate-700">
-                      {collegeDataResolved.rating}
-                    </span>
-                    <span className="text-sm text-slate-500">
-                      ({collegeDataResolved.reviewsCount} Reviews)
-                    </span>
-                  </div>
-                  <span className="text-slate-200">|</span>
-                  <a
-                    href={websiteHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="text-blue-600 hover:text-blue-800 transition-colors flex items-center gap-1.5"
-                  >
-                    <span className="text-sm font-semibold">
-                      {contactWebsiteDisplay}
-                    </span>
-                    <i className="fa-solid fa-up-right-from-square text-[10px]"></i>
-                  </a>
-                </div>
+                <a
+                  href={websiteHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center gap-1 text-[13px] font-bold uppercase tracking-wide text-blue-600 transition-colors hover:text-blue-700"
+                >
+                  {website}
+                  <i className="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+                </a>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-4">
-              <button className="px-8 py-3 bg-blue-600 text-white rounded-lg font-bold text-sm hover:bg-blue-700 transition-all shadow-lg active:scale-95 flex items-center gap-3">
-                <i className="fa-regular fa-heart"></i>
-                Apply Now
+            <div className="mt-8 flex w-full flex-wrap items-center gap-3 lg:mt-0 lg:w-auto">
+              <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-[15px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                <i className="fa-solid fa-download"></i>Brochure
               </button>
-              <button className="px-8 py-3 bg-white border-2 border-slate-100 rounded-lg font-bold text-sm text-slate-500 hover:text-blue-600 hover:border-blue-100 transition-all shadow-sm active:scale-95 flex items-center gap-3">
-                <i className="fa-solid fa-download"></i>
-                Brochure
+              <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-[15px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+                <i className="fa-regular fa-circle-question"></i>Ask Question
               </button>
-              <button className="w-12 h-12 bg-white border-2 border-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:text-blue-600 hover:border-blue-100 transition-all active:scale-95">
+              <button className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-3 text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
                 <i className="fa-solid fa-share-nodes"></i>
               </button>
             </div>
           </div>
-
-          {/* Inline Tabs Navigation - Separated from info part but inside the white container */}
-          <div className="mt-8 pt-8 border-t border-slate-50 overflow-x-auto no-scrollbar">
-            <div className="flex items-center gap-12 min-w-max pb-2">
-              {[
-                "About",
-                "Courses & Fees",
-                "Admissions",
-                "Offered Program",
-                "Scholarship",
-                "Alumni",
-                "Gallery",
-                "Review",
-              ].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() =>
-                    setActiveTab(tab.toLowerCase().replace(/ /g, "_"))
-                  }
-                  className={`text-[12px] font-black uppercase tracking-[0.2em] relative transition-all whitespace-nowrap ${activeTab === tab.toLowerCase().replace(/ /g, "_")
-                      ? "text-blue-600"
-                      : "text-slate-400 hover:text-slate-600"
-                    }`}
-                >
-                  {tab}
-                  {activeTab === tab.toLowerCase().replace(/ /g, "_") && (
-                    <div className="absolute -bottom-2 left-0 w-full h-1 bg-blue-600 rounded-full"></div>
-                  )}
-                </button>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* Main Content Sections */}
-      <main className="w-full py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 px-6 lg:px-12">
-          {/* Left Column - Content */}
-          <div className="lg:col-span-8 space-y-16">
-            {/* TAB: ABOUT */}
-            {activeTab === "about" && (
-              <div className="space-y-12 animate-fadeIn">
-                <div className="aspect-video w-full rounded-xl overflow-hidden shadow-2xl">
-                  <img
-                    src={bannerImage}
-                    className="w-full h-full object-cover"
-                    alt="Campus"
-                  />
-                </div>
-                <div className="space-y-8">
-                  <p className="text-lg text-slate-600 font-medium leading-relaxed">
-                    <span className="font-black text-slate-900">
-                      {collegeDataResolved.name}
-                    </span>{" "}
-                    {college?.description ||
-                      "is committed to delivering quality education with strong academic foundations and real-world learning opportunities."}
-                  </p>
-                  <p className="text-lg text-slate-600 font-medium leading-relaxed">
-                    {aboutDataResolved.campusLife}
-                  </p>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <VisionMissionCard
-                    type="Vision"
-                    icon="fa-eye"
-                    desc={aboutDataResolved.vision}
-                    color="blue"
-                    image="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
-                  />
-                  <VisionMissionCard
-                    type="Mission"
-                    icon="fa-bullseye"
-                    desc={aboutDataResolved.mission}
-                    color="emerald"
-                    image="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=60"
-                  />
-                </div>
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-8">
-                  <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">
-                    Message from {aboutDataResolved.principalName}
-                  </p>
-                  <p className="text-sm font-bold text-slate-700 leading-relaxed mb-3">
-                    {aboutDataResolved.principalMessage}
-                  </p>
-                  <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest">
-                    {aboutDataResolved.principalTitle}
-                  </p>
-                </div>
-              </div>
-            )}
+      <div className="sticky top-0 z-40 overflow-x-auto border-b border-t border-gray-100 bg-white px-6 shadow-sm shadow-gray-100/50 md:px-12 lg:px-24 xl:px-32">
+        <nav className="flex space-x-8 whitespace-nowrap">
+          {[
+            ["about", "About"],
+            ["courses", "Courses & Fees"],
+            ["admissions", "Admissions"],
+            ["offered", "Offered Program"],
+            ["facilities", "Facilities"],
+            ["events", "Events & Activities"],
+            ["scholarship", "Scholarship"],
+            ["alumni", "Alumni"],
+            ["gallery", "Gallery"],
+            ["review", "Review"],
+            ["news", "News & Notice"],
+            ["download", "Downloads"],
+          ].map(([key, label]) => {
+            const selected = activeTab === key;
+            return (
+              <button
+                key={key}
+                onClick={() => setActiveTab(key as TabKey)}
+                className={`border-b-2 py-4 text-[15px] ${selected ? "border-blue-600 font-bold text-gray-900" : "border-transparent font-semibold text-gray-500 hover:text-gray-900"}`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
 
-            {/* TAB: COURSES & FEES */}
-            {activeTab === "courses_&_fees" && (
-              <div className="space-y-8 animate-fadeIn">
-                <div className="bg-blue-50 text-blue-600 p-6 rounded-lg border border-blue-100 font-bold text-sm">
-                  Fees listed below are in NPR per year. additional Charges
+      <div className="grid grid-cols-1 gap-10 bg-[#f8fafc] px-6 py-8 md:gap-14 md:px-12 md:py-12 lg:grid-cols-3 lg:px-24 xl:px-32">
+        <div className="lg:col-span-2">
+          {activeTab === "about" && (
+            <div className="space-y-10">
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 md:gap-8">
+                <MediaHeroCard
+                  image="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop"
+                  title="College Message"
+                  subtitle="Listen to our Chairman's welcome"
+                  icon="fa-regular fa-message"
+                />
+                <MediaHeroCard
+                  image="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop"
+                  title="Campus Tour"
+                  subtitle="Explore our beautiful campus"
+                  icon="fa-solid fa-video"
+                />
+              </div>
+
+              <div className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px]">
+                <p>{description}</p>
+                <p>{fallbackCollege.secondDescription}</p>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                <InfoBlock
+                  title="Our Vision"
+                  desc="To become a center of excellence by imparting quality education, focusing on research, innovation, and holistic development."
+                  icon="fa-solid fa-eye"
+                  color="blue"
+                />
+                <InfoBlock
+                  title="Our Mission"
+                  desc="Equipping students with the knowledge and skills necessary to excel in a dynamic global environment while upholding strong ethical values."
+                  icon="fa-solid fa-bullseye"
+                  color="green"
+                />
+              </div>
+
+              <div className="space-y-6 rounded-[24px] border border-gray-100 bg-white p-8 shadow-sm">
+                <h2 className="text-[22px] font-bold text-gray-900">University Overview</h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full rounded-xl border border-gray-200 text-left text-sm">
+                    <tbody className="divide-y divide-gray-200 text-gray-600">
+                      <OverviewRow label="Established" value="1959" />
+                      <OverviewRow label="Location" value="Kirtipur, 5 km from Kathmandu’s city center" />
+                      <OverviewRow label="Campus Size" value="154.77 hectares (3,042-5-2 ropanis)" />
+                      <OverviewRow label="Type" value="Non-profit, autonomous, funded by Government of Nepal" />
+                      <OverviewRow label="Status" value="Declared Central University on January 8, 2013" />
+                      <OverviewRow
+                        label="Global Ranking"
+                        value="One of the world’s largest universities by size and program diversity"
+                      />
+                    </tbody>
+                  </table>
                 </div>
-                <div className="overflow-hidden bg-white rounded-xl shadow-sm border border-slate-100 overflow-x-auto">
-                  <table className="w-full text-left">
-                    <thead className="bg-slate-50 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+
+                <h2 className="pt-4 text-[22px] font-bold text-gray-900">Leadership & Administration</h2>
+                <div className="overflow-x-auto">
+                  <table className="w-full rounded-xl border border-gray-200 text-left text-sm">
+                    <thead className="bg-gray-50 text-[13px] font-bold uppercase text-gray-700">
                       <tr>
-                        <th className="px-8 py-6">Courses Name</th>
-                        <th className="px-8 py-6">Duration</th>
-                        <th className="px-8 py-6">Fee / Year</th>
-                        <th className="px-8 py-6">Eligibility & Seat</th>
+                        <th className="px-4 py-3">Position</th>
+                        <th className="px-4 py-3">Role</th>
+                        <th className="px-4 py-3">Current Holder</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-50">
-                      {coursesData.map((course, i) => (
-                        <tr
-                          key={i}
-                          className="hover:bg-slate-50 transition-colors"
-                        >
-                          <td className="px-8 py-8">
-                            <h4 className="text-lg font-black text-slate-900 mb-1">
-                              {course.name}
-                            </h4>
-                            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                              Specialization: {course.specialization}
-                            </p>
-                          </td>
-                          <td className="px-8 py-8">
-                            <div className="flex flex-col">
-                              <span className="text-lg font-black text-slate-900">
-                                {course.duration}
-                              </span>
-                              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                {course.type}
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-8 py-8">
-                            <div className="flex flex-col">
-                              <span className="text-lg font-black text-primary-600">
-                                {course.fees}
-                              </span>
-                              <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">
-                                / Year
-                              </span>
-                            </div>
-                          </td>
-                          <td className="px-8 py-8">
-                            <div className="flex flex-col gap-2">
-                              <span className="text-xs font-bold text-slate-500">
-                                {course.eligibility}
-                              </span>
-                              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest w-fit">
-                                {course.seats}
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
+                    <tbody className="divide-y divide-gray-200 text-gray-600">
+                      <AdminRow
+                        position="Chancellor"
+                        role="Ceremonial head (Prime Minister)"
+                        holder="Sushila Karki, Rt. Hon'ble Prime Minister"
+                      />
+                      <AdminRow position="Pro-Chancellor" role="Minister of Education" holder="Mahabir Pun" />
+                      <AdminRow
+                        position="Vice Chancellor"
+                        role="Chief Executive, oversees operations"
+                        holder="Prof. Deepak Aryal, PhD"
+                      />
+                      <AdminRow position="Rector" role="Manages academic programs" holder="Prof. Khadga K.C, PhD" />
+                      <AdminRow
+                        position="Registrar"
+                        role="Handles financial and administrative affairs"
+                        holder="Prof. Kedar Prasad Rijal, PhD"
+                      />
                     </tbody>
                   </table>
                 </div>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* TAB: ADMISSIONS */}
-            {activeTab === "admissions" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fadeIn">
-                {admissionsData.map((adm) => (
-                  <div
-                    key={adm.id}
-                    className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden group hover:shadow-2xl transition-all duration-500"
-                  >
-                    <div className="relative h-56 overflow-hidden">
-                      <img
-                        src={adm.image}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-                        alt=""
-                      />
-                      <div
-                        className={`absolute top-6 left-6 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest flex items-center gap-2 ${adm.status === "Ongoing" ? "bg-green-500 text-white" : "bg-rose-500 text-white"}`}
-                      >
-                        <div className="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-                        {adm.status}
-                      </div>
-                    </div>
-                    <div className="p-8">
-                      <h3 className="text-xl font-black text-slate-900 mb-6 leading-tight">
-                        {adm.name}
-                      </h3>
-                      <div className="flex items-center gap-4 mb-8">
-                        <div className="w-10 h-10 rounded-md bg-slate-50 flex items-center justify-center text-primary-600">
-                          <i className="fa-solid fa-building-columns"></i>
-                        </div>
-                        <div>
-                          <p className="text-sm font-black text-slate-900 uppercase tracking-tight">
-                            {adm.university}
-                          </p>
-                          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                            {adm.faculty}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-2 gap-4 p-4 bg-slate-50 rounded-lg mb-8">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2 text-[10px] font-black text-primary-600 uppercase tracking-widest">
-                            <i className="fa-solid fa-circle-play"></i>
-                            Admission open
-                          </div>
-                          <p className="text-[11px] font-black text-slate-800">
-                            {adm.openDate}
-                          </p>
-                        </div>
-                        <div className="space-y-1 border-l border-slate-200 pl-4">
-                          <div className="flex items-center gap-2 text-[10px] font-black text-rose-500 uppercase tracking-widest">
-                            <i className="fa-solid fa-circle-stop"></i>
-                            DEADLINE
-                          </div>
-                          <p className="text-[11px] font-black text-slate-800">
-                            {adm.deadline}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex gap-4">
-                        <button className="flex-1 py-4 bg-white border-2 border-slate-100 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-primary-600 hover:border-primary-100 transition-all">
-                          Details
-                        </button>
-                        <button
-                          className={`flex-1 py-4 rounded-lg text-[10px] font-black uppercase tracking-widest text-white transition-all ${adm.status === "Ongoing" ? "bg-primary-600 hover:bg-primary-700" : "bg-slate-400 cursor-not-allowed"}`}
-                        >
-                          Apply Now
-                        </button>
-                        <button className="w-14 h-14 bg-white border-2 border-slate-100 rounded-lg flex items-center justify-center text-slate-400 hover:text-rose-500 hover:border-rose-100 transition-all">
-                          <i className="fa-regular fa-heart"></i>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
+          {activeTab === "courses" && (
+            <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
+                <p className="text-[14px] font-semibold text-blue-600">Fees in NPR/year – filter by level</p>
+                <FilterPills active={courseFilter} onChange={setCourseFilter} />
               </div>
-            )}
-
-            {/* TAB: OFFERED PROGRAM */}
-            {activeTab === "offered_program" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fadeIn">
-                {offeredProgramsData.map((cat) => (
-                  <div
-                    key={cat.id}
-                    className="bg-white rounded-lg border border-slate-100 shadow-sm p-10 hover:shadow-2xl hover:border-primary-100 transition-all duration-500 group"
-                  >
-                    <div className="w-16 h-16 rounded-md bg-gradient-to-br from-primary-600 to-primary-700 flex items-center justify-center text-white text-3xl mb-10 shadow-xl shadow-primary-500/20 group-hover:scale-110 transition-transform">
-                      <i className={`fa-solid ${cat.icon}`}></i>
-                    </div>
-                    <div className="flex items-center justify-between mb-8">
-                      <h3 className="text-2xl font-black text-slate-900 group-hover:text-primary-600 transition-colors uppercase tracking-tight">
-                        {cat.title}
-                      </h3>
-                    </div>
-                    <div className="flex items-center justify-between mb-8 pb-4 border-b border-slate-50">
-                      <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">
-                        Admission Status
-                      </span>
-                      <span className="text-[11px] font-black text-primary-600 uppercase tracking-widest">
-                        {cat.count}
-                      </span>
-                    </div>
-                    <div className="space-y-4">
-                      {cat.programs.map((p, i) => (
-                        <div
-                          key={i}
-                          className="flex items-center justify-between group/item"
-                        >
-                          <div>
-                            <p className="text-sm font-black text-slate-800 leading-tight">
-                              {p.name}
-                            </p>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
-                              {p.level}
-                            </p>
-                          </div>
-                          <span
-                            className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest ${p.status === "Ongoing" ? "bg-green-50 text-green-600" : "bg-rose-50 text-rose-600"}`}
-                          >
-                            {p.status}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-[700px]">
+                  <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
+                    <ProgTh className="col-span-4">COURSES NAME</ProgTh>
+                    <ProgTh className="col-span-2">DURATION</ProgTh>
+                    <ProgTh className="col-span-3">FEES / YEAR</ProgTh>
+                    <ProgTh className="col-span-3">ELIGIBILITY & SEAT</ProgTh>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* TAB: SCHOLARSHIP */}
-            {activeTab === "scholarship" && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-fadeIn">
-                {scholarshipsData.map((s, i) => (
-                  <div
-                    key={i}
-                    className="bg-white rounded-lg border border-slate-100 p-12 text-center shadow-sm hover:shadow-2xl transition-all duration-500 group"
-                  >
-                    <div
-                      className={`w-24 h-24 rounded-full mx-auto mb-10 flex items-center justify-center text-4xl shadow-inner ${s.color === "amber" ? "bg-amber-50 text-amber-500" : s.color === "emerald" ? "bg-emerald-50 text-emerald-500" : "bg-rose-50 text-rose-500"} group-hover:scale-110 transition-transform`}
-                    >
-                      <i className={`fa-solid ${s.icon}`}></i>
-                    </div>
-                    <h3 className="text-2xl font-black text-slate-900 mb-4 uppercase tracking-tight">
-                      {s.title}
-                    </h3>
-                    <p className="text-sm font-bold text-slate-500 uppercase tracking-widest mb-10">
-                      {s.desc}
-                    </p>
-                    <button className="px-10 py-4 bg-primary-100 text-primary-600 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary-600 hover:text-white transition-all shadow-sm">
-                      Apply Now
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* TAB: ALUMNI */}
-            {activeTab === "alumni" && (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 animate-fadeIn">
-                {alumniData.map((person, i) => (
-                  <div
-                    key={i}
-                    className="bg-white rounded-lg border border-slate-100 p-10 text-center shadow-sm hover:shadow-2xl transition-all duration-500 group"
-                  >
-                    <div className="w-24 h-24 rounded-full overflow-hidden mx-auto mb-6 border-4 border-slate-50 shadow-lg">
-                      <img
-                        src={person.image}
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform"
-                        alt=""
-                      />
-                    </div>
-                    <h4 className="text-xl font-black text-slate-900 mb-1">
-                      {person.name}
-                    </h4>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">
-                      {person.role}
-                    </p>
-                    <p className="text-[10px] font-bold text-slate-300 uppercase tracking-widest mb-8">
-                      {person.batch}
-                    </p>
-                    <button className="flex items-center justify-center gap-3 w-full py-4 bg-primary-50 text-primary-600 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] hover:bg-primary-600 hover:text-white transition-all">
-                      Connect
-                      <i className="fa-brands fa-linkedin-in text-lg"></i>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* TAB: GALLERY */}
-            {activeTab === "gallery" && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-fadeIn">
-                {galleryImagesData.map((img, i) => (
-                  <div
-                    key={i}
-                    className="group relative aspect-square rounded-lg overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-700 cursor-zoom-in"
-                  >
-                    <img
-                      src={img.url}
-                      className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-                      alt=""
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-8">
-                      <p className="font-black text-sm uppercase tracking-widest text-white">
-                        {img.caption}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* TAB: REVIEWS */}
-            {activeTab === "review" && (
-              <div className="space-y-16 animate-fadeIn">
-                <div className="bg-white rounded-lg p-10 md:p-16 border border-slate-100 shadow-sm flex flex-col md:flex-row items-center gap-16">
-                  <div className="text-center shrink-0">
-                    <div className="text-7xl font-black text-slate-900 tracking-tighter mb-2">
-                      4.8
-                    </div>
-                    <div className="flex gap-1 justify-center text-amber-400 text-xl mb-4">
-                      {[...Array(5)].map((_, i) => (
-                        <i key={i} className="fa-solid fa-star"></i>
-                      ))}
-                    </div>
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">
-                      Based on {collegeDataResolved.reviewsCount} reviews
-                    </p>
-                  </div>
-                  <div className="flex-1 space-y-4 w-full">
-                    {[
-                      { l: "5 Star", w: "85%" },
-                      { l: "4 Star", w: "10%" },
-                      { l: "3 Star", w: "3%" },
-                      { l: "2 Star", w: "1%" },
-                      { l: "1 Star", w: "1%" },
-                    ].map((bar, i) => (
-                      <div key={i} className="flex items-center gap-6">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest w-12">
-                          {bar.l}
-                        </span>
-                        <div className="flex-1 h-3 bg-slate-50 rounded-full border border-slate-100 overflow-hidden">
-                          <div
-                            className="h-full bg-amber-400 rounded-full"
-                            style={{ width: bar.w }}
-                          ></div>
-                        </div>
-                        <span className="text-[10px] font-black text-slate-900 w-10 text-right">
-                          {bar.w}
-                        </span>
+                  {filteredCourses.map((course) => (
+                    <div key={course.name} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
+                      <div className="col-span-4">
+                        <h4 className="text-[15.5px] font-bold text-gray-900">{course.name}</h4>
+                        <p className="text-[12px] text-gray-500">{course.specialization}</p>
                       </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-10 w-full">
-                  {reviewsData.map((r, i) => (
-                    <div
-                      key={i}
-                      className="bg-white p-10 rounded-lg border border-slate-100 shadow-sm hover:shadow-xl transition-all duration-500 group"
-                    >
-                      <div className="flex items-center justify-between mb-8">
-                        <div className="flex items-center gap-6">
-                          <div
-                            className={`w-14 h-14 rounded-lg flex items-center justify-center font-black text-xl shadow-inner ${r.avatarColor}`}
-                          >
-                            {r.initials}
-                          </div>
-                          <div>
-                            <h4 className="font-black text-slate-900 leading-tight group-hover:text-primary-600 transition-colors uppercase tracking-tight">
-                              {r.name}
-                            </h4>
-                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                              {r.role} • {r.time}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex gap-0.5 text-amber-400 text-sm">
-                          {[...Array(5)].map((_, idx) => (
-                            <i
-                              key={idx}
-                              className={`fa-solid fa-star ${idx < r.rating ? "text-amber-400" : "text-slate-100"}`}
-                            ></i>
-                          ))}
-                        </div>
+                      <div className="col-span-2">
+                        <h4 className="text-[15.5px] font-bold text-gray-900">{course.duration}</h4>
+                        <p className="text-[12px] text-gray-500">{course.type}</p>
                       </div>
-                      <p className="text-slate-500 font-medium leading-relaxed italic text-lg">
-                        "{r.comment}"
-                      </p>
+                      <div className="col-span-3">
+                        <h4 className="text-[15.5px] font-bold text-[#2563eb]">{course.fees}</h4>
+                        <p className="text-[12px] text-gray-500">/ Year</p>
+                      </div>
+                      <div className="col-span-3">
+                        <p className="mb-2 text-[12.5px] font-medium text-gray-600">{course.eligibility}</p>
+                        <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">{course.seats}</span>
+                      </div>
                     </div>
                   ))}
                 </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
-          {/* Right Column - Sticky Sidebar */}
-          <div className="lg:col-span-4 space-y-8">
-            <div className="sticky top-28 space-y-8 animate-fadeIn">
-              {/* Apply Today Card */}
-              <div className="bg-white p-10 rounded-lg shadow-2xl border border-slate-100 text-center relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 h-32 bg-primary-50 rounded-full blur-3xl -mr-16 -mt-16"></div>
-                <div className="relative z-10">
-                  <span className="bg-green-50 text-green-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mb-10 inline-block border border-green-100">
-                    Admission open
-                  </span>
-                  <h3 className="text-3xl font-black text-slate-900 mb-4 tracking-tight">
-                    Apply Today
-                  </h3>
-                  <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-12">
-                    Secure your future with admission
-                  </p>
-
-                  <div className="space-y-4">
-                    <button className="w-full py-5 bg-primary-600 text-white rounded-md font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-primary-500/20 hover:bg-primary-700 transition-all active:scale-95">
-                      Apply Now
-                    </button>
-                    <button className="w-full py-5 bg-white border-2 border-slate-100 text-primary-600 rounded-md font-black text-[10px] uppercase tracking-[0.2em] hover:bg-primary-50 hover:border-primary-100 transition-all active:scale-95">
-                      Request call Back
-                    </button>
-                  </div>
-                </div>
+          {activeTab === "admissions" && (
+            <div className="rounded-[20px] border border-gray-100 bg-white p-5 shadow-sm">
+              <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
+                <p className="text-[14px] font-semibold text-blue-600">Admission notices – filter by level</p>
+                <FilterPills active={admissionFilter} onChange={setAdmissionFilter} />
               </div>
-
-              {/* Contact & Support Card */}
-              <div className="bg-white p-10 rounded-lg shadow-sm border border-slate-100">
-                <div className="flex items-center gap-4 mb-10">
-                  <div className="w-10 h-10 rounded-lg bg-primary-50 flex items-center justify-center text-primary-600 text-lg">
-                    <i className="fa-solid fa-headset"></i>
+              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                {filteredAdmissions.map((admission) => (
+                  <div key={admission.title} className="flex flex-col rounded-2xl border border-gray-100 bg-white shadow-sm hover:shadow-md">
+                    <div className="relative h-[180px] w-full overflow-hidden rounded-t-2xl">
+                      <img src={admission.image} className="h-full w-full object-cover" alt={admission.title} />
+                    </div>
+                    <div className="p-5">
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold ${admission.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}
+                      >
+                        <span className={`h-1.5 w-1.5 rounded-full ${admission.status === "Ongoing" ? "bg-[#10b981]" : "bg-[#ef4444]"}`}></span>
+                        {admission.status}
+                      </span>
+                      <h3 className="mt-2 text-[17px] font-bold text-gray-900">{admission.title}</h3>
+                      <div className="mt-1 flex items-center gap-2 text-[12.5px] font-medium text-gray-500">
+                        <i className="fa-solid fa-building-columns"></i>
+                        <span>{admission.affiliation}</span>
+                      </div>
+                      <div className="mt-3 flex justify-between rounded-xl border bg-[#f8fafc] p-4">
+                        <div>
+                          <span className="text-[11px] font-bold text-gray-500">Admission open</span>
+                          <p className="text-[13px] font-bold text-gray-900">{admission.openDate}</p>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-[11px] font-bold text-gray-500">DEADLINE</span>
+                          <p className="text-[13px] font-bold text-gray-900">{admission.deadline}</p>
+                        </div>
+                      </div>
+                      <div className="mt-4 flex gap-3">
+                        <button className="flex-1 rounded-xl border border-gray-200 py-2.5 font-bold text-gray-700 hover:bg-gray-50">Details</button>
+                        <button
+                          className={`flex-[1.5] rounded-xl py-2.5 font-bold text-white ${admission.status === "Ongoing" ? "bg-[#111827] hover:bg-black" : "cursor-not-allowed bg-gray-300 text-gray-500"}`}
+                        >
+                          {admission.status === "Ongoing" ? "Apply Now" : "Closed"}
+                        </button>
+                        <button className="flex h-[42px] w-[42px] items-center justify-center rounded-xl border border-gray-200 hover:bg-gray-50">
+                          <i className="fa-regular fa-heart text-gray-600"></i>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <h3 className="text-xl font-black text-slate-900 tracking-tight">
-                    Contact & Support
-                  </h3>
-                </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-                <div className="space-y-8">
-                  <ContactItem
-                    icon="fa-clock"
-                    label="G-MAIL"
-                    value={contactEmail}
-                    color="blue"
-                  />
-                  <ContactItem
-                    icon="fa-user-graduate"
-                    label="PHONE SUPPORT"
-                    value={contactPhone}
-                    color="emerald"
-                  />
-                  <ContactItem
-                    icon="fa-building"
-                    label="WEBSITE"
-                    value={contactWebsiteDisplay}
-                    color="amber"
-                  />
+          {activeTab === "offered" && (
+            <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
+                <p className="text-[14px] font-semibold text-blue-600">Programs offered – filter by level</p>
+                <FilterPills active={programFilter} onChange={setProgramFilter} />
+              </div>
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-[800px]">
+                  <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
+                    <ProgTh className="col-span-3">PROGRAM NAME</ProgTh>
+                    <ProgTh className="col-span-2">LEVEL</ProgTh>
+                    <ProgTh className="col-span-3">AFFILIATION</ProgTh>
+                    <ProgTh className="col-span-2">STATUS</ProgTh>
+                    <ProgTh className="col-span-2">ACTION</ProgTh>
+                  </div>
+                  {filteredPrograms.map((program) => (
+                    <div key={program.name} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50">
+                      <div className="col-span-3">
+                        <h4 className="text-[15.5px] font-bold text-gray-900">{program.name}</h4>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-[14px] text-gray-600">{program.level}</span>
+                      </div>
+                      <div className="col-span-3">
+                        <span className="text-[13px] text-gray-600">{program.affiliation}</span>
+                      </div>
+                      <div className="col-span-2">
+                        <span
+                          className={`rounded-md px-3 py-1.5 text-[12px] font-bold ${program.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}
+                        >
+                          {program.status}
+                        </span>
+                      </div>
+                      <div className="col-span-2">
+                        <button className="rounded-lg bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 hover:bg-blue-100">View Details</button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </main>
+          )}
 
-      {/* Action Footer */}
-      <div className="bg-slate-900 py-24 text-center relative overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-full bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
-        <div className="relative z-10 w-full px-6">
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-8 tracking-tight uppercase">
-            Your future at <span className="text-primary-400">{collegeDataResolved.name}</span>{" "}
-            starts today!
-          </h2>
-          <p className="text-xl text-slate-400 font-medium mb-12 w-full">
-            Take the first step towards academic excellence. Apply now for the
-            2025 intake and secure your global career.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <button className="bg-primary-600 text-white px-12 py-5 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] shadow-xl shadow-primary-950/30 hover:bg-primary-500 transition-all active:scale-95">
-              Complete Application
-            </button>
-            <button className="bg-white/10 text-white border border-white/20 backdrop-blur-md px-12 py-5 rounded-lg font-black text-[10px] uppercase tracking-[0.2em] hover:bg-white/20 transition-all">
-              Talk to Counselor
-            </button>
+          {activeTab === "facilities" && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-[20px] font-bold text-gray-900">Campus Facilities</h2>
+                <p className="mt-1 text-[14px] text-gray-500">State-of-the-art infrastructure for holistic learning.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                {facilities.map((facility) => (
+                  <div key={facility.title} className="flex items-start gap-4 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                      <i className={`fa-solid ${facility.icon}`}></i>
+                    </div>
+                    <div>
+                      <h4 className="text-[16px] font-bold text-gray-900">{facility.title}</h4>
+                      <p className="text-[13px] text-gray-600">{facility.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "events" && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-[20px] font-bold text-gray-900">Events & Activities</h2>
+                <p className="mt-1 text-[14px] text-gray-500">Happening around the campus – join the vibe.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+                {events.map((event) => (
+                  <div key={event.title} className="overflow-hidden rounded-xl border border-gray-100 bg-white shadow-sm">
+                    <img src={event.image} className="h-40 w-full object-cover" alt={event.title} />
+                    <div className="p-4">
+                      <h4 className="text-[16px] font-bold text-gray-900">{event.title}</h4>
+                      <div className="my-1 flex items-center gap-2 text-[12px] text-gray-500">
+                        <i className="fa-regular fa-calendar"></i>
+                        {event.date}
+                      </div>
+                      <p className="text-[13px] text-gray-600">{event.desc}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "scholarship" && (
+            <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
+              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
+                <p className="text-[14px] font-semibold text-blue-600">Scholarship opportunities – filter by level</p>
+                <FilterPills active={scholarshipFilter} onChange={setScholarshipFilter} />
+              </div>
+              <div className="w-full overflow-x-auto">
+                <div className="min-w-[800px]">
+                  <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
+                    <ProgTh className="col-span-2">PROGRAM</ProgTh>
+                    <ProgTh className="col-span-2">SCHOLARSHIP</ProgTh>
+                    <ProgTh className="col-span-2">BENEFIT</ProgTh>
+                    <ProgTh className="col-span-3">FOR WHOM</ProgTh>
+                    <ProgTh className="col-span-3"></ProgTh>
+                  </div>
+                  {filteredScholarships.map((scholarship) => (
+                    <div
+                      key={`${scholarship.program}-${scholarship.scholarship}`}
+                      className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 hover:bg-gray-50/50"
+                    >
+                      <div className="col-span-2">
+                        <h4 className="text-[14px] font-bold text-gray-900">{scholarship.program}</h4>
+                      </div>
+                      <div className="col-span-2">{scholarship.scholarship}</div>
+                      <div className="col-span-2">
+                        <span className="text-[13px] font-medium text-green-600">{scholarship.benefit}</span>
+                      </div>
+                      <div className="col-span-3">{scholarship.audience}</div>
+                      <div className="col-span-3">
+                        <button className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white hover:bg-blue-700">Get Scholarship</button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activeTab === "alumni" && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-[20px] font-bold text-gray-900">Notable Alumni</h2>
+                <p className="text-[14px] text-gray-500">Connect with our proud graduates working globally.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                {alumni.map((person) => (
+                  <div key={person.name} className="flex items-center gap-4 rounded-2xl border border-gray-100 bg-white p-5 transition hover:-translate-y-1 hover:shadow-md">
+                    <img src={person.image} className="h-16 w-16 rounded-full object-cover" alt={person.name} />
+                    <div className="flex-1">
+                      <h4 className="font-bold text-gray-900">{person.name}</h4>
+                      <p className="text-[12.5px] text-gray-500">{person.role}</p>
+                      <p className="text-[11.5px] text-gray-400">{person.batch}</p>
+                    </div>
+                    <button className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-50 text-blue-600 hover:bg-blue-100">
+                      <i className="fa-brands fa-linkedin-in"></i>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "gallery" && (
+            <div>
+              <div className="mb-6 flex items-center justify-between">
+                <h2 className="text-[20px] font-bold text-gray-900">Campus Gallery</h2>
+                <button className="text-[13.5px] font-bold text-blue-600">View All</button>
+              </div>
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
+                {galleryImages.map((image) => (
+                  <div key={image} className="aspect-[16/10] overflow-hidden rounded-lg">
+                    <img src={image} className="h-full w-full object-cover transition duration-300 hover:scale-105" alt="Gallery" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {activeTab === "review" && (
+            <div>
+              <div className="mb-8 flex flex-col items-center gap-8 rounded-[24px] border border-gray-100 bg-white p-8 shadow-sm md:flex-row">
+                <div className="text-center md:border-r md:pr-8 md:text-left">
+                  <h2 className="mb-2 text-5xl font-extrabold text-gray-900">4.5</h2>
+                  <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <i key={`full-${idx}`} className="fa-solid fa-star text-[14px] text-yellow-400"></i>
+                    ))}
+                    <i className="fa-solid fa-star-half-stroke text-[14px] text-yellow-400"></i>
+                  </div>
+                  <p className="text-[13px] font-medium text-gray-500">Based on {reviewsCount} reviews</p>
+                </div>
+                <div className="w-full flex-1 space-y-2.5">
+                  <RatingBar label="5" width="70%" color="bg-green-500" pct="70%" />
+                  <RatingBar label="4" width="20%" color="bg-green-400" pct="20%" />
+                  <RatingBar label="3" width="7%" color="bg-yellow-400" pct="7%" />
+                  <RatingBar label="2" width="2%" color="bg-orange-400" pct="2%" />
+                  <RatingBar label="1" width="1%" color="bg-red-500" pct="1%" />
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                <h3 className="text-[18px] font-bold text-gray-900">Recent Reviews</h3>
+                <ReviewCard
+                  initials="AS"
+                  name="Amit Sharma"
+                  subtitle="B.Sc. CSIT · Batch 2022"
+                  rating={5}
+                  pros="Excellent faculty with real-world industry experience. The labs are well-equipped with the latest tech."
+                  cons="Canteen food could be better. Parking space is quite limited during peak hours."
+                  tone="blue"
+                />
+                <ReviewCard
+                  initials="SM"
+                  name="Sita Maharjan"
+                  subtitle="BBA · Batch 2021"
+                  rating={4}
+                  pros="Great focus on extracurricular activities and business competitions. Very supportive administration."
+                  cons="The library space is somewhat small for a growing number of students."
+                  tone="purple"
+                />
+              </div>
+            </div>
+          )}
+
+          {activeTab === "news" && (
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+              {newsCards.map((news) => (
+                <div key={news.title} className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition hover:shadow-md">
+                  <div className="flex-1 p-5">
+                    <div className="mb-4">
+                      <span className={`inline-block rounded-full px-3.5 py-1 text-[12px] font-bold ${news.badgeClass}`}>{news.badge}</span>
+                    </div>
+                    <div className="mb-4 h-[140px] w-full overflow-hidden rounded-xl">
+                      <img src={news.image} className="h-full w-full object-cover transition hover:scale-105" alt={news.title} />
+                    </div>
+                    <h3 className="mb-2 text-[17px] font-bold text-gray-900">{news.title}</h3>
+                    <p className="line-clamp-2 text-[13.5px] text-gray-500">{news.desc}</p>
+                  </div>
+                  <div className="flex items-center justify-between border-t border-gray-50 bg-white px-5 py-4">
+                    <div className="flex items-center gap-1.5 text-gray-400">
+                      <i className="fa-regular fa-clock"></i>
+                      <span className="text-[12.5px] font-medium">{news.time}</span>
+                    </div>
+                    <button className="flex items-center text-[13px] font-bold text-blue-600 hover:text-blue-700">
+                      View Details
+                      <i className="fa-solid fa-chevron-right ml-1 text-[11px]"></i>
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {activeTab === "download" && (
+            <div>
+              <div className="mb-6">
+                <h2 className="text-[20px] font-bold text-gray-900">Downloads</h2>
+                <p className="mt-1 text-[14px] text-gray-500">Access brochures, forms, and study materials.</p>
+              </div>
+              <div className="grid grid-cols-1 gap-4">
+                {downloads.map((download) => (
+                  <div key={download.title} className="flex items-center justify-between rounded-xl border border-gray-100 bg-white p-5 shadow-sm transition hover:shadow">
+                    <div className="flex items-center gap-4">
+                      <div className={`flex h-12 w-12 items-center justify-center rounded-xl ${download.color}`}>
+                        <i className="fa-regular fa-file-lines text-xl"></i>
+                      </div>
+                      <div>
+                        <h4 className="font-bold text-gray-900">{download.title}</h4>
+                        <p className="text-[12.5px] text-gray-500">{download.size}</p>
+                      </div>
+                    </div>
+                    <button className={`flex items-center gap-2 rounded-lg px-5 py-2.5 text-sm font-bold text-white shadow-sm ${download.btn}`}>
+                      <i className="fa-solid fa-download"></i>Download
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="space-y-6 lg:col-span-1">
+          <div className="rounded-[24px] border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-5 text-[18px] font-bold text-gray-900">Contact Information</h3>
+            <ul className="space-y-4">
+              <ContactInfoRow
+                icon="fa-solid fa-location-dot"
+                title="Address"
+                value={locationText}
+                badge="bg-blue-50 text-blue-600"
+              />
+              <ContactInfoRow
+                icon="fa-solid fa-phone"
+                title="Phone"
+                value={college?.phone || "+977 1-4444444, 4444445"}
+                badge="bg-green-50 text-green-600"
+              />
+              <ContactInfoRow
+                icon="fa-solid fa-envelope"
+                title="Email"
+                value={college?.email || "info@goldengate.edu.np"}
+                badge="bg-red-50 text-red-600"
+              />
+              <ContactInfoRow
+                icon="fa-solid fa-globe"
+                title="Website"
+                value={website}
+                badge="bg-purple-50 text-purple-600"
+                link
+              />
+            </ul>
+            <div className="relative mt-6 h-[150px] w-full overflow-hidden rounded-xl bg-gray-100">
+              <img
+                src="https://images.unsplash.com/photo-1524661135-423995f22d0b?q=80&w=800&auto=format&fit=crop"
+                className="h-full w-full object-cover opacity-60 mix-blend-multiply"
+                alt="Map"
+              />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <button className="flex items-center gap-2 rounded-lg bg-white/90 px-4 py-2 text-[13px] font-bold text-gray-800 shadow-sm backdrop-blur-sm hover:bg-white">
+                  <i className="fa-solid fa-arrow-up-right-from-square"></i>
+                  Get Directions
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-[24px] border border-gray-100 bg-white p-6 shadow-sm">
+            <h3 className="mb-2 text-[18px] font-bold text-gray-900">Request Information</h3>
+            <p className="mb-5 text-[13px] text-gray-500">Fill the form and our admission counselor will contact you.</p>
+            <form className="space-y-3">
+              <input
+                type="text"
+                placeholder="Full Name"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              />
+              <input
+                type="email"
+                placeholder="Email Address"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              />
+              <input
+                type="tel"
+                placeholder="Phone Number"
+                className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+              />
+              <select className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-[13.5px] text-gray-600 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                <option>Select Course of Interest</option>
+                <option>B.Sc. CSIT</option>
+                <option>BBA Finance</option>
+                <option>MBA</option>
+              </select>
+              <button
+                type="button"
+                className="mt-2 w-full rounded-xl bg-blue-600 py-3.5 text-[14px] font-bold text-white shadow-sm shadow-blue-600/20 transition-colors hover:bg-blue-700"
+              >
+                Submit Request
+              </button>
+            </form>
           </div>
         </div>
       </div>
@@ -1043,209 +1016,171 @@ const CollegeDetailsPage: React.FC<CollegeDetailsPageProps> = ({ onNavigate }) =
   );
 };
 
-// Sub-components helpers
-const VisionMissionCard: React.FC<{
-  type: string;
-  icon: string;
-  desc: string;
-  color: string;
+const FilterPills: React.FC<{
+  active: LevelFilter;
+  onChange: (value: LevelFilter) => void;
+}> = ({ active, onChange }) => {
+  const levels: LevelFilter[] = ["all", "+2", "Bachelor", "Master"];
+  return (
+    <div className="flex gap-2 text-xs font-medium">
+      {levels.map((level) => {
+        const selected = active === level;
+        return (
+          <button
+            key={level}
+            onClick={() => onChange(level)}
+            className={`rounded-full px-4 py-1.5 ${selected ? "bg-blue-600 text-white shadow-sm" : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"}`}
+          >
+            {level === "all" ? "All" : level}
+          </button>
+        );
+      })}
+    </div>
+  );
+};
+
+const ProgTh: React.FC<{ className?: string; children: React.ReactNode }> = ({ className = "", children }) => (
+  <div className={`text-[13px] font-bold uppercase text-gray-800 ${className}`}>{children}</div>
+);
+
+const MediaHeroCard: React.FC<{
   image: string;
-}> = ({ type, icon, desc, color, image }) => (
-  <div
-    className={`rounded-xl border transition-all duration-500 hover:shadow-2xl flex flex-col h-full bg-${color === "blue" ? "blue" : "emerald"}-50/30 border-${color === "blue" ? "blue" : "emerald"}-100 overflow-hidden group`}
-  >
-    <div className="h-48 overflow-hidden">
-      <img
-        src={image}
-        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-        alt={type}
-      />
+  title: string;
+  subtitle: string;
+  icon: string;
+}> = ({ image, title, subtitle, icon }) => (
+  <div className="group relative h-[240px] w-full cursor-pointer overflow-hidden rounded-[24px] shadow-sm md:h-[300px]">
+    <img src={image} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" alt={title} />
+    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 transition-colors group-hover:bg-black/40">
+      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/95 pl-1 shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-sm group-hover:scale-110">
+        <i className="fa-solid fa-play text-blue-600"></i>
+      </div>
     </div>
-    <div className="p-10">
-      <div className="flex items-center gap-6 mb-8">
+    <div className="absolute inset-0 z-20 flex flex-col justify-end bg-gradient-to-t from-[#0f172a]/90 via-[#0f172a]/30 to-transparent p-6 md:p-8">
+      <h3 className="mb-1.5 flex items-center gap-2.5 text-[19px] font-bold text-white md:text-[21px]">
+        <i className={`${icon} text-blue-400`}></i>
+        {title}
+      </h3>
+      <p className="text-[14px] text-gray-200">{subtitle}</p>
+    </div>
+  </div>
+);
+
+const InfoBlock: React.FC<{
+  title: string;
+  desc: string;
+  icon: string;
+  color: "blue" | "green";
+}> = ({ title, desc, icon, color }) => (
+  <div className="rounded-[20px] border border-gray-100 bg-white p-8 shadow-sm">
+    <div className="mb-4 flex items-center gap-3.5">
+      <div
+        className={`flex h-10 w-10 items-center justify-center rounded-full ${color === "blue" ? "bg-blue-100/80 text-blue-600" : "bg-green-100/80 text-green-600"}`}
+      >
+        <i className={icon}></i>
+      </div>
+      <h3 className="text-[16px] font-bold text-gray-900">{title}</h3>
+    </div>
+    <p className="text-[14.5px] leading-[1.7] text-gray-600">{desc}</p>
+  </div>
+);
+
+const OverviewRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
+  <tr>
+    <td className="w-1/3 bg-gray-50 px-4 py-3 font-semibold">{label}</td>
+    <td className="px-4 py-3">{value}</td>
+  </tr>
+);
+
+const AdminRow: React.FC<{ position: string; role: string; holder: string }> = ({ position, role, holder }) => (
+  <tr>
+    <td className="px-4 py-3 font-medium">{position}</td>
+    <td className="px-4 py-3">{role}</td>
+    <td className="px-4 py-3">{holder}</td>
+  </tr>
+);
+
+const RatingBar: React.FC<{ label: string; width: string; color: string; pct: string }> = ({ label, width, color, pct }) => (
+  <div className="flex items-center text-[13px] font-medium text-gray-600">
+    <span className="w-3">{label}</span>
+    <i className="fa-solid fa-star mx-1.5 text-[10px] text-gray-400"></i>
+    <div className="relative mx-3 h-2 flex-grow rounded bg-[#f1f5f9]">
+      <div className={`h-full rounded ${color}`} style={{ width }}></div>
+    </div>
+    <span className="w-8 text-right text-gray-400">{pct}</span>
+  </div>
+);
+
+const ReviewCard: React.FC<{
+  initials: string;
+  name: string;
+  subtitle: string;
+  rating: number;
+  pros: string;
+  cons: string;
+  tone: "blue" | "purple";
+}> = ({ initials, name, subtitle, rating, pros, cons, tone }) => (
+  <div className="rounded-[20px] border border-gray-100 bg-white p-6 shadow-sm">
+    <div className="mb-4 flex items-start justify-between">
+      <div className="flex items-center gap-3">
         <div
-          className={`w-14 h-14 rounded-md flex items-center justify-center text-2xl shadow-sm ${color === "blue" ? "bg-blue-100 text-blue-600" : "bg-emerald-100 text-emerald-600"}`}
+          className={`flex h-10 w-10 items-center justify-center rounded-full font-bold ${tone === "blue" ? "bg-blue-100 text-blue-600" : "bg-purple-100 text-purple-600"}`}
         >
-          <i className={`fa-solid ${icon}`}></i>
+          {initials}
         </div>
-        <h3 className="text-2xl font-black text-slate-900 uppercase tracking-tight">
-          Our {type}
-        </h3>
-      </div>
-      <p className="text-sm font-bold text-slate-500 leading-relaxed uppercase tracking-widest">
-        {desc}
-      </p>
-    </div>
-  </div>
-);
-
-const ContactItem: React.FC<{
-  icon: string;
-  label: string;
-  value: string;
-  color: string;
-}> = ({ icon, label, value, color }) => (
-  <div className="flex items-start gap-6 group">
-    <div
-      className={`w-12 h-12 rounded-full flex items-center justify-center text-xl shrink-0 transition-all group-hover:scale-110 ${color === "blue"
-          ? "bg-blue-100 text-blue-600"
-          : color === "emerald"
-            ? "bg-emerald-100 text-emerald-600"
-            : "bg-amber-100 text-amber-600"
-        }`}
-    >
-      <i className={`fa-solid ${icon}`}></i>
-    </div>
-    <div className="min-w-0">
-      <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] mb-1">
-        {label}
-      </p>
-      <p className="text-[13px] font-black text-slate-800 leading-tight uppercase tracking-tight">
-        {value}
-      </p>
-    </div>
-  </div>
-);
-
-const AboutCard: React.FC<{
-  icon: string;
-  title: string;
-  desc: string;
-  color: string;
-}> = ({ icon, title, desc, color }) => (
-  <div className="bg-white p-10 rounded-md border border-slate-100 shadow-sm hover:shadow-2xl hover:border-primary-100 transition-all duration-500 group flex flex-col h-full transform hover:-translate-y-2">
-    <div
-      className={`w-16 h-16 rounded-md flex items-center justify-center text-3xl mb-8 transition-all group-hover:scale-110 shadow-sm ${color === "blue"
-          ? "bg-blue-50 text-blue-600"
-          : color === "emerald"
-            ? "bg-emerald-50 text-emerald-600"
-            : "bg-purple-50 text-purple-600"
-        }`}
-    >
-      <i className={`fa-solid ${icon}`}></i>
-    </div>
-    <h3 className="text-2xl font-black text-slate-900 mb-4 uppercase tracking-tight leading-tight">
-      {title}
-    </h3>
-    <p className="text-sm font-medium text-slate-500 leading-relaxed">{desc}</p>
-  </div>
-);
-
-const AdmissionItem: React.FC<{ icon: string; text: string }> = ({
-  icon,
-  text,
-}) => (
-  <li className="flex items-start gap-5 group">
-    <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-500 border border-emerald-100 flex items-center justify-center text-sm group-hover:bg-emerald-500 group-hover:text-white transition-all duration-300 shadow-sm shrink-0">
-      <i className={`fa-solid ${icon}`}></i>
-    </div>
-    <span className="text-slate-600 font-bold text-sm leading-relaxed group-hover:text-slate-900 transition-colors pt-2">
-      {text}
-    </span>
-  </li>
-);
-
-const TimelineStep: React.FC<{
-  step: string;
-  title: string;
-  sub: string;
-  desc: string;
-  isLast?: boolean;
-}> = ({ step, title, sub, desc, isLast }) => (
-  <div className="relative group">
-    <div
-      className={`absolute -left-10 top-0 w-1 bg-slate-100 h-full ${isLast ? "hidden" : ""}`}
-    ></div>
-    <div className="absolute -left-12 top-0 w-5 h-5 rounded-full bg-white border-4 border-primary-600 shadow-lg z-10 group-hover:scale-125 transition-transform duration-300"></div>
-    <div className="bg-white p-10 rounded-md border border-slate-100 shadow-sm group-hover:shadow-2xl transition-all duration-500 transform group-hover:translate-x-2 border-l-4 group-hover:border-l-primary-600">
-      <div className="flex justify-between items-start mb-6">
         <div>
-          <h3 className="text-2xl font-black text-slate-900 tracking-tight">
-            {title}
-          </h3>
-          <p className="text-[10px] font-black text-primary-600 uppercase tracking-widest mt-1">
-            {sub}
-          </p>
+          <h4 className="text-[14.5px] font-bold text-gray-900">{name}</h4>
+          <p className="text-[12px] text-gray-500">{subtitle}</p>
         </div>
-        <span className="text-5xl font-black text-slate-50 leading-none select-none group-hover:text-primary-50 transition-colors">
-          {step}
-        </span>
       </div>
-      <p className="text-slate-500 font-medium text-sm leading-relaxed">
-        {desc}
-      </p>
+      <div className="flex gap-0.5">
+        {Array.from({ length: 5 }).map((_, idx) => (
+          <i
+            key={idx}
+            className={`${idx < rating ? "fa-solid text-yellow-400" : "fa-regular text-gray-300"} fa-star text-[13px]`}
+          ></i>
+        ))}
+      </div>
+    </div>
+    <div className="mb-3 rounded-lg border border-gray-100 bg-[#fafafa] p-4">
+      <div className="mb-2 flex items-start gap-2">
+        <i className="fa-solid fa-thumbs-up mt-0.5 text-green-500"></i>
+        <p className="text-[13.5px] leading-relaxed text-gray-700">
+          <span className="font-bold text-gray-900">Pros:</span> {pros}
+        </p>
+      </div>
+      <div className="flex items-start gap-2">
+        <i className="fa-solid fa-thumbs-down mt-0.5 text-red-500"></i>
+        <p className="text-[13.5px] leading-relaxed text-gray-700">
+          <span className="font-bold text-gray-900">Cons:</span> {cons}
+        </p>
+      </div>
     </div>
   </div>
 );
 
-const DeptCard: React.FC<{
+const ContactInfoRow: React.FC<{
   icon: string;
   title: string;
-  color: string;
-  desc: string;
-}> = ({ icon, title, color, desc }) => (
-  <div
-    className={`bg-white p-10 rounded-lg border transition-all duration-500 hover:shadow-2xl group flex flex-col h-full ${color === "blue"
-        ? "border-blue-100 hover:border-blue-400"
-        : color === "emerald"
-          ? "border-emerald-100 hover:border-emerald-400"
-          : "border-pink-100 hover:border-pink-400"
-      }`}
-  >
-    <div
-      className={`w-16 h-16 rounded-md flex items-center justify-center text-2xl mb-10 shadow-lg group-hover:scale-110 transition-transform duration-500 ${color === "blue"
-          ? "bg-blue-600 text-white shadow-blue-200"
-          : color === "emerald"
-            ? "bg-emerald-600 text-white shadow-emerald-200"
-            : "bg-pink-600 text-white shadow-pink-200"
-        }`}
-    >
-      <i className={`fa-solid ${icon}`}></i>
+  value: string;
+  badge: string;
+  link?: boolean;
+}> = ({ icon, title, value, badge, link = false }) => (
+  <li className="flex items-start gap-3">
+    <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-full ${badge}`}>
+      <i className={icon}></i>
     </div>
-    <h3 className="text-2xl font-black text-slate-900 mb-6 uppercase tracking-tight">
-      {title}
-    </h3>
-    <p className="text-slate-500 font-medium text-sm leading-relaxed mb-10 flex-grow">
-      {desc}
-    </p>
-    <button className="text-[10px] font-black uppercase tracking-[0.2em] text-primary-600 hover:text-primary-800 flex items-center gap-3 transition-all group-hover:gap-5">
-      View Faculty <i className="fa-solid fa-arrow-right-long"></i>
-    </button>
-  </div>
-);
-
-const MetaBlock: React.FC<{ icon: string; label: string; value: string }> = ({
-  icon,
-  label,
-  value,
-}) => (
-  <div className="flex items-start gap-4">
-    <div className="w-12 h-12 rounded-md bg-slate-50 flex items-center justify-center text-slate-400 shrink-0 shadow-inner group-hover:bg-primary-50 group-hover:text-primary-600 transition-colors">
-      <i className={`fa-solid ${icon} text-lg`}></i>
+    <div>
+      <p className="text-[13px] font-bold text-gray-900">{title}</p>
+      {link ? (
+        <a href="#" className="mt-0.5 block text-[13.5px] text-blue-600 hover:underline">
+          {value}
+        </a>
+      ) : (
+        <p className="mt-0.5 text-[13.5px] text-gray-600">{value}</p>
+      )}
     </div>
-    <div className="min-w-0">
-      <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest mb-1">
-        {label}
-      </p>
-      <p className="text-sm font-black text-slate-800 leading-tight uppercase tracking-tight">
-        {value}
-      </p>
-    </div>
-  </div>
-);
-
-const MiniStat: React.FC<{ value: string; label: string }> = ({
-  value,
-  label,
-}) => (
-  <div className="bg-slate-50/50 p-4 rounded-md border border-slate-100 flex flex-col items-center justify-center gap-1 hover:border-primary-100 transition-all group">
-    <p className="text-lg font-black text-slate-900 tracking-tight group-hover:text-primary-600 transition-colors">
-      {value}
-    </p>
-    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
-      {label}
-    </p>
-  </div>
+  </li>
 );
 
 export default CollegeDetailsPage;

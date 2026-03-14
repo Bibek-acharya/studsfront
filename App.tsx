@@ -95,6 +95,7 @@ const ResourcesPage = lazy(
 );
 const NewsPage = lazy(() => import("./components/News/NewsPage"));
 const NewsDetailsPage = lazy(() => import("./components/News/NewsDetailsPage"));
+
 const BlogPage = lazy(() => import("./components/Blog/BlogPage"));
 const BlogDetailsPage = lazy(() => import("./components/Blog/BlogDetailsPage"));
 const EventsPage = lazy(() => import("./components/Events/EventsPage"));
@@ -111,6 +112,8 @@ const AuthContainer = lazy(() => import("./components/Auth/AuthContainer"));
 const OnboardingFlow = lazy(
   () => import("./components/Onboarding/OnboardingFlow"),
 );
+const AboutPage = lazy(() => import("./components/About/AboutPage"));
+const ContactPage = lazy(() => import("./components/Contact/ContactPage"));
 
 const GoogleCallbackHandler = lazy(
   () => import("./components/Auth/GoogleCallbackHandler"),
@@ -137,7 +140,17 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen font-sans selection:bg-blue-500 selection:text-white overflow-x-hidden bg-white">
       <ScrollToTop />
-      {!hideNavFooter && <EducationNavbar onNavigate={(view) => navigate(view === 'educationPage' ? '/' : `/${view}`)} user={user} onLogout={handleLogout} />}
+      {!hideNavFooter && (
+        <EducationNavbar
+          onNavigate={(view, data) =>
+            navigate(view === "educationPage" ? "/" : `/${view}`, {
+              state: data,
+            })
+          }
+          user={user}
+          onLogout={handleLogout}
+        />
+      )}
 
       <div className={!hideNavFooter ? "pt-[106px] md:pt-[110px]" : ""}>
         <Suspense fallback={routeFallback}>
@@ -206,10 +219,14 @@ const App: React.FC = () => {
             <Route path="/studyResources" element={<ResourcesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/newsPage" element={<NewsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/newsDetails" element={<NewsDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/blogPage" element={<BlogPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/blogDetails" element={<BlogDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/eventsPage" element={<EventsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/eventDetails" element={<EventDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/institutionZone" element={<InstitutionZone onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/adminColleges" element={<AdminCollegesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/contact" element={<ContactPage />} />
           </Routes>
         </Suspense>
 

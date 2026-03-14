@@ -1,200 +1,309 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { getBlogById, getRelatedBlogs } from "../../lib/blogs-data";
 
 interface BlogDetailsPageProps {
-  id: string;
   onNavigate: (view: any, data?: any) => void;
 }
 
-const BlogDetailsPage: React.FC<BlogDetailsPageProps> = ({
-  id,
-  onNavigate,
-}) => {
-  const blog = getBlogById(id);
-  const related = blog ? getRelatedBlogs(id, blog.category) : [];
+interface CommentItem {
+  id: string;
+  author: string;
+  avatar: string;
+  time: string;
+  message: string;
+  likes: number;
+}
+
+const BlogDetailsPage: React.FC<BlogDetailsPageProps> = ({ onNavigate }) => {
+  const location = useLocation();
+  const state = location.state as { id?: string } | null;
+  const blogId = state?.id || "1";
+
+  const blog = getBlogById(blogId);
+  const related = blog ? getRelatedBlogs(blogId, blog.category) : [];
+
+  const [commentInput, setCommentInput] = useState("");
+  const [comments, setComments] = useState<CommentItem[]>([
+    {
+      id: "seed-1",
+      author: "Rohan Sharma",
+      avatar: "R",
+      time: "2 days ago",
+      message:
+        "This extension is really helpful. I was having issues with document upload due to internet connectivity problems in my area.",
+      likes: 6,
+    },
+  ]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [id]);
+  }, [blogId]);
 
-  if (!blog)
-    return <div className="pt-32 text-center">Blog post not found.</div>;
+  const topCategory = useMemo(() => {
+    if (!blog) return "Admission";
+    if (blog.category === "Career Advice") return "Admission";
+    if (blog.category === "Study Tips") return "Exam";
+    return "Fee";
+  }, [blog]);
+
+  const topCategoryClass = useMemo(() => {
+    if (topCategory === "Admission") return "bg-[#1e3a8a]";
+    if (topCategory === "Exam") return "bg-red-500";
+    return "bg-yellow-600";
+  }, [topCategory]);
+
+  const postComment = () => {
+    const text = commentInput.trim();
+    if (!text) return;
+
+    setComments((prev) => [
+      {
+        id: `${Date.now()}`,
+        author: "You (Guest)",
+        avatar: "Y",
+        time: "Just now",
+        message: text,
+        likes: 0,
+      },
+      ...prev,
+    ]);
+    setCommentInput("");
+  };
+
+  if (!blog) {
+    return (
+      <div className="min-h-[40vh] flex items-center justify-center text-slate-500 font-semibold">
+        Blog post not found.
+      </div>
+    );
+  }
 
   return (
-    <div className="bg-white min-h-screen pt-24 font-sans pb-20">
-      <div className="max-w-4xl mx-auto px-6">
-        {/* Navigation / Header */}
-        <button
-          onClick={() => onNavigate("blogPage")}
-          className="flex items-center gap-3 text-slate-400 hover:text-primary-600 transition-all font-black text-[10px] uppercase tracking-widest mb-12 group"
-        >
-          <i className="fa-solid fa-arrow-left transition-transform group-hover:-translate-x-1"></i>
-          <span>Back to Articles</span>
-        </button>
+    <div className="text-gray-800 antialiased selection:bg-blue-200 selection:text-blue-900 bg-white">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12 flex flex-col lg:flex-row gap-8 lg:gap-12">
+        <main className="lg:w-2/3">
+          <div className="flex items-center gap-4 text-sm mb-4">
+            <span className={`${topCategoryClass} text-white px-3 py-1 rounded-full font-medium flex items-center gap-1.5`}>
+              <i className="fa-solid fa-graduation-cap text-xs"></i> {topCategory}
+            </span>
+            <span className="text-gray-500 flex items-center gap-1.5">
+              <i className="fa-regular fa-clock"></i> 90 days ago
+            </span>
+            <span className="text-gray-500 flex items-center gap-1.5 ml-auto sm:ml-0">
+              <i className="fa-regular fa-eye"></i> 200 views
+            </span>
+          </div>
 
-        <header className="text-center mb-16">
-          <span className="inline-block px-5 py-2 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-black uppercase tracking-widest mb-8 border border-slate-100">
-            {blog.category}
-          </span>
-          <h1 className="text-4xl md:text-7xl font-black text-slate-900 leading-[1.1] tracking-tighter uppercase mb-12">
-            {blog.title}
-          </h1>
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-6 leading-tight">{blog.title}</h1>
 
-          <div className="flex flex-col items-center justify-center gap-6">
-            <div className="flex items-center gap-4">
-              <img
-                src={`https://api.dicebear.com/7.x/notionists/svg?seed=${blog.authorAvatar}`}
-                className="w-14 h-14 rounded-2xl border-2 border-slate-50 bg-slate-50 shadow-sm"
-                alt=""
-              />
-              <div className="text-left">
-                <p className="text-sm font-black text-slate-900 uppercase tracking-widest">
-                  {blog.author}
-                </p>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
-                  {blog.authorTitle}
-                </p>
-              </div>
+          <div className="flex flex-wrap items-center gap-y-2 gap-x-6 text-sm text-gray-600 border-b border-gray-100 pb-6 mb-6">
+            <div className="flex items-center gap-2">
+              <i className="fa-solid fa-user text-gray-400"></i>
+              <span>
+                Published by: <strong className="text-gray-900 font-semibold">{blog.author}</strong>
+              </span>
             </div>
-            <div className="flex items-center gap-4 text-[10px] font-black text-slate-300 uppercase tracking-[0.2em] pt-4 border-t border-slate-50 w-full justify-center">
-              <span>{blog.date}</span>
-              <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-              <span>{blog.readTime} Read Time</span>
+            <div className="flex items-center gap-2">
+              <i className="fa-regular fa-calendar text-gray-400"></i>
+              <span>
+                Latest Update: <strong className="text-gray-900 font-semibold">Today</strong>
+              </span>
             </div>
           </div>
-        </header>
 
-        <div className="w-full aspect-video rounded-2xl overflow-hidden shadow-2xl mb-20 border border-slate-100">
           <img
             src={blog.image}
-            className="w-full h-full object-cover"
             alt={blog.title}
+            className="w-full h-[300px] sm:h-[400px] object-cover rounded-xl mb-8"
           />
-        </div>
 
-        {/* Article Body */}
-        <article className="prose prose-lg max-w-none prose-slate animate-fadeIn">
-          <p className="text-2xl font-bold text-slate-700 leading-relaxed mb-12 italic border-l-8 border-primary-600 pl-8">
-            "{blog.excerpt}"
-          </p>
-
-          <div className="text-slate-600 space-y-8 leading-relaxed text-lg font-medium whitespace-pre-line">
-            {blog.content}
-            <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-              enim ad minim veniam, quis nostrud exercitation ullamco laboris
-              nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in
-              reprehenderit in voluptate velit esse cillum dolore eu fugiat
-              nulla pariatur.{" "}
-            </p>
-
-            <h3 className="text-3xl font-black text-slate-900 mt-16 mb-8 tracking-tight uppercase">
-              Why This Matters for Your Career
-            </h3>
-            <p>
-              Excepteur sint occaecat cupidatat non proident, sunt in culpa qui
-              officia deserunt mollit anim id est laborum. At StudSphere, we
-              believe that providing students with actionable insights is the
-              first step towards bridging the skill gap in Nepal's tech and
-              academic ecosystems.
-            </p>
-
-            <blockquote className="bg-slate-50 p-10 rounded-2xl border border-slate-100 my-12 relative overflow-hidden">
-              <i className="fa-solid fa-quote-left absolute top-8 left-10 text-primary-100 text-6xl"></i>
-              <p className="relative z-10 text-xl font-bold text-slate-800 leading-relaxed italic">
-                "Success in the professional world isn't just about what you
-                know; it's about how you adapt your knowledge to solve
-                real-world problems."
-              </p>
-              <footer className="mt-6 text-xs font-black uppercase tracking-widest text-primary-600">
-                — The StudSphere Mentorship Team
-              </footer>
-            </blockquote>
-
-            <p>
-              Sed ut perspiciatis unde omnis iste natus error sit voluptatem
-              accusantium doloremque laudantium, totam rem aperiam, eaque ipsa
-              quae ab illo inventore veritatis et quasi architecto beatae vitae
-              dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit
-              aspernatur aut odit aut fugit.
-            </p>
+          <div className="bg-blue-50 border-l-4 border-blue-500 p-5 rounded-r-xl mb-8 text-gray-700 text-sm sm:text-base leading-relaxed">
+            {blog.excerpt}
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-3 mt-20 pt-10 border-t border-slate-50">
-            {blog.tags.map((t) => (
-              <span
-                key={t}
-                className="px-5 py-2 bg-slate-50 text-slate-400 border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:text-primary-600 hover:border-primary-100 transition-all cursor-default"
+          <div className="prose max-w-none text-gray-700">
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Revised Schedule</h2>
+            <p className="mb-4">
+              The previous deadline for counseling registration was set for December 10th, 2024. The new revised schedule is as follows:
+            </p>
+
+            <ul className="list-disc pl-5 mb-8 space-y-2 marker:text-gray-400">
+              <li>
+                <strong>New Registration Deadline:</strong> December 20th, 2024 (5:00 PM NST)
+              </li>
+              <li>
+                <strong>Choice Filling Deadline:</strong> December 20th, 2024
+              </li>
+              <li>
+                <strong>Seat Allotment (Round 1):</strong> December 25th, 2024
+              </li>
+              <li>
+                <strong>Fee Payment & Document Verification:</strong> December 26th - 28th, 2024
+              </li>
+            </ul>
+
+            <h2 className="text-xl font-bold text-gray-900 mb-4">Instructions for Applicants</h2>
+            <p className="mb-4">All registered candidates must follow these steps:</p>
+
+            <ol className="list-decimal pl-5 mb-8 space-y-2">
+              <li>Log in to the admission portal using your credentials</li>
+              <li>Verify and update your personal information if needed</li>
+              <li>Complete the choice filling process carefully</li>
+              <li>Submit the application before the deadline</li>
+              <li>Keep your documents ready for verification</li>
+            </ol>
+
+            <div className="text-gray-700 whitespace-pre-line mb-8">{blog.content}</div>
+          </div>
+
+          <div className="mt-8 mb-6 flex flex-wrap items-center gap-3">
+            <span className="text-gray-900 font-medium">Tags:</span>
+            {blog.tags.map((tag) => (
+              <button
+                key={tag}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-xs font-medium transition-colors"
               >
-                #{t}
-              </span>
+                {tag}
+              </button>
             ))}
           </div>
-        </article>
 
-        {/* Related Section */}
-        <section className="mt-32 pt-20 border-t border-slate-100">
-          <div className="flex items-center justify-between mb-12">
-            <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tight">
-              More like this
-            </h2>
-            <button
-              onClick={() => onNavigate("blogPage")}
-              className="text-[10px] font-black uppercase tracking-widest text-primary-600 hover:underline flex items-center gap-2"
-            >
-              View all articles <i className="fa-solid fa-arrow-right-long"></i>
-            </button>
+          <div className="flex items-center justify-between border-t border-b border-gray-100 py-4 mb-10">
+            <span className="text-gray-900 font-medium">Share this announcement:</span>
+            <div className="flex items-center gap-2">
+              <button className="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center hover:bg-blue-600 transition-colors" aria-label="Share on Facebook">
+                <i className="fa-brands fa-facebook-f text-sm"></i>
+              </button>
+              <button className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors" aria-label="Share on Instagram">
+                <i className="fa-brands fa-instagram text-sm"></i>
+              </button>
+              <button className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors" aria-label="Share on LinkedIn">
+                <i className="fa-brands fa-linkedin-in text-sm"></i>
+              </button>
+              <button className="w-8 h-8 rounded-full bg-blue-400 text-white flex items-center justify-center hover:bg-blue-500 transition-colors" aria-label="Copy Link">
+                <i className="fa-solid fa-link text-sm"></i>
+              </button>
+            </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-            {related.map((rel) => (
-              <div
-                key={rel.id}
-                onClick={() => onNavigate("blogDetails", { id: rel.id })}
-                className="bg-slate-50 p-8 rounded-2xl hover:bg-white hover:shadow-2xl transition-all duration-500 group cursor-pointer border border-transparent hover:border-slate-100"
-              >
-                <div className="flex items-start gap-6">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden shrink-0 shadow-sm">
-                    <img
-                      src={rel.image}
-                      className="w-full h-full object-cover transition-transform group-hover:scale-110"
-                      alt=""
-                    />
+
+          <section>
+            <div className="flex items-center gap-2 mb-6">
+              <i className="fa-solid fa-comments text-blue-600 text-xl"></i>
+              <h2 className="text-xl font-bold text-gray-900">Comments & Discussion</h2>
+            </div>
+
+            <div className="mb-10">
+              <textarea
+                value={commentInput}
+                onChange={(event) => setCommentInput(event.target.value)}
+                className="w-full border border-gray-200 rounded-lg p-4 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none text-sm placeholder-gray-400"
+                rows={4}
+                placeholder="Join the discussion..."
+              ></textarea>
+              <div className="flex justify-between items-center mt-3">
+                <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <i className="fa-solid fa-circle-info text-gray-400"></i> Please keep comments respectful
+                </span>
+                <button
+                  onClick={postComment}
+                  className="bg-[#2563eb] hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-lg text-sm transition-colors"
+                >
+                  Post Comment
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-6 pl-2">
+              {comments.map((comment) => (
+                <div key={comment.id} className="flex gap-4 relative">
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#1e3a8a] rounded-full"></div>
+
+                  <div className="flex-shrink-0 pl-4">
+                    <div
+                      className={`w-10 h-10 rounded-full ${
+                        comment.author.startsWith("You")
+                          ? "bg-green-100 text-green-600"
+                          : "bg-blue-100 text-blue-600"
+                      } flex items-center justify-center font-bold text-sm`}
+                    >
+                      {comment.avatar}
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[9px] font-black text-primary-600 uppercase tracking-widest mb-2 block">
-                      {rel.category}
-                    </span>
-                    <h3 className="font-black text-slate-900 text-lg group-hover:text-primary-600 transition-colors leading-tight uppercase tracking-tight line-clamp-2">
-                      {rel.title}
-                    </h3>
+                  <div className="flex-1 pb-4">
+                    <div className="mb-1">
+                      <h4 className="font-bold text-sm text-gray-900 inline-block mr-2">{comment.author}</h4>
+                      <span className="text-xs text-gray-400">{comment.time}</span>
+                    </div>
+                    <p className="text-sm text-gray-700 leading-relaxed mb-3 whitespace-pre-wrap">{comment.message}</p>
+                    <div className="flex items-center gap-4 text-xs text-gray-500">
+                      <button className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                        <i className="fa-regular fa-heart"></i> {comment.likes}
+                      </button>
+                      <button className="flex items-center gap-1 hover:text-blue-600 transition-colors">
+                        <i className="fa-regular fa-comment"></i> Reply
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        </main>
 
-        {/* Comments Placeholder */}
-        <section className="mt-32 bg-slate-50 rounded-2xl p-10 md:p-16 border border-slate-100 text-center">
-          <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-8 shadow-xl text-slate-200">
-            <i className="fa-solid fa-comments text-4xl"></i>
+        <aside className="lg:w-1/3 mt-12 lg:mt-0">
+          <div className="sticky top-8">
+            <div className="flex items-center gap-2 mb-6 border-b border-gray-100 pb-2">
+              <i className="fa-regular fa-copy text-blue-600 text-lg"></i>
+              <h3 className="text-lg font-bold text-gray-900">Related Articles</h3>
+            </div>
+
+            <div className="space-y-8">
+              {related.map((rel, idx) => {
+                const tag = idx % 3 === 0 ? "Scholarship" : idx % 3 === 1 ? "Exam" : "Fee";
+                const tagClass =
+                  tag === "Scholarship"
+                    ? "bg-green-100 text-green-700"
+                    : tag === "Exam"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-yellow-100 text-yellow-700";
+
+                return (
+                  <button
+                    key={rel.id}
+                    onClick={() => onNavigate("blogDetails", { id: rel.id })}
+                    className="group block text-left w-full"
+                  >
+                    <img
+                      src={rel.image}
+                      alt={rel.title}
+                      className="w-full h-40 object-cover rounded-xl mb-3"
+                    />
+                    <div className="flex justify-between items-center mb-2">
+                      <span className={`${tagClass} text-xs font-semibold px-2 py-0.5 rounded`}>{tag}</span>
+                      <span className="text-xs text-gray-500 flex items-center gap-1">
+                        <i className="fa-regular fa-clock"></i> 90 days ago
+                      </span>
+                    </div>
+                    <h4 className="font-bold text-sm text-gray-900 group-hover:text-blue-600 transition-colors mb-2 line-clamp-2">
+                      {rel.title}
+                    </h4>
+                    <p className="text-xs text-gray-500 line-clamp-2">{rel.excerpt}</p>
+                  </button>
+                );
+              })}
+            </div>
+
+            <div className="mt-8 text-center">
+              <button
+                onClick={() => onNavigate("blogPage")}
+                className="inline-flex items-center gap-2 text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                View all articles <i className="fa-solid fa-arrow-right text-xs"></i>
+              </button>
+            </div>
           </div>
-          <h3 className="text-2xl font-black text-slate-900 mb-4 uppercase tracking-tight">
-            Discussion
-          </h3>
-          <p className="text-slate-500 font-medium mb-10 max-w-sm mx-auto">
-            Have a question or thought on this article? Join the discussion on
-            our Campus Forum.
-          </p>
-          <button
-            onClick={() => onNavigate("campusForum")}
-            className="bg-slate-900 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-black transition-all active:scale-95"
-          >
-            Go to Forum
-          </button>
-        </section>
+        </aside>
       </div>
     </div>
   );

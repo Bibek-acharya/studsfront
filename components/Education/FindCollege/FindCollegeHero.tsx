@@ -1,194 +1,82 @@
-import React, { useState, useEffect, useRef } from "react";
+import React from "react";
 
 interface FindCollegeHeroProps {
   searchQuery: string;
   onSearchChange: (value: string) => void;
+  activeTab: "all" | "plustwo" | "bachelor" | "master";
+  onTabChange: (tab: "all" | "plustwo" | "bachelor" | "master") => void;
 }
 
 const FindCollegeHero: React.FC<FindCollegeHeroProps> = ({
   searchQuery,
   onSearchChange,
+  activeTab,
+  onTabChange,
 }) => {
-  const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
-  const [selectedRating, setSelectedRating] = useState<number | null>(null);
-  // Fixed: Replaced NodeJS.Timeout with ReturnType<typeof setTimeout> to resolve namespace issue in browser environment
-  const inactivityTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const ratings = [
-    { emoji: "😊", label: "Love", color: "bg-emerald-400" },
-    { emoji: "🙂", label: "Good", color: "bg-lime-400" },
-    { emoji: "😐", label: "Neutral", color: "bg-yellow-400" },
-    { emoji: "🙁", label: "Poor", color: "bg-orange-400" },
-    { emoji: "😠", label: "Hate", color: "bg-rose-400" },
+  const tabs: Array<{
+    key: "all" | "plustwo" | "bachelor" | "master";
+    label: string;
+  }> = [
+    { key: "all", label: "All" },
+    { key: "plustwo", label: "Plus Two (+2)" },
+    { key: "bachelor", label: "Bachelor" },
+    { key: "master", label: "Master" },
   ];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
   };
 
-  const resetInactivityTimer = () => {
-    if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
-    inactivityTimerRef.current = setTimeout(
-      () => setIsFeedbackExpanded(false),
-      3000,
-    );
-  };
-
-  const toggleFeedback = () => {
-    setIsFeedbackExpanded(!isFeedbackExpanded);
-    if (!isFeedbackExpanded) resetInactivityTimer();
-  };
-
-  const handleInteraction = () => {
-    if (isFeedbackExpanded) resetInactivityTimer();
-  };
-
-  useEffect(() => {
-    return () => {
-      if (inactivityTimerRef.current) clearTimeout(inactivityTimerRef.current);
-    };
-  }, []);
-
   return (
-    <section className="relative w-full overflow-hidden min-h-[600px] flex items-center">
-      {/* Background Image */}
-      <div className="absolute inset-0">
-        <img
-          src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2786&auto=format&fit=crop"
-          alt="College Building"
-          className="w-full h-full object-cover"
-        />
-      </div>
+    <section className="bg-white border-b border-gray-200 pt-10 pb-6 px-1 md:px-2 mb-8">
+      <div className="max-w-7xl mx-auto w-full">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">Explore Programs</h1>
+        <p className="text-gray-500 text-base mb-6 max-w-2xl">
+          Discover the perfect course to advance your career and academic journey.
+        </p>
 
-      {/* Transparent Blue Overlay with Curve */}
-      <div className="absolute inset-0 pointer-events-none">
-        <svg
-          className="absolute inset-0 w-full h-full"
-          viewBox="0 0 1440 600"
-          preserveAspectRatio="none"
-          xmlns="http://www.w3.org/2000/svg"
-        >
-          <path
-            fill="rgba(37, 99, 235, 0.78)"
-            d="M0,0 L0,600 L1200,1300 Q1100,1200 1200,800 Q1000,0 500,0 Z"
-          />
-        </svg>
-      </div>
-
-      {/* Content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-6 md:px-12 py-20 w-full animate-fadeInUp">
-        <div className="max-w-3xl">
-          <h1 className="text-5xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tighter">
-            Navigate Your Path to <br />
-            <span className="text-white">Right College</span>
-          </h1>
-
-          <p className="text-lg md:text-xl text-white/90 mb-10 max-w-2xl font-medium leading-relaxed">
-            Make informed decisions with detailed insights on courses, campuses,
-            and global scholarship opportunities.
-          </p>
-
-          {/* Search Bar */}
-          <form
-            onSubmit={handleSearch}
-            className="relative max-w-2xl mb-8 group"
-          >
-            <div className="flex items-center bg-white rounded-full shadow-2xl overflow-hidden p-1.5 border border-white/20">
-              <div className="pl-6 text-slate-400">
-                <i className="fa-solid fa-magnifying-glass"></i>
-              </div>
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => onSearchChange(e.target.value)}
-                placeholder="Search scholarship name, college or keywords..."
-                className="flex-1 py-4 px-4 text-slate-800 text-lg border-0 outline-none placeholder-slate-400 font-bold"
-              />
-              <button
-                type="submit"
-                className="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 font-black rounded-full transition-all active:scale-95 uppercase tracking-widest text-xs"
-              >
-                Search
-              </button>
-            </div>
-          </form>
-
-          {/* Quick Stats/Links */}
-          <div className="flex flex-wrap items-center gap-6 text-white/80">
-            <span className="text-xs font-black uppercase tracking-widest opacity-60">
-              Your recent visits:
-            </span>
-            <button className="text-sm font-bold border-b border-white/20 hover:border-white transition-colors">
-              BIT Colleges
-            </button>
-            <button className="text-sm font-bold border-b border-white/20 hover:border-white transition-colors">
-              Scholarships
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Floating Feedback Tab (Right Side) */}
-      <div
-        className={`fixed right-0 top-1/2 -translate-y-1/2 z-[100] transition-all duration-500 ease-in-out transform ${isFeedbackExpanded ? "translate-x-0" : "translate-x-full"}`}
-      >
-        <div className="flex relative items-center">
-          {/* Vertical Label Tab */}
-          <button
-            onClick={toggleFeedback}
-            className="absolute left-0 -translate-x-full bg-blue-600 text-white px-3 py-10 flex flex-col items-center justify-center rounded-l-2xl shadow-2xl hover:bg-blue-700 transition-colors"
-          >
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] [writing-mode:vertical-lr] rotate-180 mb-2">
-              Feedback
-            </span>
-            <i
-              className={`fa-solid fa-chevron-${isFeedbackExpanded ? "right" : "left"} text-xs`}
-            ></i>
-          </button>
-
-          {/* Expanded Panel */}
-          <div
-            onMouseMove={handleInteraction}
-            className="bg-white p-8 w-80 shadow-[-20px_0_50px_rgba(0,0,0,0.1)] border-l border-slate-100"
-          >
-            <h3 className="text-slate-900 font-black text-sm uppercase tracking-widest mb-6 text-center">
-              Rate your experience
-            </h3>
-            <div className="flex justify-between gap-2 mb-8">
-              {ratings.map((rating, idx) => (
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-5">
+          <div className="flex flex-wrap items-center gap-2">
+            {tabs.map((tab) => {
+              const isActive = activeTab === tab.key;
+              return (
                 <button
-                  key={idx}
-                  onClick={() => {
-                    setSelectedRating(idx);
-                    handleInteraction();
-                  }}
-                  className={`w-12 h-12 rounded-full ${rating.color} flex items-center justify-center text-2xl transition-all hover:scale-110 shadow-sm ${selectedRating === idx ? "ring-4 ring-blue-500 ring-offset-2 scale-110" : ""}`}
+                  key={tab.key}
+                  onClick={() => onTabChange(tab.key)}
+                  className={`px-4 py-1.5 rounded-full text-sm font-semibold transition-colors shadow-sm border ${
+                    isActive
+                      ? "bg-[#3b82f6] text-white border-[#3b82f6]"
+                      : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                  }`}
                 >
-                  {rating.emoji}
+                  {tab.label}
                 </button>
-              ))}
-            </div>
-            <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-slate-300 px-1 mb-8">
-              <span>Love</span>
-              <span>Hate</span>
-            </div>
-            <button
-              onClick={() => setIsFeedbackExpanded(false)}
-              className="w-full py-4 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-black transition-all active:scale-95"
-            >
-              Next Step
-            </button>
+              );
+            })}
           </div>
-        </div>
-      </div>
 
-      {/* Website Link Chip */}
-      <div className="absolute bottom-8 right-8 z-20">
-        <div className="bg-white/95 backdrop-blur-md px-6 py-2.5 rounded-full shadow-2xl border border-white/50 flex items-center gap-3 animate-fadeIn">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <span className="text-xs font-black text-blue-600 uppercase tracking-widest">
-            goldengate.com
-          </span>
+          <form onSubmit={handleSearch} className="relative w-full md:w-72">
+            <svg
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(event) => onSearchChange(event.target.value)}
+              placeholder="Search courses, colleges..."
+              className="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#3b82f6] focus:border-transparent text-sm shadow-sm transition-shadow"
+            />
+          </form>
         </div>
       </div>
     </section>

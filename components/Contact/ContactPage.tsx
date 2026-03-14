@@ -1,18 +1,32 @@
 import React, { useState } from "react";
 
+type ToastState = {
+  id: number;
+  title: string;
+  message: string;
+  exiting: boolean;
+};
+
+const initialFormData = {
+  name: "",
+  email: "",
+  phone: "",
+  message: "",
+};
+
+const socialLinks = [
+  { icon: "fa-facebook-f", label: "Facebook" },
+  { icon: "fa-instagram", label: "Instagram" },
+  { icon: "fa-linkedin-in", label: "LinkedIn" },
+  { icon: "fa-x-twitter", label: "X" },
+];
+
 const ContactPage: React.FC = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    services: "",
-    message: "",
-  });
+  const [formData, setFormData] = useState(initialFormData);
+  const [toasts, setToasts] = useState<ToastState[]>([]);
 
   const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >,
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -21,217 +35,248 @@ const ContactPage: React.FC = () => {
     }));
   };
 
+  const dismissToast = (id: number) => {
+    setToasts((prev) =>
+      prev.map((toast) =>
+        toast.id === id ? { ...toast, exiting: true } : toast,
+      ),
+    );
+
+    window.setTimeout(() => {
+      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    }, 300);
+  };
+
+  const showToast = (title: string, message: string) => {
+    const id = Date.now();
+    setToasts((prev) => [...prev, { id, title, message, exiting: false }]);
+    window.setTimeout(() => dismissToast(id), 4000);
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    alert("Thank you for contacting us! Your message has been sent.");
-    setFormData({ name: "", email: "", phone: "", services: "", message: "" });
+    showToast("Success!", "Your quote request has been sent successfully.");
+    setFormData(initialFormData);
   };
 
   return (
-    <div className="min-h-screen bg-white font-sans">
-      {/* Header Section */}
-      <div className="pt-24 md:pt-32 pb-8 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-6 md:px-12 text-center">
-          <h1 className="text-4xl md:text-5xl font-black text-black mb-3">
+    <>
+      <style>
+        {`
+          @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+          }
+
+          @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+          }
+
+          .contact-toast-enter {
+            animation: slideIn 0.3s ease-out forwards;
+          }
+
+          .contact-toast-exit {
+            animation: slideOut 0.3s ease-in forwards;
+          }
+        `}
+      </style>
+
+      <div className="min-h-screen bg-white text-gray-800 antialiased">
+        <header className="px-4 py-12 text-center sm:px-6 md:py-16 lg:px-8">
+          <h1 className="mb-3 text-3xl font-bold text-black md:text-4xl">
             Contact Us
           </h1>
-          <nav className="text-sm font-bold uppercase tracking-widest flex items-center justify-center gap-2">
-            <span className="text-gray-500">Home</span>
-            <span className="text-gray-300">/</span>
-            <span className="text-blue-600">Contact Us</span>
-          </nav>
-        </div>
-      </div>
+          <p className="text-sm font-medium text-gray-800">
+            Home/
+            <span className="text-[#1c64f2]">Contact Us</span>
+          </p>
+        </header>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 py-16">
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Form Section */}
-          <div className="lg:col-span-2">
-            <h2 className="text-3xl font-black text-black mb-10">
-              Get your free quote Today
-            </h2>
+        <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 lg:gap-12">
+            <section className="lg:col-span-2">
+              <h2 className="mb-8 text-2xl font-bold text-gray-900">
+                Get your free quote Today
+              </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Name and Email Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-black uppercase tracking-widest">
-                    Your Name <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Ex. Jagdish Dhami"
-                    required
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all font-medium placeholder-gray-400"
-                  />
+              <form className="space-y-6" onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <FormField label="Your Name" required>
+                    <input
+                      type="text"
+                      id="name"
+                      name="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Ex.Jagdish Dhami"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
+                    />
+                  </FormField>
+
+                  <FormField label="Email" required>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="jagdishdhami@200"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
+                    />
+                  </FormField>
+
+                  <FormField label="Phone" required>
+                    <input
+                      type="tel"
+                      id="phone"
+                      name="phone"
+                      required
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+977-9809890000"
+                      className="w-full rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
+                    />
+                  </FormField>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-black uppercase tracking-widest">
-                    Email <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
+
+                <FormField label="Your Message">
+                  <textarea
+                    id="message"
+                    name="message"
+                    rows={6}
+                    value={formData.message}
                     onChange={handleChange}
-                    placeholder="Ex. jagdish@example.com"
-                    required
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all font-medium placeholder-gray-400"
+                    placeholder="enter here..."
+                    className="w-full resize-none rounded-lg border border-gray-300 px-4 py-3 text-sm transition-colors placeholder-gray-400 focus:border-[#1c64f2] focus:outline-none focus:ring-1 focus:ring-[#1c64f2]"
                   />
-                </div>
-              </div>
+                </FormField>
 
-              {/* Phone and Services Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-black uppercase tracking-widest">
-                    Phone <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="Ex. 98XXXXXXXX"
-                    required
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all font-medium placeholder-gray-400"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-black uppercase tracking-widest">
-                    Services <span className="text-red-500">*</span>
-                  </label>
-                  <input
-                    type="text"
-                    name="services"
-                    value={formData.services}
-                    onChange={handleChange}
-                    placeholder="Ex. Career Counseling"
-                    required
-                    className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all font-medium placeholder-gray-400"
-                  />
-                </div>
-              </div>
-
-              {/* Message */}
-              <div className="space-y-2">
-                <label className="text-sm font-bold text-black uppercase tracking-widest">
-                  Your Message
-                </label>
-                <textarea
-                  name="message"
-                  value={formData.message}
-                  onChange={handleChange}
-                  placeholder="enter here..."
-                  rows={8}
-                  className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all font-medium resize-none placeholder-gray-400"
-                />
-              </div>
-
-              {/* Submit Button */}
-              <div>
-                <button
-                  type="submit"
-                  className="bg-blue-600 hover:bg-blue-700 text-white font-black py-4 px-10 rounded-xl transition-all shadow-xl shadow-blue-500/20 active:scale-95 text-lg"
-                >
-                  Send Now
-                </button>
-              </div>
-            </form>
-          </div>
-
-          {/* Info Card Section */}
-          <div className="lg:col-span-1">
-            <div className="bg-blue-600 rounded-2xl p-10 text-white shadow-2xl relative overflow-hidden group">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2"></div>
-
-              <div className="relative z-10 space-y-10">
-                {/* Address Section */}
                 <div>
-                  <h3 className="text-2xl font-black mb-4 flex items-center gap-3">
-                    <i className="fa-solid fa-location-dot text-blue-200"></i>
-                    Address
-                  </h3>
-                  <p className="text-blue-50 font-medium leading-relaxed">
-                    New Baneshwor
+                  <button
+                    type="submit"
+                    className="rounded-lg bg-[#1c64f2] px-8 py-3 font-medium text-white transition-colors hover:bg-[#1655ce] focus:outline-none focus:ring-2 focus:ring-[#1c64f2] focus:ring-offset-2"
+                  >
+                    Send Now
+                  </button>
+                </div>
+              </form>
+            </section>
+
+            <aside className="lg:col-span-1">
+              <div className="flex h-full flex-col space-y-8 rounded-xl bg-[#1c64f2] p-8 text-white shadow-lg lg:p-10">
+                <InfoBlock title="Address">
+                  <p className="text-sm leading-relaxed text-white/90">
+                    New Baneshwor,
                     <br />
-                    Kathmandu 44600, Nepal
+                    Kathmandu 44600,Nepal
                   </p>
-                </div>
+                </InfoBlock>
 
-                {/* Contact Section */}
-                <div>
-                  <h3 className="text-2xl font-black mb-4 flex items-center gap-3">
-                    <i className="fa-solid fa-phone text-blue-200"></i>
-                    Contact
-                  </h3>
-                  <p className="text-blue-50 font-medium mb-1">
-                    Tel : 01-456746, 01-985647
+                <InfoBlock title="Contact">
+                  <p className="mb-1 text-sm leading-relaxed text-white/90">
+                    Tel : 01-456746 , 01-985647
                   </p>
-                  <p className="text-blue-50 font-medium">
-                    Email: hello@studsphere.com
+                  <p className="text-sm leading-relaxed text-white/90">
+                    Email: hello@stusphere.com
                   </p>
-                </div>
+                </InfoBlock>
 
-                {/* Open Time Section */}
-                <div>
-                  <h3 className="text-2xl font-black mb-4 flex items-center gap-3">
-                    <i className="fa-solid fa-clock text-blue-200"></i>
-                    Open Time
-                  </h3>
-                  <p className="text-blue-50 font-medium mb-1">
-                    Sunday - Friday
+                <InfoBlock title="Open Time">
+                  <p className="mb-1 text-sm leading-relaxed text-white/90">
+                    Tel : 01-456746 , 01-985647
                   </p>
-                  <p className="text-blue-50 font-medium">9:00 AM - 6:00 PM</p>
-                </div>
+                  <p className="text-sm leading-relaxed text-white/90">
+                    Email: hello@stusphere.com
+                  </p>
+                </InfoBlock>
 
-                {/* Stay Connected Section */}
-                <div>
-                  <h3 className="text-2xl font-black mb-6">Stay Connected</h3>
-                  <div className="flex gap-4">
-                    <SocialIcon icon="fa-facebook-f" />
-                    <SocialIcon icon="fa-instagram" />
-                    <SocialIcon icon="fa-linkedin-in" />
-                    <SocialIcon icon="fa-twitter" />
+                <div className="mt-auto pt-4">
+                  <h3 className="mb-4 text-xl font-semibold">Stay Connected</h3>
+                  <div className="flex space-x-3">
+                    {socialLinks.map((item) => (
+                      <a
+                        key={item.label}
+                        href="#"
+                        aria-label={item.label}
+                        className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#1c64f2] shadow-sm transition-colors hover:bg-gray-100"
+                      >
+                        <i className={`fa-brands ${item.icon} text-sm`}></i>
+                      </a>
+                    ))}
                   </div>
                 </div>
               </div>
-            </div>
+            </aside>
           </div>
-        </div>
-      </div>
 
-      {/* Google Map Section */}
-      <div className="max-w-7xl mx-auto px-6 md:px-12 pb-24">
-        <div className="w-full lg:w-3/4 mx-auto overflow-hidden rounded-2xl shadow-xl border border-gray-100">
-          <iframe
-            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.814343940183!2d85.3312!3d27.6915!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb199a06c2ad2b%3A0x390a3992d995bb!2sNew%20Baneshwor%2C%20Kathmandu%2044600!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
-            width="100%"
-            height="400"
-            style={{ border: 0 }}
-            allowFullScreen
-            loading="lazy"
-            referrerPolicy="no-referrer-when-downgrade"
-            className="grayscale hover:grayscale-0 transition-all duration-700"
-          />
+          <div className="mt-12 h-96 w-full overflow-hidden rounded-2xl border border-gray-200 shadow-sm">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14130.857353934944!2d85.3392436!3d27.6952226!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb199042c161ab%3A0x6b29f0e1c2813583!2sNew%20Baneshwor%2C%20Kathmandu%2044600%2C%20Nepal!5e0!3m2!1sen!2snp!4v1700000000000!5m2!1sen!2snp"
+              title="Location Map"
+              className="h-full w-full border-0"
+              loading="lazy"
+              allowFullScreen
+              referrerPolicy="no-referrer-when-downgrade"
+            />
+          </div>
+        </main>
+
+        <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-3">
+          {toasts.map((toast) => (
+            <div
+              key={toast.id}
+              className={`flex max-w-sm items-start gap-3 rounded border-l-4 border-[#1c64f2] bg-white px-4 py-3 shadow-lg ${
+                toast.exiting ? "contact-toast-exit" : "contact-toast-enter"
+              }`}
+            >
+              <div className="mt-0.5 text-[#1c64f2]">
+                <i className="fa-solid fa-circle-check text-lg"></i>
+              </div>
+              <div>
+                <h4 className="text-sm font-bold text-gray-900">{toast.title}</h4>
+                <p className="mt-1 text-sm text-gray-600">{toast.message}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => dismissToast(toast.id)}
+                className="ml-auto text-gray-400 transition-colors hover:text-gray-600"
+                aria-label="Dismiss notification"
+              >
+                <i className="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+          ))}
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
-const SocialIcon: React.FC<{ icon: string }> = ({ icon }) => (
-  <a
-    href="#"
-    className="bg-white text-blue-600 w-11 h-11 rounded-full flex items-center justify-center hover:bg-blue-50 transition-all duration-300 shadow-lg shadow-black/10 hover:scale-110"
-  >
-    <i className={`fa-brands ${icon} text-lg`}></i>
-  </a>
+const FormField: React.FC<{
+  label: string;
+  required?: boolean;
+  children: React.ReactNode;
+}> = ({ label, required = false, children }) => (
+  <div>
+    <label className="mb-2 block text-sm font-bold text-gray-900">
+      {label} {required && <span className="text-red-500">*</span>}
+    </label>
+    {children}
+  </div>
+);
+
+const InfoBlock: React.FC<{
+  title: string;
+  children: React.ReactNode;
+}> = ({ title, children }) => (
+  <div>
+    <h3 className="mb-3 text-xl font-semibold">{title}</h3>
+    {children}
+  </div>
 );
 
 export default ContactPage;

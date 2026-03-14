@@ -1,377 +1,983 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 
 interface CollegeComparisonResultPageProps {
-    onNavigate: (view: any, data?: any) => void;
+  onNavigate: (view: any, data?: any) => void;
 }
 
-const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = ({ onNavigate }) => {
-    const location = useLocation();
-    const navigate = useNavigate();
-    const state = location.state as { college1?: any; college2?: any } | null;
+type TabKey =
+  | "overview"
+  | "academics"
+  | "facilities"
+  | "financial"
+  | "career"
+  | "reviews"
+  | "photos";
 
-    const c1Text = state?.college1?.name || (typeof state?.college1 === 'string' ? state.college1 : "Pulchowk Campus");
-    const c2Text = state?.college2?.name || (typeof state?.college2 === 'string' ? state.college2 : "Kathmandu University");
+interface ComparisonCollege {
+  name?: string;
+  logo?: string;
+  location?: string;
+  rating?: number;
+  reviews_count?: number;
+}
 
-    const [activeTab, setActiveTab] = useState("Academic Quality");
+interface CompareRow {
+  label: string;
+  left: string;
+  right: string;
+}
 
-    const tabs = [
-        "Academic Quality",
-        "Infrastructure & Facilities",
-        "Fee Structure & Scholarships",
-        "Location & Accessibility",
-        "Result & Reputation",
-        "Career Support & Opportunities",
-        "Student Life & Environment",
-        "Course & Stream Options"
-    ];
+interface CompareSection {
+  title: string;
+  rows: CompareRow[];
+}
 
-    return (
-        <div className="bg-[#ffffff] min-h-screen w-full font-sans pb-16 pt-6">
-            <style>{`
-        /* Avoid overriding global body if not needed, isolate to container */
-        .comparison-container {
-            font-family: 'Inter', sans-serif;
-        }
+const tabs: Array<{ key: TabKey; label: string }> = [
+  { key: "overview", label: "Overview" },
+  { key: "academics", label: "Academics" },
+  { key: "facilities", label: "Facilities" },
+  { key: "financial", label: "Financial & Scholarship" },
+  { key: "career", label: "Career & Placement" },
+  { key: "reviews", label: "Reviews & Reputation" },
+  { key: "photos", label: "Photos & Video" },
+];
 
-        /* Utility to hide scrollbars for specific containers like the tabs */
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-        .scrollbar-hide {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
-        }
-        
-        /* Tab specific styling to achieve the exact folder-tab overlap effect */
-        .tab-btn {
-            position: relative;
-            bottom: -1px; /* Overlap the bottom border */
-        }
-        .tab-active {
-            border-top: 2px solid #3b82f6 !important; /* Blue top border */
-            border-left: 1px solid #e5e7eb !important;
-            border-right: 1px solid #e5e7eb !important;
-            border-bottom: 1px solid #ffffff !important;
-            background-color: #f8fafc;
-            color: #1e293b !important;
-            font-weight: 600 !important;
-        }
-      `}</style>
+const leftCourseOptions = [
+  "BSc. CSIT",
+  "BCA",
+  "BBA",
+  "BIM",
+  "BBS",
+  "BIT",
+];
 
-            <div className="max-w-[1100px] mx-auto px-4 comparison-container">
+const rightCourseOptions = [
+  "All Courses",
+  "BSc. CSIT",
+  "BCA",
+  "BBA",
+  "BBS",
+  "BA",
+];
 
-                {/* Header Area */}
-                <div className="flex justify-between items-center mb-6">
-                    <h1 className="text-3xl font-bold text-[#1e293b]">Compare {c1Text} vs {c2Text}</h1>
-                    <button className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors font-medium">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <circle cx="18" cy="5" r="3"></circle>
-                            <circle cx="6" cy="12" r="3"></circle>
-                            <circle cx="18" cy="19" r="3"></circle>
-                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
-                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
-                        </svg>
-                        Share
-                    </button>
-                </div>
-
-                {/* Comparison Cards Container */}
-                <div className="border border-gray-200 rounded-xl flex flex-col relative bg-white shadow-sm">
-
-                    {/* VS Badge (Absolutely positioned in the center of the top half) */}
-                    <div className="absolute left-1/2 top-[110px] -translate-x-1/2 -translate-y-1/2 bg-[#1e293b] text-white text-[11px] font-bold rounded-full w-8 h-8 flex items-center justify-center border-[3px] border-white z-10 hidden md:flex">
-                        VS
-                    </div>
-
-                    {/* Top Section: Company Info */}
-                    <div className="flex flex-col md:flex-row">
-
-                        {/* College 1 Card */}
-                        <div className="flex-1 p-6 md:border-r border-b md:border-b-0 border-gray-200 relative">
-                            <div className="flex justify-between items-start">
-                                <div className="flex gap-4">
-                                    {/* Logo Box */}
-                                    <div className="w-20 h-20 rounded-xl border border-gray-200 p-1 flex-shrink-0">
-                                        <div className="w-full h-full rounded-full bg-gradient-to-b from-blue-700 via-blue-500 to-indigo-600 flex items-center justify-center text-white font-bold text-xl uppercase">
-                                            {c1Text.substring(0, 2)}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h2 className="text-[22px] font-bold text-blue-600 leading-tight mb-2 hover:underline cursor-pointer">{c1Text}</h2>
-
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <div className="bg-[#5cb85c] text-white flex items-center gap-1 px-1.5 py-0.5 rounded text-sm font-bold">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                                </svg>
-                                                4.5
-                                            </div>
-                                            <span className="text-sm text-gray-500">(1,240 Reviews)</span>
-                                        </div>
-
-                                        <div className="bg-blue-50 border border-blue-100 rounded-md px-2.5 py-1.5 flex items-center gap-2 w-fit">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
-                                                <polyline points="2 17 12 22 22 17"></polyline>
-                                                <polyline points="2 12 12 17 22 12"></polyline>
-                                            </svg>
-                                            <span className="text-[13px] text-blue-700 font-medium">Top Ranked <span className="text-blue-500 font-normal">Engineering Campus</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M12 20h9"></path>
-                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-
-                        {/* College 2 Card */}
-                        <div className="flex-1 p-6">
-                            <div className="flex justify-between items-start">
-                                <div className="flex gap-4">
-                                    {/* Logo Box */}
-                                    <div className="w-20 h-20 rounded-xl border border-gray-200 flex items-center justify-center p-2 flex-shrink-0 bg-white">
-                                        <div className="w-full h-full rounded-full bg-gradient-to-b from-red-600 via-red-500 to-orange-500 flex items-center justify-center text-white font-bold text-xl uppercase">
-                                            {c2Text.substring(0, 2)}
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <h2 className="text-[22px] font-bold text-blue-600 leading-tight mb-2 hover:underline cursor-pointer">{c2Text}</h2>
-
-                                        <div className="flex items-center gap-2 mb-3">
-                                            <div className="bg-[#5cb85c] text-white flex items-center gap-1 px-1.5 py-0.5 rounded text-sm font-bold">
-                                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none">
-                                                    <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                                                </svg>
-                                                4.6
-                                            </div>
-                                            <span className="text-sm text-gray-500">(980 Reviews)</span>
-                                        </div>
-
-                                        <div className="bg-[#f0fdf4] border border-[#dcfce7] rounded-md px-2.5 py-1.5 flex items-center gap-2 w-fit">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                                <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-                                                <path d="M6 12v5c3 3 9 3 12 0v-5"></path>
-                                            </svg>
-                                            <span className="text-[13px] text-[#16a34a] font-medium">Top Rated <span className="text-gray-500 font-normal">for Research & IT</span></span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <button className="w-8 h-8 rounded-full border border-gray-200 flex items-center justify-center text-gray-400 hover:bg-gray-50 transition-colors">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M12 20h9"></path>
-                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Bottom Section: Dropdown Selectors */}
-                    <div className="flex flex-col md:flex-row border-t border-gray-200">
-
-                        {/* College 1 Selectors */}
-                        <div className="flex-1 flex md:border-r border-b md:border-b-0 border-gray-200">
-                            <div className="flex-1 flex items-center justify-between p-4 border-r border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-                                    </svg>
-                                    <span className="text-[14px] text-gray-700">All Programs</span>
-                                </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </div>
-
-                            <div className="flex-1 flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                        <circle cx="12" cy="10" r="3"></circle>
-                                    </svg>
-                                    <span className="text-[14px] text-gray-700">Nepal</span>
-                                </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </div>
-                        </div>
-
-                        {/* College 2 Selectors */}
-                        <div className="flex-1 flex">
-                            <div className="flex-1 flex items-center justify-between p-4 border-r border-gray-200 hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-                                    </svg>
-                                    <span className="text-[14px] text-gray-700">All Programs</span>
-                                </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </div>
-
-                            <div className="flex-1 flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors">
-                                <div className="flex items-center gap-3">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                                        <circle cx="12" cy="10" r="3"></circle>
-                                    </svg>
-                                    <span className="text-[14px] text-gray-700">Nepal</span>
-                                </div>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Navigation Tabs */}
-                <div className="mt-6 border-b border-gray-200 w-full overflow-x-auto scrollbar-hide">
-                    <ul className="flex min-w-max">
-                        {tabs.map((tab) => (
-                            <li
-                                key={tab}
-                                className={`tab-btn px-5 py-3.5 text-sm cursor-pointer whitespace-nowrap border-t-2 border-l border-r border-b ${activeTab === tab ? "tab-active" : "border-transparent border-b-transparent text-gray-600 hover:text-gray-900 font-medium"}`}
-                                onClick={() => setActiveTab(tab)}
-                            >
-                                {tab}
-                            </li>
-                        ))}
-                    </ul>
-                </div>
-
-                {/* Academic Quality Content Section (Using standard sub points) */}
-                <div className="mt-8">
-                    <div className="flex items-center gap-2 mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
-                        </svg>
-                        <h2 className="text-[20px] font-bold text-[#1e293b]">{activeTab}</h2>
-                    </div>
-
-                    {activeTab === "Academic Quality" ? (
-                        <div className="border border-gray-200 rounded-xl bg-[#f8fafc] flex flex-col">
-                            {/* Sub-point 1: University affiliation */}
-                            <div className="p-6 border-b border-gray-200 last:border-b-0 flex flex-col md:flex-row md:items-center">
-                                <div className="text-[15px] font-semibold text-[#64748b] mb-4 md:mb-0 md:w-1/3">University Affiliation</div>
-                                <div className="flex md:w-2/3 flex-col sm:flex-row gap-4 sm:gap-0">
-                                    <div className="flex-1 flex items-center gap-2">
-                                        <div className="bg-blue-500 text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">Tribhuvan University (TU)</span>
-                                    </div>
-                                    <div className="flex-1 flex items-center gap-2">
-                                        <div className="bg-blue-500 text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">Autonomous (KU)</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Sub-point 2: Faculty qualification */}
-                            <div className="p-6 border-b border-gray-200 last:border-b-0 flex flex-col md:flex-row md:items-center">
-                                <div className="text-[15px] font-semibold text-[#64748b] mb-4 md:mb-0 md:w-1/3">Faculty Qualification</div>
-                                <div className="flex md:w-2/3 flex-col sm:flex-row gap-4 sm:gap-0">
-                                    <div className="flex-1 flex items-center gap-2 flex-wrap">
-                                        <div className="bg-[#5cb85c] text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">4.6</span>
-                                        <span className="text-sm text-gray-500 ml-1">Highly Experienced</span>
-                                    </div>
-                                    <div className="flex-1 flex items-center gap-2 flex-wrap">
-                                        <div className="bg-[#5cb85c] text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">4.5</span>
-                                        <span className="text-sm text-gray-500 ml-1">Research Oriented</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Sub-point 3: Pass rate / board results */}
-                            <div className="p-6 border-b border-gray-200 last:border-b-0 flex flex-col md:flex-row md:items-center">
-                                <div className="text-[15px] font-semibold text-[#64748b] mb-4 md:mb-0 md:w-1/3">Pass Rate / Board Results</div>
-                                <div className="flex md:w-2/3 flex-col sm:flex-row gap-4 sm:gap-0">
-                                    <div className="flex-1 flex items-center gap-2">
-                                        <div className="bg-yellow-500 text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">88%</span>
-                                    </div>
-                                    <div className="flex-1 flex items-center gap-2 flex-wrap">
-                                        <div className="bg-[#5cb85c] text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">94%</span>
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="#facc15" stroke="#ca8a04" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                            <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path>
-                                            <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path>
-                                            <path d="M4 22h16"></path>
-                                            <path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path>
-                                            <path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path>
-                                            <path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path>
-                                        </svg>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Sub-point 4: Teaching method */}
-                            <div className="p-6 border-b border-gray-200 last:border-b-0 flex flex-col md:flex-row md:items-center">
-                                <div className="text-[15px] font-semibold text-[#64748b] mb-4 md:mb-0 md:w-1/3">Teaching Method</div>
-                                <div className="flex md:w-2/3 flex-col sm:flex-row gap-4 sm:gap-0">
-                                    <div className="flex-1 flex items-center gap-2">
-                                        <div className="bg-gray-400 text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">Theoretical</span>
-                                    </div>
-                                    <div className="flex-1 flex items-center gap-2">
-                                        <div className="bg-[#5cb85c] text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">Practical Focus</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Sub-point 5: Extra academic support */}
-                            <div className="p-6 border-b border-gray-200 last:border-b-0 flex flex-col md:flex-row md:items-center">
-                                <div className="text-[15px] font-semibold text-[#64748b] mb-4 md:mb-0 md:w-1/3">Extra Academic Support</div>
-                                <div className="flex md:w-2/3 flex-col sm:flex-row gap-4 sm:gap-0">
-                                    <div className="flex-1 flex items-center gap-2 flex-wrap">
-                                        <div className="bg-yellow-500 text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">3.2</span>
-                                        <span className="text-sm text-gray-500 ml-1">Self-study</span>
-                                    </div>
-                                    <div className="flex-1 flex items-center gap-2 flex-wrap">
-                                        <div className="bg-[#5cb85c] text-white p-0.5 rounded-sm shadow-sm">
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
-                                        </div>
-                                        <span className="font-bold text-[17px] text-[#1e293b] underline decoration-gray-400 underline-offset-4">4.1</span>
-                                        <span className="text-sm text-gray-500 ml-1">Structured</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-                    ) : (
-                        <div className="border border-gray-200 rounded-xl bg-[#f8fafc] flex flex-col items-center justify-center p-12 text-gray-500">
-                            <p className="font-medium text-lg">Details for {activeTab} are pending available data.</p>
-                        </div>
-                    )}
-                </div>
-
+const renderComparisonRows = (rows: CompareRow[]) => (
+  <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm">
+    {rows.map((row, index) => {
+      const isLast = index === rows.length - 1;
+      return (
+        <div key={row.label}>
+          <div
+            className={`bg-[#f8fafe] px-4 md:px-6 py-2.5 text-[14px] font-medium text-slate-600 ${
+              isLast ? "" : "border-b border-gray-200"
+            }`}
+          >
+            {row.label}
+          </div>
+          <div
+            className={`grid grid-cols-2 bg-white ${
+              isLast ? "" : "border-b border-gray-200"
+            }`}
+          >
+            <div className="p-4 md:px-6 border-r border-gray-200">
+              <span className="text-gray-900 font-semibold text-[15px]">{row.left}</span>
             </div>
+            <div className="p-4 md:px-6">
+              <span className="text-gray-900 font-semibold text-[15px]">{row.right}</span>
+            </div>
+          </div>
         </div>
-    );
+      );
+    })}
+  </div>
+);
+
+const renderGroupedSections = (sections: CompareSection[]) => (
+  <>
+    {sections.map((section) => (
+      <div key={section.title} className="mt-8 first:mt-0">
+        <h3 className="text-[17px] font-bold text-gray-800 mb-3 pl-1">{section.title}</h3>
+        {renderComparisonRows(section.rows)}
+      </div>
+    ))}
+  </>
+);
+
+const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = () => {
+  const location = useLocation();
+  const state = location.state as {
+    college1?: ComparisonCollege | string;
+    college2?: ComparisonCollege | string;
+  } | null;
+
+  const college1Obj: ComparisonCollege =
+    typeof state?.college1 === "string"
+      ? { name: state.college1 }
+      : state?.college1 || {};
+  const college2Obj: ComparisonCollege =
+    typeof state?.college2 === "string"
+      ? { name: state.college2 }
+      : state?.college2 || {};
+
+  const c1Name = college1Obj.name || "KIST College";
+  const c2Name = college2Obj.name || "GoldenGate Int'l";
+
+  const [activeTab, setActiveTab] = useState<TabKey>("overview");
+  const [leftCourse, setLeftCourse] = useState("BSc. CSIT");
+  const [rightCourse, setRightCourse] = useState("All Courses");
+  const [leftSearch, setLeftSearch] = useState("");
+  const [rightSearch, setRightSearch] = useState("");
+  const [leftDropdownOpen, setLeftDropdownOpen] = useState(false);
+  const [rightDropdownOpen, setRightDropdownOpen] = useState(false);
+
+  const leftDropdownRef = useRef<HTMLDivElement>(null);
+  const rightDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const onOutsideClick = (event: MouseEvent) => {
+      if (
+        leftDropdownRef.current &&
+        !leftDropdownRef.current.contains(event.target as Node)
+      ) {
+        setLeftDropdownOpen(false);
+      }
+
+      if (
+        rightDropdownRef.current &&
+        !rightDropdownRef.current.contains(event.target as Node)
+      ) {
+        setRightDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", onOutsideClick);
+    return () => document.removeEventListener("mousedown", onOutsideClick);
+  }, []);
+
+  const filteredLeftCourses = useMemo(
+    () =>
+      leftCourseOptions.filter((option) =>
+        option.toLowerCase().includes(leftSearch.toLowerCase()),
+      ),
+    [leftSearch],
+  );
+
+  const filteredRightCourses = useMemo(
+    () =>
+      rightCourseOptions.filter((option) =>
+        option.toLowerCase().includes(rightSearch.toLowerCase()),
+      ),
+    [rightSearch],
+  );
+
+  const overviewRows: CompareRow[] = [
+    { label: "Year Established", left: "1995", right: "2007" },
+    {
+      label: "Type (Private / Public / Community)",
+      left: "Private",
+      right: "Private",
+    },
+    {
+      label: "Affiliated University",
+      left: "Pokhara University (PU)",
+      right: "Tribhuvan University (TU)",
+    },
+    { label: "Total Students (Approx.)", left: "3,500+", right: "2,800+" },
+    { label: "Campus Size", left: "3 Acres", right: "2.5 Acres" },
+    {
+      label: "Class Mode (Physical / Hybrid / Online)",
+      left: "Physical / Hybrid",
+      right: "Physical",
+    },
+  ];
+
+  const academicsSections: CompareSection[] = [
+    {
+      title: "Programs Offered",
+      rows: [
+        {
+          label: "+2 Programs",
+          left: "Science, Management",
+          right: "Science, Management, Humanities",
+        },
+        {
+          label: "Bachelor Programs",
+          left: "BBA, BIM, BIT, BBS",
+          right: "BSc. CSIT, BCA, BBA, BA",
+        },
+        {
+          label: "Master Programs",
+          left: "MBS, MIT",
+          right: "MSc, MA, MBS",
+        },
+      ],
+    },
+    {
+      title: "Academic Structure",
+      rows: [
+        {
+          label: "Semester / Annual System",
+          left: "Semester Based",
+          right: "Semester Based",
+        },
+        {
+          label: "Credit System (Yes/No)",
+          left: "Yes (120 Credits)",
+          right: "Yes (120 Credits)",
+        },
+        {
+          label: "Internship Included (Yes/No)",
+          left: "Yes (Mandatory in 8th Sem)",
+          right: "Yes",
+        },
+      ],
+    },
+    {
+      title: "Faculty Information",
+      rows: [
+        { label: "Total Faculty", left: "120+", right: "100+" },
+        {
+          label: "% with Masters / PhD",
+          left: "85% Masters / 15% PhD",
+          right: "80% Masters / 12% PhD",
+        },
+        {
+          label: "Industry Experience (Yes/No)",
+          left: "Yes (IT & Mgmt Experts)",
+          right: "Yes",
+        },
+      ],
+    },
+    {
+      title: "Academic Performance",
+      rows: [
+        { label: "Board / University Pass Rate", left: "88%", right: "85%" },
+        { label: "Distinction / GPA Holders", left: "22%", right: "18%" },
+        {
+          label: "Research / Project-Based Learning",
+          left: "High Emphasis (Annual IT Fests)",
+          right: "Moderate",
+        },
+      ],
+    },
+  ];
+
+  const facilitiesSections: CompareSection[] = [
+    {
+      title: "Academic Facilities",
+      rows: [
+        {
+          label: "Computer Labs (No. of Labs)",
+          left: "5 Labs (200+ PCs)",
+          right: "4 Labs (150+ PCs)",
+        },
+        {
+          label: "Science Labs",
+          left: "Physics, Chemistry, Biology",
+          right: "Physics, Chemistry, Biology",
+        },
+        {
+          label: "Engineering Workshops",
+          left: "No",
+          right: "Yes (Basic Electronics)",
+        },
+        {
+          label: "Library (No. of Books)",
+          left: "15,000+ Books",
+          right: "12,000+ Books",
+        },
+        {
+          label: "E-Library Access",
+          left: "Yes (ProQuest, IEEE)",
+          right: "Yes (HINARI, Local Portal)",
+        },
+      ],
+    },
+    {
+      title: "Student Facilities",
+      rows: [
+        {
+          label: "Hostel (Boys / Girls)",
+          left: "Available (Both)",
+          right: "Available (Both)",
+        },
+        {
+          label: "Transportation",
+          left: "Valley-wide Service",
+          right: "Limited Routes",
+        },
+        {
+          label: "Cafeteria",
+          left: "2 Hygienic Canteens",
+          right: "Standard Cafeteria",
+        },
+        {
+          label: "Sports (Indoor / Outdoor)",
+          left: "Basketball, TT, Futsal",
+          right: "Basketball, TT, Badminton",
+        },
+        {
+          label: "Clubs",
+          left: "IT, Robotics, Management, Debate",
+          right: "IT, Sports, Arts & Culture",
+        },
+        {
+          label: "Healthcare / First Aid",
+          left: "On-campus Clinic & Nurse",
+          right: "Basic First Aid",
+        },
+        {
+          label: "Counseling Services",
+          left: "Weekly Sessions",
+          right: "On-demand",
+        },
+      ],
+    },
+    {
+      title: "Digital Infrastructure",
+      rows: [
+        {
+          label: "Student Portal",
+          left: "Yes (Attendance, Grades, Notes)",
+          right: "Yes (Basic Portal)",
+        },
+        {
+          label: "WiFi Access",
+          left: "Campus-wide (High-speed)",
+          right: "Limited Zones",
+        },
+        {
+          label: "Online Exam System",
+          left: "Moodle Based",
+          right: "Custom Portal",
+        },
+      ],
+    },
+  ];
+
+  const financialSections: CompareSection[] = [
+    {
+      title: "Fee Structure",
+      rows: [
+        {
+          label: "Total Fee Range (Approx.)",
+          left: "NPR 6,00,000 - 12,00,000",
+          right: "NPR 5,50,000 - 10,00,000",
+        },
+        {
+          label: "Admission Fee",
+          left: "NPR 50,000 (One-time)",
+          right: "NPR 40,000 (One-time)",
+        },
+        {
+          label: "Exam Fee (if separate)",
+          left: "As per University Norms",
+          right: "As per University Norms",
+        },
+      ],
+    },
+    {
+      title: "Payment Options",
+      rows: [
+        {
+          label: "Installment Available",
+          left: "Yes (Semester-wise)",
+          right: "Yes (Quarterly)",
+        },
+        {
+          label: "EMI Option",
+          left: "Available via Nabil Bank",
+          right: "Not Available",
+        },
+        {
+          label: "Payment Mode (Bank / Online)",
+          left: "eSewa, ConnectIPS, Bank Deposit",
+          right: "Bank Deposit Only",
+        },
+      ],
+    },
+    {
+      title: "Scholarship Types",
+      rows: [
+        {
+          label: "Merit-Based",
+          left: "Up to 100% (GPA 3.6+)",
+          right: "Up to 75% (GPA 3.6+)",
+        },
+        {
+          label: "Need-Based",
+          left: "Yes (Up to 50% waiver)",
+          right: "Yes (Subject to verification)",
+        },
+        {
+          label: "Entrance-Based",
+          left: "Top 10 Rankers",
+          right: "Top 5 Rankers",
+        },
+        {
+          label: "Government Quota",
+          left: "10% seats reserved",
+          right: "10% seats reserved",
+        },
+        {
+          label: "Special Category (Dalit / Remote Area / etc.)",
+          left: "As per TU/PU regulations",
+          right: "As per TU regulations",
+        },
+      ],
+    },
+    {
+      title: "Financial Transparency",
+      rows: [
+        {
+          label: "Refund Policy",
+          left: "Security Deposit only",
+          right: "Strict (No tuition refund)",
+        },
+        {
+          label: "Hidden Charges (If Reported)",
+          left: "Field trips / Events extra",
+          right: "Handouts / Printed materials extra",
+        },
+      ],
+    },
+  ];
+
+  const careerSections: CompareSection[] = [
+    {
+      title: "Career Support",
+      rows: [
+        {
+          label: "Career Counseling (Yes/No)",
+          left: "Yes (Dedicated Placement Cell)",
+          right: "Yes (Faculty Advised)",
+        },
+        {
+          label: "CV / Interview Training",
+          left: "Regular Workshops & Mock Tests",
+          right: "Occasional Seminars",
+        },
+        {
+          label: "Internship Placement Assistance",
+          left: "Strong (IT & Banking Sector)",
+          right: "Moderate Support",
+        },
+        {
+          label: "Job Fair Organized",
+          left: "Yes (Annual IT & Mgmt Fest)",
+          right: "Yes",
+        },
+      ],
+    },
+    {
+      title: "Placement Information",
+      rows: [
+        {
+          label: "Hiring Companies",
+          left: "F1Soft, Leapfrog, Nabil Bank",
+          right: "Local IT Firms, Commercial Banks",
+        },
+        { label: "Placement Support (Yes/No)", left: "Yes", right: "Yes" },
+        { label: "Placement Rate", left: "~75% (Specifically in IT)", right: "~65%" },
+        {
+          label: "Average Salary Range (Entry-level)",
+          left: "NPR 25,000 - 45,000 / month",
+          right: "NPR 20,000 - 35,000 / month",
+        },
+      ],
+    },
+    {
+      title: "Alumni Network",
+      rows: [
+        {
+          label: "Notable Alumni",
+          left: "Tech Entrepreneurs, Senior Bankers",
+          right: "Government Officials, Entrepreneurs",
+        },
+        {
+          label: "Alumni Association",
+          left: "Highly Active (KIST Alumni Society)",
+          right: "Registered & Active",
+        },
+        {
+          label: "Alumni Mentorship",
+          left: "Yes (Frequent Guest Lectures)",
+          right: "Informal Networking",
+        },
+      ],
+    },
+    {
+      title: "Higher Study Support",
+      rows: [
+        {
+          label: "Abroad Counseling",
+          left: "Yes (In-house Guidance Cell)",
+          right: "Basic General Guidance",
+        },
+        {
+          label: "Recommendation Letters",
+          left: "Standardized & Prompt Process",
+          right: "Provided Upon Request",
+        },
+        {
+          label: "Test Preparation Support",
+          left: "Tie-ups with Top Consultancies",
+          right: "Not Specifically Provided",
+        },
+      ],
+    },
+  ];
+
+  const initials = (name: string) =>
+    name
+      .split(" ")
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((part) => part[0]?.toUpperCase())
+      .join("");
+
+  return (
+    <div className="bg-gray-50/50 text-gray-800 min-h-screen p-4 md:p-8">
+      <div className="max-w-[1000px] mx-auto">
+        <div className="flex justify-between items-center mb-6 gap-4">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">
+            Compare {c1Name} vs {c2Name}
+          </h1>
+          <button className="flex items-center gap-2 text-gray-500 hover:text-gray-800 transition-colors font-medium text-sm">
+            <i className="fa-solid fa-share-nodes text-[13px]"></i>
+            Share
+          </button>
+        </div>
+
+        <div className="relative border border-gray-200 rounded-xl bg-white shadow-sm flex flex-col md:flex-row overflow-visible">
+          <div className="absolute left-1/2 top-[100px] md:top-24 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white shadow-sm hidden md:flex">
+            VS
+          </div>
+
+          <div className="flex-1 flex flex-col md:border-r border-gray-200">
+            <div className="p-5 md:p-6 relative flex gap-4 rounded-tl-xl md:rounded-bl-none">
+              <button className="absolute top-4 right-4 p-1.5 border border-gray-200 rounded-full text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors">
+                <i className="fa-solid fa-pen text-[11px]"></i>
+              </button>
+
+              <div className="w-[72px] h-[72px] border border-gray-200 rounded-xl flex items-center justify-center p-1 flex-shrink-0 bg-white shadow-sm overflow-hidden">
+                {college1Obj.logo ? (
+                  <img src={college1Obj.logo} alt={c1Name} className="w-full h-full object-contain" />
+                ) : (
+                  <span className="text-sm font-bold text-indigo-700">{initials(c1Name)}</span>
+                )}
+              </div>
+
+              <div className="flex-1">
+                <button className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left">
+                  {c1Name}
+                </button>
+
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="bg-[#10b981] text-white px-1.5 py-0.5 rounded flex items-center gap-1 text-sm font-bold">
+                    <i className="fa-solid fa-star text-[11px]"></i>
+                    {college1Obj.rating?.toFixed(1) || "4.2"}
+                  </span>
+                  <span className="text-[#64748b] text-sm">
+                    ({college1Obj.reviews_count?.toLocaleString() || "1.2k"} Reviews)
+                  </span>
+                </div>
+
+                <div className="inline-flex items-center gap-1.5 bg-green-50 text-green-700 px-2 py-1 rounded text-[13px] font-medium border border-green-100/50">
+                  <i className="fa-solid fa-arrow-up text-[11px]"></i>
+                  <span>Rated 4% above the avg.</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex border-t border-gray-100 flex-col sm:flex-row h-auto sm:h-12">
+              <div
+                ref={leftDropdownRef}
+                className="relative flex-1 border-b sm:border-b-0 sm:border-r border-gray-100"
+              >
+                <button
+                  onClick={() => setLeftDropdownOpen((prev) => !prev)}
+                  className={`flex items-center justify-between p-3 w-full h-full transition-colors ${
+                    leftCourse === "BSc. CSIT" ? "bg-[#fffbf4] hover:bg-[#fcf6ea]" : "bg-white hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <i className="fa-solid fa-book-open text-[#2c51c6]"></i>
+                    <span className={`truncate ${leftCourse === "BSc. CSIT" ? "font-medium" : ""}`}>
+                      {leftCourse}
+                    </span>
+                  </div>
+                  <i className="fa-solid fa-chevron-down text-[11px] text-gray-400"></i>
+                </button>
+
+                {leftDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-[300px] bg-white border border-gray-200 rounded-lg shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)] z-50">
+                    <div className="absolute -top-2 left-6 w-4 h-4 bg-white border-t border-l border-gray-200 transform rotate-45"></div>
+                    <div className="relative z-10 bg-white rounded-lg flex flex-col">
+                      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+                        <span className="font-bold text-gray-900 text-[15px]">Select Course</span>
+                        <button
+                          onClick={() => setLeftCourse("")}
+                          className="text-[#2c51c6] font-medium hover:underline text-sm"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                      <div className="p-3 border-b border-gray-100 bg-white">
+                        <div className="relative">
+                          <i className="fa-solid fa-magnifying-glass text-xs text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                          <input
+                            value={leftSearch}
+                            onChange={(event) => setLeftSearch(event.target.value)}
+                            type="text"
+                            placeholder="Search course"
+                            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-[#2c51c6] focus:ring-1 focus:ring-[#2c51c6] placeholder-gray-400"
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto p-1.5">
+                        {filteredLeftCourses.map((option) => (
+                          <label
+                            key={option}
+                            className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md cursor-pointer"
+                          >
+                            <input
+                              type="radio"
+                              checked={leftCourse === option}
+                              onChange={() => {
+                                setLeftCourse(option);
+                                setLeftDropdownOpen(false);
+                              }}
+                              className="accent-[#2c51c6]"
+                            />
+                            <span className="text-gray-700 text-[14.5px]">{option}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button className="flex-1 flex items-center justify-between p-3 cursor-pointer bg-white hover:bg-gray-50 transition-colors h-full">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <i className="fa-solid fa-location-dot text-[#2c51c6]"></i>
+                  <span className="truncate">{college1Obj.location || "Kamalpokhari, KTM"}</span>
+                </div>
+                <i className="fa-solid fa-chevron-down text-[11px] text-gray-400"></i>
+              </button>
+            </div>
+          </div>
+
+          <div className="flex-1 flex flex-col relative border-t md:border-t-0 border-gray-200">
+            <div className="absolute left-1/2 top-0 transform -translate-x-1/2 -translate-y-1/2 bg-[#1b254b] text-white rounded-full w-8 h-8 flex items-center justify-center text-[10px] font-bold z-10 border-[3px] border-white shadow-sm md:hidden">
+              VS
+            </div>
+
+            <div className="p-5 md:p-6 relative flex gap-4">
+              <button className="absolute top-4 right-4 p-1.5 border border-gray-200 rounded-full text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors">
+                <i className="fa-solid fa-pen text-[11px]"></i>
+              </button>
+
+              <div className="w-[72px] h-[72px] border border-gray-200 rounded-xl flex items-center justify-center p-1 flex-shrink-0 bg-white shadow-sm overflow-hidden">
+                {college2Obj.logo ? (
+                  <img src={college2Obj.logo} alt={c2Name} className="w-full h-full object-contain" />
+                ) : (
+                  <span className="text-sm font-bold text-indigo-700">{initials(c2Name)}</span>
+                )}
+              </div>
+
+              <div className="flex-1">
+                <button className="text-xl font-semibold text-[#2c51c6] hover:underline block mb-1 text-left">
+                  {c2Name}
+                </button>
+
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="bg-[#f59e0b] text-white px-1.5 py-0.5 rounded flex items-center gap-1 text-sm font-bold">
+                    <i className="fa-solid fa-star text-[11px]"></i>
+                    {college2Obj.rating?.toFixed(1) || "4.0"}
+                  </span>
+                  <span className="text-[#64748b] text-sm">(980 Reviews)</span>
+                </div>
+
+                <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 px-2 py-1 rounded text-[13px] font-medium border border-red-100/50">
+                  <i className="fa-solid fa-arrow-down text-[11px]"></i>
+                  <span>Rated 2% below the avg.</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex border-t border-gray-100 flex-col sm:flex-row h-auto sm:h-12">
+              <div
+                ref={rightDropdownRef}
+                className="relative flex-1 border-b sm:border-b-0 sm:border-r border-gray-100"
+              >
+                <button
+                  onClick={() => setRightDropdownOpen((prev) => !prev)}
+                  className="flex items-center justify-between p-3 w-full h-full transition-colors bg-white hover:bg-gray-50"
+                >
+                  <div className="flex items-center gap-2 text-sm text-gray-700">
+                    <i className="fa-solid fa-book-open text-[#2c51c6]"></i>
+                    <span className="truncate">{rightCourse}</span>
+                  </div>
+                  <i className="fa-solid fa-chevron-down text-[11px] text-gray-400"></i>
+                </button>
+
+                {rightDropdownOpen && (
+                  <div className="absolute top-full left-0 mt-2 w-[300px] bg-white border border-gray-200 rounded-lg shadow-[0_4px_20px_-4px_rgba(0,0,0,0.15)] z-50">
+                    <div className="absolute -top-2 left-6 w-4 h-4 bg-white border-t border-l border-gray-200 transform rotate-45"></div>
+                    <div className="relative z-10 bg-white rounded-lg flex flex-col">
+                      <div className="flex justify-between items-center px-4 py-3 border-b border-gray-100">
+                        <span className="font-bold text-gray-900 text-[15px]">Select Course</span>
+                        <button
+                          onClick={() => setRightCourse("All Courses")}
+                          className="text-[#2c51c6] font-medium hover:underline text-sm"
+                        >
+                          Clear
+                        </button>
+                      </div>
+                      <div className="p-3 border-b border-gray-100 bg-white">
+                        <div className="relative">
+                          <i className="fa-solid fa-magnifying-glass text-xs text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                          <input
+                            value={rightSearch}
+                            onChange={(event) => setRightSearch(event.target.value)}
+                            type="text"
+                            placeholder="Search course"
+                            className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-md text-sm focus:outline-none focus:border-[#2c51c6] focus:ring-1 focus:ring-[#2c51c6] placeholder-gray-400"
+                          />
+                        </div>
+                      </div>
+                      <div className="max-h-64 overflow-y-auto p-1.5">
+                        {filteredRightCourses.map((option) => (
+                          <label
+                            key={option}
+                            className="flex items-center gap-3 p-2 hover:bg-gray-50 rounded-md cursor-pointer"
+                          >
+                            <input
+                              type="radio"
+                              checked={rightCourse === option}
+                              onChange={() => {
+                                setRightCourse(option);
+                                setRightDropdownOpen(false);
+                              }}
+                              className="accent-[#2c51c6]"
+                            />
+                            <span className="text-gray-700 text-[14.5px]">{option}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <button className="flex-1 flex items-center justify-between p-3 cursor-pointer bg-white hover:bg-gray-50 transition-colors h-full md:rounded-br-xl">
+                <div className="flex items-center gap-2 text-sm text-gray-700">
+                  <i className="fa-solid fa-location-dot text-[#2c51c6]"></i>
+                  <span className="truncate">{college2Obj.location || "Battisputali, KTM"}</span>
+                </div>
+                <i className="fa-solid fa-chevron-down text-[11px] text-gray-400"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 border-b border-gray-200">
+          <ul className="flex overflow-x-auto text-sm font-medium text-center [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {tabs.map((tab) => (
+              <li className="mr-2" key={tab.key}>
+                <button
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`inline-block px-4 py-3 border-b-2 rounded-t-lg whitespace-nowrap ${
+                    activeTab === tab.key
+                      ? "text-[#2c51c6] border-[#2c51c6] font-semibold"
+                      : "text-gray-500 hover:text-gray-700 border-transparent hover:border-gray-300"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-8 mb-16">
+          {activeTab === "overview" && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <i className="fa-solid fa-table-columns text-[#1b254b]"></i>
+                <h2 className="text-xl font-bold text-[#1b254b]">Overview</h2>
+              </div>
+              {renderComparisonRows(overviewRows)}
+            </div>
+          )}
+
+          {activeTab === "academics" && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <i className="fa-solid fa-graduation-cap text-[#1b254b]"></i>
+                <h2 className="text-xl font-bold text-[#1b254b]">Academics</h2>
+              </div>
+              {renderGroupedSections(academicsSections)}
+            </div>
+          )}
+
+          {activeTab === "facilities" && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <i className="fa-solid fa-building text-[#1b254b]"></i>
+                <h2 className="text-xl font-bold text-[#1b254b]">Facilities</h2>
+              </div>
+              {renderGroupedSections(facilitiesSections)}
+            </div>
+          )}
+
+          {activeTab === "financial" && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <i className="fa-solid fa-wallet text-[#1b254b]"></i>
+                <h2 className="text-xl font-bold text-[#1b254b]">Financial & Scholarship</h2>
+              </div>
+              {renderGroupedSections(financialSections)}
+            </div>
+          )}
+
+          {activeTab === "career" && (
+            <div>
+              <div className="flex items-center gap-2 mb-4">
+                <i className="fa-solid fa-briefcase text-[#1b254b]"></i>
+                <h2 className="text-xl font-bold text-[#1b254b]">Career & Placement</h2>
+              </div>
+              {renderGroupedSections(careerSections)}
+            </div>
+          )}
+
+          {activeTab === "reviews" && (
+            <div className="max-w-4xl mx-auto">
+              <div className="flex items-center gap-2 mb-4">
+                <i className="fa-solid fa-star text-[#1b254b]"></i>
+                <h2 className="text-xl font-bold text-[#1b254b]">Reviews & Reputation</h2>
+              </div>
+
+              <h3 className="text-[17px] font-bold text-gray-800 mb-3 mt-6 pl-1">Student Ratings (Out of 5)</h3>
+              {renderComparisonRows([
+                { label: "Teaching Quality", left: "4.4 ★", right: "4.1 ★" },
+                { label: "Infrastructure", left: "4.0 ★", right: "3.8 ★" },
+                { label: "Administration", left: "3.9 ★", right: "3.5 ★" },
+                { label: "Value for Money", left: "4.2 ★", right: "4.0 ★" },
+                { label: "Campus Life", left: "4.5 ★", right: "3.9 ★" },
+                { label: "Overall Rating", left: "4.2 ★", right: "4.0 ★" },
+              ])}
+
+              <div className="flex items-center gap-2 mb-4 mt-10 pl-1">
+                <i className="fa-regular fa-message text-[#1b254b]"></i>
+                <h3 className="text-[19px] font-bold text-[#1b254b]">Reviews</h3>
+              </div>
+
+              <div className="border border-gray-200 rounded-xl overflow-hidden bg-white shadow-sm flex flex-col md:flex-row">
+                <div className="flex-1 flex flex-col md:border-r border-gray-200">
+                  <div className="p-5 flex-1">
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex items-center">
+                        <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
+                        <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
+                          <i className="fa-solid fa-star text-[11px]"></i> 4.5
+                        </span>
+                      </div>
+                      <span className="text-[13px] text-gray-500 mt-1">updated on 15 Feb 2026</span>
+                    </div>
+                    <div className="mt-3 text-[13px]">
+                      <span className="text-gray-500">rated by a BSc. CSIT Student in Kathmandu</span>
+                      <div className="text-gray-900 font-semibold mt-0.5">Tribhuvan University (TU) · Full Time</div>
+                    </div>
+                    <div className="mt-5">
+                      <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
+                      <p className="text-[14.5px] text-gray-700 leading-relaxed">
+                        Great faculty for core subjects, good library resources, and active student clubs organizing regular tech fests.
+                      </p>
+                    </div>
+                    <div className="mt-4 mb-2">
+                      <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
+                      <p className="text-[14.5px] text-gray-700 leading-relaxed">
+                        Practical labs need hardware upgrades. Administration processes can be quite slow during exam form submissions.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="border-t border-gray-100 p-4 bg-white">
+                    <button className="text-blue-600 font-bold text-[14.5px] hover:underline">View all TU student reviews</button>
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-col">
+                  <div className="p-5 flex-1">
+                    <div className="flex justify-between items-start gap-3">
+                      <div className="flex items-center">
+                        <div className="w-1 h-6 bg-[#2e7d32] rounded-sm mr-2"></div>
+                        <span className="flex items-center gap-1 bg-[#2e7d32] text-white px-2 py-0.5 rounded text-[15px] font-bold">
+                          <i className="fa-solid fa-star text-[11px]"></i> 4.2
+                        </span>
+                      </div>
+                      <span className="text-[13px] text-gray-500 mt-1">updated on 28 Jan 2026</span>
+                    </div>
+                    <div className="mt-3 text-[13px]">
+                      <span className="text-gray-500">rated by a BCA Student in Pokhara</span>
+                      <div className="text-gray-900 font-semibold mt-0.5">Pokhara University (PU) · Full Time</div>
+                    </div>
+                    <div className="mt-5">
+                      <h4 className="font-bold text-gray-900 text-[15px] mb-1">Likes</h4>
+                      <p className="text-[14.5px] text-gray-700 leading-relaxed">
+                        Beautiful campus environment, updated modern curriculum for IT, and highly supportive professors.
+                      </p>
+                    </div>
+                    <div className="mt-4 mb-2">
+                      <h4 className="font-bold text-gray-900 text-[15px] mb-1">Dislikes</h4>
+                      <p className="text-[14.5px] text-gray-700 leading-relaxed">
+                        Extracurricular activities are somewhat limited compared to academics. Transportation to the main campus can be a hassle sometimes.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="border-t border-gray-100 p-4 bg-white">
+                    <button className="text-blue-600 font-bold text-[14.5px] hover:underline">View all PU student reviews</button>
+                  </div>
+                </div>
+              </div>
+
+              <h3 className="text-[17px] font-bold text-gray-800 mb-3 mt-8 pl-1">Reputation Indicators</h3>
+              {renderComparisonRows([
+                {
+                  label: "Awards & Achievements",
+                  left: "Best IT College Award (2022)",
+                  right: "Excellence in Education (2020)",
+                },
+                {
+                  label: "Years of Operation Badge",
+                  left: "25+ Years of Excellence",
+                  right: "15+ Years Legacy",
+                },
+                {
+                  label: "Media Mentions",
+                  left: "Top 10 Colleges in Nepal",
+                  right: "Tech Fest Highlights",
+                },
+                {
+                  label: "Affiliation Recognition",
+                  left: "TU & PU Highly Recognized",
+                  right: "TU Recognized",
+                },
+              ])}
+            </div>
+          )}
+
+          {activeTab === "photos" && (
+            <div className="p-8 text-center text-gray-500 bg-white border border-gray-200 rounded-xl">
+              Photos & Video content goes here...
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CollegeComparisonResultPage;

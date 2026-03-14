@@ -380,12 +380,14 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) => {
         className={`fixed md:static inset-y-0 left-0 z-[80] w-64 bg-white border-r border-slate-200 transform ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 transition-transform duration-300 flex flex-col h-full shadow-xl md:shadow-none`}
       >
         <div className="h-20 flex items-center px-8 border-b border-slate-100 hidden md:flex">
-          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-lg shadow-blue-500/30">
+          <a href="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-lg shadow-blue-500/30">
             S
           </div>
           <span className="font-bold text-xl tracking-tight text-slate-800">
             StudSphere
           </span>
+          </a>
         </div>
 
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1 mt-16 md:mt-0 flex flex-col">
@@ -416,11 +418,11 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) => {
               label: "Notifications",
               badge: true,
             },
-            {
-              id: "resources",
-              icon: "fas fa-book-open",
-              label: "Study Resources",
-            },
+            // {
+            //   id: "resources",
+            //   icon: "fas fa-book-open",
+            //   label: "Study Resources",
+            // },
           ].map((item) => (
             <button
               key={item.id}
@@ -428,7 +430,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) => {
                 setActiveTab(item.id);
                 setIsSidebarOpen(false);
               }}
-              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors w-full text-left ${activeTab === item.id ? "bg-blue-50 text-blue-600 border-r-4 border-blue-600" : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"}`}
+              className={`flex items-center px-4 py-3 text-sm font-medium rounded-lg transition-colors w-full text-left ${activeTab === item.id ? "bg-blue-200 text-blue-600 " : "text-slate-600 hover:bg-slate-50 hover:text-blue-600"}`}
             >
               <div className="relative">
                 <i className={`${item.icon} w-6`}></i>
@@ -442,7 +444,7 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) => {
 
           <div className="mt-auto"></div>
 
-          <div className="px-2 py-4 mb-2">
+          {/* <div className="px-2 py-4 mb-2">
             <div className="bg-gradient-to-br from-indigo-600 to-blue-500 rounded-xl p-4 text-white text-center shadow-lg relative overflow-hidden group">
               <div className="absolute top-0 right-0 p-2 opacity-10">
                 <i className="fas fa-briefcase text-4xl transform rotate-12"></i>
@@ -457,9 +459,9 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) => {
                 Search Now
               </button>
             </div>
-          </div>
+          </div> */}
 
-          <div className="pt-2 border-t border-slate-100">
+          <div className="pt-2 border-t border-slate-100 ">
             <p className="px-4 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2 mt-4">
               Settings
             </p>

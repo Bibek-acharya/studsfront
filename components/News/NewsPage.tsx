@@ -1,200 +1,233 @@
-import React, { useState, useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { getAllNews, NewsArticle } from "../../lib/news-data";
 
 interface NewsPageProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
+type NewsCategoryFilter =
+  | "All News"
+  | "Admission"
+  | "Scholarship"
+  | "Exams"
+  | "Notice"
+  | "Events"
+  | "Achievements"
+  | "Others";
+
+const categoryPills: NewsCategoryFilter[] = [
+  "All News",
+  "Admission",
+  "Scholarship",
+  "Exams",
+  "Notice",
+  "Events",
+  "Achievements",
+  "Others",
+];
+
+const mapNewsToUiCategory = (article: NewsArticle): NewsCategoryFilter => {
+  if (article.category === "Academic") return "Admission";
+  if (article.category === "Policy") return "Notice";
+  if (article.category === "Tech") return "Exams";
+  if (article.category === "Jobs") return "Others";
+  return "Others";
+};
+
+const categoryBadgeClass = (category: NewsCategoryFilter) => {
+  if (category === "Exams") return "bg-orange-100 text-orange-700";
+  if (category === "Admission") return "bg-blue-100 text-blue-700";
+  if (category === "Scholarship") return "bg-emerald-100 text-emerald-700";
+  if (category === "Notice") return "bg-violet-100 text-violet-700";
+  if (category === "Events") return "bg-pink-100 text-pink-700";
+  if (category === "Achievements") return "bg-amber-100 text-amber-700";
+  return "bg-slate-100 text-slate-700";
+};
+
 const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
-  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [activeCategory, setActiveCategory] = useState<NewsCategoryFilter>("All News");
+  const [sortBy, setSortBy] = useState<"Newest First" | "Oldest First">("Newest First");
+
   const allNews = getAllNews();
   const featuredNews = allNews[0];
 
-  const categories = ["All", "Academic", "Tech", "Jobs", "Policy"];
+  const processedNews = useMemo(() => {
+    const filtered =
+      activeCategory === "All News"
+        ? allNews
+        : allNews.filter((article) => mapNewsToUiCategory(article) === activeCategory);
 
-  const filteredNews = useMemo(() => {
-    if (activeCategory === "All") return allNews;
-    return allNews.filter((n) => n.category === activeCategory);
-  }, [activeCategory, allNews]);
+    const sorted = [...filtered].sort((a, b) => {
+      if (sortBy === "Newest First") {
+        return Number(b.id) - Number(a.id);
+      }
+      return Number(a.id) - Number(b.id);
+    });
+
+    return sorted;
+  }, [activeCategory, allNews, sortBy]);
 
   return (
-    <div className="bg-white min-h-screen pt-24 font-sans pb-20">
-      {/* Featured News Hero - Mirrors BlogPage style */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-10">
-        <div
-          onClick={() => onNavigate("newsDetails", { id: featuredNews.id })}
-          className="relative h-[450px] md:h-[600px] rounded-2xl overflow-hidden group cursor-pointer shadow-2xl animate-fadeInUp"
-        >
-          <img
-            src={featuredNews.image}
-            className="w-full h-full object-cover brightness-[0.4] transition-transform duration-[2000ms] group-hover:scale-105"
-            alt="Featured News"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-slate-900/20 to-transparent"></div>
-
-          <div className="absolute bottom-0 left-0 p-8 md:p-20 w-full md:w-4/5">
-            <span className="inline-block px-5 py-2 rounded-xl bg-primary-600 text-white text-[10px] font-black uppercase tracking-widest mb-8 shadow-xl">
-              Latest Top Story
-            </span>
-            <h1 className="text-4xl md:text-7xl font-black text-white leading-[1.1] tracking-tighter uppercase mb-8 group-hover:text-primary-400 transition-colors">
-              {featuredNews.title}
-            </h1>
-            <p className="text-lg md:text-xl text-slate-300 font-medium leading-relaxed mb-10 max-w-2xl line-clamp-2">
-              {featuredNews.excerpt}
-            </p>
-            <div className="flex items-center gap-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full border-2 border-white/20 bg-white/10 flex items-center justify-center text-white text-xl">
-                  <i className="fa-solid fa-feather"></i>
-                </div>
-                <div className="text-left leading-none">
-                  <p className="text-sm font-black text-white uppercase tracking-widest mb-1">
-                    {featuredNews.author}
-                  </p>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                    StudSphere News Desk
-                  </p>
-                </div>
-              </div>
-              <div className="h-10 w-px bg-white/10"></div>
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {featuredNews.readTime} Read
-              </span>
-              <div className="h-10 w-px bg-white/10 hidden sm:block"></div>
-              <span className="hidden sm:inline-block text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                {featuredNews.date}
-              </span>
-            </div>
-          </div>
+    <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-14 bg-gray-50 min-h-screen text-slate-800">
+      <section>
+        <h2 className="text-2xl font-bold text-slate-900 mb-5">Browse by category</h2>
+        <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {categoryPills.map((pill) => {
+            const isActive = activeCategory === pill;
+            return (
+              <button
+                key={pill}
+                onClick={() => setActiveCategory(pill)}
+                className={`whitespace-nowrap rounded-full px-5 py-2 text-sm font-medium transition-all shadow-sm ${
+                  isActive
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-white border border-gray-200 text-slate-700 hover:bg-gray-50 hover:border-gray-300"
+                }`}
+              >
+                {pill}
+              </button>
+            );
+          })}
         </div>
       </section>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Category Tabs */}
-        <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-16">
-          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2 w-full md:w-auto">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`whitespace-nowrap px-8 py-3 rounded-2xl text-xs font-black uppercase tracking-widest border transition-all ${activeCategory === cat
-                    ? "bg-slate-900 text-white border-slate-900 shadow-xl"
-                    : "bg-white border-slate-100 text-slate-400 hover:bg-slate-50"
-                  }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-          <div className="flex items-center gap-4 shrink-0">
-            <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">
-              Sort by
-            </span>
-            <select className="bg-slate-50 border border-slate-100 rounded-xl px-5 py-2.5 text-[10px] font-black text-slate-600 uppercase tracking-widest outline-none focus:ring-4 focus:ring-primary-50 appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2024%2024%22%20stroke%3D%22%23cbd5e1%22%20stroke-width%3D%222%22%3E%3Cpath%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20d%3D%22M19%209l-7%207-7-7%22%20%2F%3E%3C%2Fsvg%3E')] bg-[length:1em] bg-[right_1rem_center] bg-no-repeat pr-12">
-              <option>Newest First</option>
-              <option>Most Popular</option>
-            </select>
-          </div>
-        </div>
+      {featuredNews && (
+        <section>
+          <h2 className="text-2xl font-bold text-slate-900 mb-5">Featured Story of the Week</h2>
+          <div
+            onClick={() => onNavigate("newsDetails", { id: featuredNews.id })}
+            className="relative w-full h-[450px] sm:h-[400px] rounded-2xl overflow-hidden shadow-lg group cursor-pointer"
+          >
+            <img
+              src={featuredNews.image}
+              alt={featuredNews.title}
+              className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-in-out"
+            />
 
-        {/* News Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-          {filteredNews.map((article, idx) => (
-            <article
-              key={article.id}
-              onClick={() => onNavigate("newsDetails", { id: article.id })}
-              className="group cursor-pointer animate-fadeInUp"
-              style={{ animationDelay: `${idx * 0.1}s` }}
-            >
-              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden mb-8 shadow-sm hover:shadow-2xl transition-all duration-700">
-                <img
-                  src={article.image}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                  alt={article.title}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="absolute top-6 left-6">
-                  <span className="px-4 py-1.5 rounded-xl bg-white/95 backdrop-blur-sm text-primary-600 text-[10px] font-black uppercase tracking-widest border border-slate-100 shadow-lg">
-                    {article.category}
-                  </span>
-                </div>
-              </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-900/90 via-slate-900/50 to-transparent"></div>
 
-              <div className="px-2 flex flex-col h-full">
-                <div className="flex items-center gap-3 text-[10px] font-black text-slate-300 uppercase tracking-widest mb-4">
-                  <span>{article.date}</span>
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-200"></span>
-                  <span>{article.readTime} Read</span>
-                </div>
-
-                <h2 className="text-2xl font-black text-slate-900 group-hover:text-primary-600 transition-colors leading-tight mb-4 uppercase tracking-tight line-clamp-2">
-                  {article.title}
-                </h2>
-
-                <p className="text-slate-500 font-medium text-base leading-relaxed mb-8 line-clamp-3">
-                  {article.excerpt}
-                </p>
-
-                <div className="mt-auto pt-6 border-t border-slate-50 flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-primary-600 text-xs shadow-sm">
-                      <i className="fa-solid fa-feather"></i>
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
-                      {article.author}
+            <div className="absolute inset-0 flex flex-col justify-end p-6 sm:p-10">
+              <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-6 w-full">
+                <div className="max-w-2xl">
+                  <div className="flex items-center gap-4 mb-4">
+                    <span className="bg-emerald-500 text-white text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+                      Featured
                     </span>
+                    <div className="flex items-center text-gray-300 text-sm font-medium">
+                      <i className="fa-regular fa-clock mr-1.5 opacity-80"></i>
+                      90 days ago
+                    </div>
                   </div>
-                  <i className="fa-solid fa-arrow-right -rotate-45 text-slate-200 group-hover:rotate-0 group-hover:text-primary-600 transition-all duration-300"></i>
+
+                  <h3 className="text-3xl sm:text-4xl font-bold text-white mb-3 leading-tight tracking-tight">
+                    {featuredNews.title}
+                  </h3>
+                  <p className="text-gray-200 text-base sm:text-lg font-medium line-clamp-2">
+                    {featuredNews.excerpt}
+                  </p>
                 </div>
+
+                <button className="w-full sm:w-auto bg-white text-slate-900 font-semibold px-6 py-3 rounded-lg hover:bg-blue-50 hover:text-blue-700 transition-all duration-200 shadow-sm whitespace-nowrap">
+                  Read Full Story
+                </button>
               </div>
-            </article>
-          ))}
-        </div>
-
-        {filteredNews.length === 0 && (
-          <div className="py-24 text-center bg-white rounded-2xl border border-dashed border-slate-200 animate-fadeIn">
-            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-200">
-              <i className="fa-solid fa-newspaper text-5xl"></i>
             </div>
-            <h3 className="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight">
-              No news found
-            </h3>
-            <p className="text-slate-500 font-medium">
-              Try another category or check back later for more updates.
-            </p>
-          </div>
-        )}
-
-        {/* Global Newsletter - Integrated directly as in Blog page */}
-        <section className="mt-32 relative overflow-hidden rounded-2xl bg-primary-600 p-12 md:p-24 text-center text-white shadow-[0_30px_70px_rgba(37,99,235,0.4)] group">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-white opacity-10 rounded-full blur-[100px] -mr-32 -mt-32 transition-transform group-hover:scale-110 duration-1000"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-slate-900 opacity-20 rounded-full blur-[80px] -ml-24 -mb-24"></div>
-
-          <div className="relative z-10 max-w-3xl mx-auto">
-            <h2 className="text-4xl md:text-6xl font-black mb-8 tracking-tighter uppercase leading-tight">
-              Never miss an academic update.
-            </h2>
-            <p className="text-lg text-primary-100 font-medium mb-12 opacity-80 uppercase tracking-widest">
-              Join 50,000+ students staying ahead of the curve.
-            </p>
-            <form
-              className="flex flex-col sm:flex-row gap-4 max-w-xl mx-auto"
-              onSubmit={(e) => e.preventDefault()}
-            >
-              <input
-                type="email"
-                placeholder="Enter Your Email"
-                className="flex-1 px-8 py-5 rounded-2xl bg-white/10 backdrop-blur-md border border-white/20 text-white placeholder:text-primary-100/50 outline-none focus:bg-white/20 transition-all font-bold text-sm"
-                required
-              />
-              <button className="px-12 py-5 bg-white text-primary-600 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-slate-50 transition-all active:scale-95">
-                Subscribe Now
-              </button>
-            </form>
           </div>
         </section>
-      </main>
-    </div>
+      )}
+
+      <section>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+          <h2 className="text-2xl font-bold text-slate-900">Latest News & stories</h2>
+          <div className="flex items-center text-sm font-medium text-slate-600">
+            <span className="mr-2">Sort by:</span>
+            <label className="flex items-center gap-1 bg-white border border-gray-200 rounded-md px-3 py-1.5 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-blue-500">
+              <select
+                value={sortBy}
+                onChange={(event) => setSortBy(event.target.value as "Newest First" | "Oldest First")}
+                className="bg-transparent outline-none"
+              >
+                <option>Newest First</option>
+                <option>Oldest First</option>
+              </select>
+              <i className="fa-solid fa-chevron-down text-xs ml-1 text-gray-400"></i>
+            </label>
+          </div>
+        </div>
+
+        <div id="news-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {processedNews.map((item) => {
+            const uiCategory = mapNewsToUiCategory(item);
+
+            return (
+              <article
+                key={item.id}
+                onClick={() => onNavigate("newsDetails", { id: item.id })}
+                className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer"
+              >
+                <div className="mb-4">
+                  <span
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${categoryBadgeClass(
+                      uiCategory,
+                    )}`}
+                  >
+                    {uiCategory}
+                  </span>
+                </div>
+
+                <div className="rounded-xl overflow-hidden aspect-[16/10] mb-5 bg-gray-100">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                  />
+                </div>
+
+                <h3 className="font-bold text-lg text-slate-900 leading-snug mb-2 group-hover:text-blue-600 transition-colors">
+                  {item.title}
+                </h3>
+                <p className="text-slate-500 text-sm mb-5 flex-grow line-clamp-2 leading-relaxed">
+                  {item.excerpt}
+                </p>
+
+                <div className="pt-4 border-t border-gray-100 flex justify-between items-center text-sm mt-auto">
+                  <span className="text-slate-400 flex items-center font-medium">
+                    <i className="fa-regular fa-clock mr-1.5"></i> 90 Days ago
+                  </span>
+                  <span className="text-blue-600 font-semibold flex items-center group-hover:translate-x-1 transition-transform duration-200">
+                    View Details <i className="fa-solid fa-chevron-right text-xs ml-1"></i>
+                  </span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
+
+        {processedNews.length === 0 && (
+          <div className="text-center py-10 text-slate-500 bg-white border border-gray-200 rounded-2xl mt-6">
+            No news available for this category.
+          </div>
+        )}
+      </section>
+
+      <div className="flex justify-center items-center space-x-2 pt-8">
+        <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-200 text-slate-500 bg-white shadow-sm opacity-50" disabled>
+          <i className="fa-solid fa-chevron-left text-xs"></i>
+        </button>
+        <button className="w-10 h-10 flex items-center justify-center rounded-md bg-blue-600 text-white font-medium shadow-sm transition-colors">
+          1
+        </button>
+        <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-200 text-slate-600 hover:bg-gray-50 transition-colors bg-white shadow-sm font-medium">
+          2
+        </button>
+        <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-200 text-slate-600 hover:bg-gray-50 transition-colors bg-white shadow-sm font-medium">
+          3
+        </button>
+        <button className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-200 text-slate-600 hover:bg-gray-50 hover:text-slate-800 transition-colors bg-white shadow-sm">
+          <i className="fa-solid fa-chevron-right text-xs"></i>
+        </button>
+      </div>
+    </main>
   );
 };
 

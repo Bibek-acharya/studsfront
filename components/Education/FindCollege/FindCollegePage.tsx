@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import FindCollegeHero from "./FindCollegeHero";
+import React, { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import FilterSidebar from "./FilterSidebar";
 import CollegeGrid from "./CollegeGrid";
 
@@ -8,43 +8,57 @@ interface FindCollegePageProps {
 }
 
 export interface CollegeFilters {
-  verified: boolean;
-  popular: boolean;
   type: string[];
-  location: string;
+  location: string[];
   search: string;
+  quick: string[];
   academic: string[];
   stream: string[];
-  nationalWide: boolean;
+  facilities: string[];
+  feeRange: string[];
+  duration: string[];
+  popularity: string[];
 }
 
+export const DEFAULT_COLLEGE_FILTERS: CollegeFilters = {
+  type: [],
+  location: [],
+  search: "",
+  quick: [],
+  academic: [],
+  stream: [],
+  facilities: [],
+  feeRange: [],
+  duration: [],
+  popularity: [],
+};
+
 const FindCollegePage: React.FC<FindCollegePageProps> = ({ onNavigate }) => {
-  const [filters, setFilters] = useState<CollegeFilters>({
-    verified: false,
-    popular: false,
-    type: [],
-    location: "",
-    search: "",
-    academic: [],
-    stream: [],
-    nationalWide: false,
-  });
+  const location = useLocation();
+  const [filters, setFilters] = useState<CollegeFilters>(DEFAULT_COLLEGE_FILTERS);
+
+  useEffect(() => {
+    const state = location.state as { search?: string } | null;
+    const incomingSearch = state?.search?.trim();
+
+    if (!incomingSearch) {
+      return;
+    }
+
+    setFilters((prev) =>
+      prev.search === incomingSearch ? prev : { ...prev, search: incomingSearch },
+    );
+  }, [location.state]);
 
   return (
-    <div className="font-[Inter,sans-serif] bg-[#f8fafc] min-h-screen">
-      <FindCollegeHero
-        searchQuery={filters.search}
-        onSearchChange={(search) => setFilters((prev) => ({ ...prev, search }))}
-      />
-      <div className="p-4 md:p-8">
-        <div className="max-w-[1400px] mx-auto flex flex-col md:flex-row gap-6 items-start">
-          <aside className="w-full md:w-[320px] flex-shrink-0 bg-white border border-slate-200 rounded-xl shadow-sm p-5 h-max">
+    <div className="min-h-screen bg-gray-50 p-4 font-[Inter,sans-serif] text-gray-800 md:p-6 lg:p-8">
+      <div className="mx-auto flex max-w-[1400px] flex-col gap-6 lg:flex-row lg:flex-nowrap lg:gap-8">
+          <aside className="w-full shrink-0 lg:w-[300px]">
             <FilterSidebar filters={filters} setFilters={setFilters} />
           </aside>
-          <main className="flex-grow w-full">
+          <main className="min-w-0 flex-1">
             <CollegeGrid filters={filters} onNavigate={onNavigate} setFilters={setFilters} />
           </main>
-        </div>
       </div>
     </div>
   );

@@ -1,196 +1,225 @@
-import React, { useState, useMemo } from "react";
-import { getAllEvents, StudEvent } from "../../lib/events-data";
+import React, { useMemo, useState } from "react";
+import { getAllEvents } from "../../lib/events-data";
 
 interface EventsPageProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
+type EventFilter =
+  | "All News"
+  | "Feast & Concert"
+  | "Seminar & Workshop"
+  | "Career Fairs"
+  | "Hackthons"
+  | "Cultural Programs"
+  | "Achievements"
+  | "Others";
+
+const filterPills: EventFilter[] = [
+  "All News",
+  "Feast & Concert",
+  "Seminar & Workshop",
+  "Career Fairs",
+  "Hackthons",
+  "Cultural Programs",
+  "Achievements",
+  "Others",
+];
+
+const mapCategory = (category: string): EventFilter => {
+  if (category === "Workshop" || category === "Seminar") return "Seminar & Workshop";
+  if (category === "Job Fair") return "Career Fairs";
+  if (category === "Hackathon") return "Hackthons";
+  return "Others";
+};
+
+const badgeClass = (filter: EventFilter) => {
+  if (filter === "Seminar & Workshop") return "bg-[#00c2a8]";
+  if (filter === "Career Fairs") return "bg-orange-500";
+  if (filter === "Hackthons") return "bg-blue-500";
+  return "bg-blue-500";
+};
+
+const registerButtonClass = (filter: EventFilter) => {
+  if (filter === "Career Fairs") return "bg-[#0f172a] hover:bg-black";
+  return "bg-blue-500 hover:bg-blue-600";
+};
+
 const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
-  const [activeCategory, setActiveCategory] = useState<string>("All");
+  const [activeFilter, setActiveFilter] = useState<EventFilter>("All News");
+  const [sortBy, setSortBy] = useState<"Newest First" | "Oldest First" | "Popular">("Newest First");
+
   const allEvents = getAllEvents();
+  const featured = allEvents[0];
 
-  const categories = ["All", "Workshop", "Seminar", "Job Fair", "Hackathon"];
+  const visibleEvents = useMemo(() => {
+    const filtered =
+      activeFilter === "All News"
+        ? allEvents
+        : allEvents.filter((event) => mapCategory(event.category) === activeFilter);
 
-  const filteredEvents = useMemo(() => {
-    if (activeCategory === "All") return allEvents;
-    return allEvents.filter((e) => e.category === activeCategory);
-  }, [activeCategory, allEvents]);
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "Newest First") return Number(b.id) - Number(a.id);
+      if (sortBy === "Oldest First") return Number(a.id) - Number(b.id);
+      return b.interestedCount - a.interestedCount;
+    });
+  }, [activeFilter, allEvents, sortBy]);
 
   return (
-    <div className="bg-slate-50 min-h-screen pt-24 font-sans pb-20">
-      {/* Dynamic Hero Section */}
-      <section className="max-w-7xl mx-auto px-4 md:px-8 py-10">
-        <div className="bg-slate-900 rounded-3xl p-10 md:p-20 text-white relative overflow-hidden shadow-2xl group border border-white/5">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary-600 rounded-full blur-[120px] opacity-20 transition-transform group-hover:scale-110 duration-1000"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-600 rounded-full blur-[100px] opacity-10"></div>
-
-          <div className="relative z-10 grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <span className="inline-block px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-primary-400 text-[10px] font-black uppercase tracking-[0.2em] mb-8 shadow-xl">
-                Community Events
-              </span>
-              <h1 className="text-4xl md:text-6xl font-black text-white leading-tight mb-8 tracking-tighter uppercase">
-                Shape your future at{" "}
-                <span className="text-primary-400 underline decoration-white/20">
-                  Nepal's Top
-                </span>{" "}
-                Tech Events.
-              </h1>
-              <p className="text-lg text-slate-400 font-medium leading-relaxed mb-10 max-w-lg">
-                From hands-on hackathons to career-defining job fairs, join
-                thousands of students building their professional path.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <button className="px-10 py-4 bg-primary-600 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-primary-500/20 hover:bg-primary-700 transition-all active:scale-95">
-                  Explore All
-                </button>
-                <button className="px-10 py-4 bg-white/10 text-white border border-white/20 backdrop-blur-md rounded-xl font-black text-xs uppercase tracking-widest hover:bg-white/20 transition-all">
-                  Host an Event
-                </button>
-              </div>
-            </div>
-            <div className="hidden lg:block relative group/img">
-              <div className="relative rounded-2xl overflow-hidden shadow-2xl rotate-3 group-hover/img:rotate-0 transition-transform duration-700 aspect-[4/3]">
-                <img
-                  src="https://images.pexels.com/photos/2774556/pexels-photo-2774556.jpeg?auto=compress&cs=tinysrgb&w=1200"
-                  className="w-full h-full object-cover brightness-75"
-                  alt=""
-                />
-              </div>
-              <div className="absolute -bottom-6 -right-6 bg-white p-6 rounded-xl shadow-2xl animate-float">
-                <p className="text-[10px] font-black uppercase tracking-widest text-slate-300 mb-2">
-                  Next Big Event
-                </p>
-                <p className="text-slate-900 font-black text-sm">
-                  AI Workshop 2025
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        {/* Filter Bar */}
-        <div className="flex items-center justify-between gap-8 mb-16 flex-wrap">
-          <div className="flex items-center gap-4 overflow-x-auto no-scrollbar pb-2">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setActiveCategory(cat)}
-                className={`whitespace-nowrap px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest border transition-all ${activeCategory === cat
-                    ? "bg-slate-900 text-white border-slate-900 shadow-xl"
-                    : "bg-white border-slate-100 text-slate-400 hover:bg-slate-50"
+    <div className="bg-white text-gray-900 antialiased min-h-screen max-w-[1400px] mx-auto px-4 py-8">
+      <div className=" mx-auto py-8">
+        <section className="mb-10">
+          <h2 className="text-xl font-bold mb-4">Browse by category</h2>
+          <div className="flex flex-wrap gap-2 text-sm font-semibold items-center">
+            {filterPills.map((pill) => {
+              const isActive = activeFilter === pill;
+              return (
+                <button
+                  key={pill}
+                  onClick={() => setActiveFilter(pill)}
+                  className={`px-4 py-2 rounded-full transition ${
+                    isActive
+                      ? "bg-blue-500 text-white shadow-sm"
+                      : "text-gray-700 hover:text-black hover:bg-gray-100"
                   }`}
-              >
-                {cat}
-              </button>
-            ))}
+                >
+                  {pill}
+                </button>
+              );
+            })}
           </div>
-          <div className="flex items-center gap-3 bg-white px-6 py-3 rounded-xl border border-slate-100 shadow-sm text-xs font-black uppercase tracking-widest text-slate-400">
-            <i className="fa-solid fa-calendar-day text-primary-600"></i>
-            Sort by:{" "}
-            <select className="bg-transparent border-none focus:ring-0 text-slate-900 p-0 ml-1 font-black cursor-pointer appearance-none">
-              <option>Upcoming</option>
-              <option>Popular</option>
-            </select>
-          </div>
-        </div>
+        </section>
 
-        {/* Event Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-          {filteredEvents.map((event, idx) => (
+        {featured && (
+          <section className="mb-14">
+            <h2 className="text-xl font-bold mb-4">Featured Story of the Week</h2>
             <div
-              key={event.id}
-              onClick={() => onNavigate("eventDetails", { id: event.id })}
-              className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-2xl transition-all duration-500 group cursor-pointer flex flex-col h-full animate-fadeInUp"
-              style={{ animationDelay: `${idx * 0.1}s` }}
+              onClick={() => onNavigate("eventDetails", { id: featured.id })}
+              className="relative rounded-2xl overflow-hidden h-[360px] group shadow-sm cursor-pointer"
             >
-              <div className="relative aspect-[4/3] overflow-hidden rounded-t-2xl">
-                <img
-                  src={event.image}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                  alt={event.title}
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <div className="absolute top-6 left-6 flex flex-col gap-2">
-                  <span className="px-4 py-1.5 rounded-lg bg-white/95 backdrop-blur-md text-primary-600 text-[10px] font-black uppercase tracking-widest border border-slate-100 shadow-lg">
-                    {event.category}
-                  </span>
-                </div>
-                {event.isOnline && (
-                  <div className="absolute bottom-6 left-6 px-4 py-1.5 rounded-lg bg-primary-600 text-white text-[10px] font-black uppercase tracking-widest shadow-xl">
-                    <i className="fa-solid fa-video mr-2"></i> Online Session
-                  </div>
-                )}
-              </div>
+              <img src={featured.image} alt={featured.title} className="absolute inset-0 w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
 
-              <div className="p-10 flex flex-col flex-1">
-                <div className="flex items-center justify-between text-[10px] font-black text-slate-300 uppercase tracking-widest mb-6">
-                  <div className="flex items-center gap-3">
-                    <i className="fa-solid fa-calendar text-primary-600"></i>
-                    <span>{event.date}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-primary-600">
-                    <i className="fa-solid fa-ticket"></i>
-                    <span>{event.registrationFee}</span>
-                  </div>
-                </div>
-
-                <h3 className="text-2xl font-black text-slate-900 group-hover:text-primary-600 transition-colors leading-tight mb-4 uppercase tracking-tight line-clamp-2">
-                  {event.title}
-                </h3>
-
-                <p className="text-slate-500 font-medium text-sm leading-relaxed mb-8 line-clamp-3">
-                  {event.excerpt}
-                </p>
-
-                <div className="mt-auto flex items-center justify-between pt-6 border-t border-slate-50">
-                  <div className="flex items-center gap-4">
-                    <div className="flex -space-x-3">
-                      {[1, 2, 3].map((i) => (
-                        <div
-                          key={i}
-                          className="w-8 h-8 rounded-full border-2 border-white bg-slate-100 overflow-hidden shadow-sm"
-                        >
-                          <img
-                            src={`https://api.dicebear.com/7.x/notionists/svg?seed=${i + idx}`}
-                            alt=""
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                      {event.interestedCount}+ Interested
+              <div className="absolute bottom-0 left-0 right-0 p-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+                <div className="text-white max-w-3xl">
+                  <div className="flex items-center gap-4 mb-4">
+                    <span className="bg-green-500 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
+                      Featured
+                    </span>
+                    <span className="flex items-center text-sm text-gray-200 font-medium">
+                      <i className="fa-regular fa-clock mr-1.5 opacity-80"></i> 90 days ago
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-primary-600 font-black text-[10px] uppercase tracking-widest hover:text-primary-800 transition-colors">
-                    View Details
-                    <i className="fa-solid fa-arrow-right-long"></i>
-                  </div>
+                  <h3 className="text-3xl font-bold mb-2">{featured.title}</h3>
+                  <p className="text-gray-200 text-base font-medium line-clamp-2">{featured.excerpt}</p>
                 </div>
+                <button className="bg-white text-black px-6 py-3 rounded-lg font-bold hover:bg-gray-100 transition whitespace-nowrap shadow-sm">
+                  Read Full Story
+                </button>
               </div>
             </div>
-          ))}
-        </div>
-
-        {filteredEvents.length === 0 && (
-          <div className="py-24 text-center bg-white rounded-3xl border border-dashed border-slate-200 animate-fadeIn">
-            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-200">
-              <i className="fa-solid fa-calendar-xmark text-5xl"></i>
-            </div>
-            <h3 className="text-2xl font-black text-slate-900 mb-2 uppercase tracking-tight">
-              No events found
-            </h3>
-            <p className="text-slate-500 font-medium">
-              Try another category or check back later for more updates.
-            </p>
-          </div>
+          </section>
         )}
-      </main>
+
+        <section>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h2 className="text-xl font-bold">Latest News & stories</h2>
+            <div className="flex items-center text-sm text-gray-600">
+              <span className="mr-3 font-semibold">Sort by:</span>
+              <select
+                value={sortBy}
+                onChange={(event) =>
+                  setSortBy(event.target.value as "Newest First" | "Oldest First" | "Popular")
+                }
+                className="border border-gray-300 rounded-md px-3 py-1.5 bg-white text-gray-800 font-semibold outline-none focus:border-blue-500 shadow-sm cursor-pointer"
+              >
+                <option>Newest First</option>
+                <option>Oldest First</option>
+                <option>Popular</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {visibleEvents.map((event) => {
+              const mapped = mapCategory(event.category);
+              return (
+                <article
+                  key={event.id}
+                  className="bg-white border border-gray-200 rounded-xl overflow-hidden flex flex-col hover:shadow-md transition-shadow"
+                >
+                  <img src={event.image} alt={event.title} className="h-48 w-full object-cover" />
+                  <div className="p-5 flex flex-col flex-grow">
+                    <div className="flex justify-between items-center mb-3">
+                      <span
+                        className={`${badgeClass(mapped)} text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider`}
+                      >
+                        {mapped}
+                      </span>
+                      <span className="flex items-center text-xs text-gray-500 font-semibold">
+                        <i className="fa-regular fa-calendar mr-1.5"></i> Oct 25 , 2024
+                      </span>
+                    </div>
+
+                    <button
+                      onClick={() => onNavigate("eventDetails", { id: event.id })}
+                      className={`font-bold text-lg mb-3 leading-tight text-left hover:underline ${
+                        mapped === "Seminar & Workshop" ? "text-blue-500" : "text-gray-900"
+                      }`}
+                    >
+                      {event.title}
+                    </button>
+
+                    <div className="flex items-center text-xs text-gray-600 mb-2 font-semibold">
+                      <i className="fa-regular fa-building mr-2 text-gray-500"></i> {event.organizer}
+                    </div>
+                    <div className="flex items-center text-xs text-gray-600 mb-3 font-semibold">
+                      <i className="fa-solid fa-location-dot mr-2 text-gray-500"></i> {event.location}
+                    </div>
+
+                    <p className="text-xs text-gray-500 mb-5 line-clamp-3 leading-relaxed font-medium">{event.excerpt}</p>
+
+                    <div className="mt-auto flex gap-2">
+                      <button
+                        onClick={() => onNavigate("eventDetails", { id: event.id })}
+                        className="flex-1 bg-white border border-gray-300 text-gray-700 text-sm font-bold py-2 rounded-lg hover:bg-gray-50 transition"
+                      >
+                        Details
+                      </button>
+                      <button className={`flex-1 text-white text-sm font-bold py-2 rounded-lg transition ${registerButtonClass(mapped)}`}>
+                        Register Now
+                      </button>
+                      <button className="w-10 h-10 flex items-center justify-center border border-gray-300 rounded-lg text-gray-500 hover:bg-gray-50 transition">
+                        <i className="fa-regular fa-heart"></i>
+                      </button>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+
+          {visibleEvents.length === 0 && (
+            <div className="text-center py-10 text-slate-500 bg-white border border-gray-200 rounded-2xl mt-6">
+              No events available for this category.
+            </div>
+          )}
+
+          <div className="flex justify-center mt-12 mb-8 space-x-2">
+            <button className="w-9 h-9 flex items-center justify-center border border-gray-300 rounded-md bg-white text-gray-500 hover:bg-gray-50 transition shadow-sm">
+              <i className="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <button className="w-9 h-9 flex items-center justify-center rounded-md bg-blue-500 text-white font-bold shadow-sm">1</button>
+            <button className="w-9 h-9 flex items-center justify-center border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 font-bold transition shadow-sm">2</button>
+            <button className="w-9 h-9 flex items-center justify-center border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 font-bold transition shadow-sm">3</button>
+            <button className="w-9 h-9 flex items-center justify-center border border-gray-300 rounded-md bg-white text-gray-500 hover:bg-gray-50 transition shadow-sm">
+              <i className="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+        </section>
+      </div>
     </div>
   );
 };
 
-// Fixed: Added missing default export
 export default EventsPage;
