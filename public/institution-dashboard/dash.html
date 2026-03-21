@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#6d28d9', // violet-700 approx
+                        primaryLight: '#ede9fe', // violet-100 approx
+                        bgLight: '#f8fafc', // slate-50
+                        textMain: '#1e293b', // slate-800
+                        textMuted: '#64748b', // slate-500
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Custom Checkbox */
+        .custom-checkbox input:checked + div {
+            background-color: #8b5cf6; /* violet-500 */
+            border-color: #8b5cf6;
+        }
+        .custom-checkbox input:checked + div svg {
+            display: block;
+        }
+
+        /* Card Hover Effects */
+        .hover-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .hover-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+    </style>
+</head>
+<body class="bg-bgLight text-textMain font-sans flex h-screen overflow-hidden antialiased">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white border-r border-gray-100 flex flex-col justify-between hidden md:flex h-full shrink-0 z-20">
+        <div class="p-6 flex-1 overflow-y-auto">
+            <!-- Logo -->
+            <div class="flex items-center gap-2 mb-10 px-2">
+                <div class="bg-primary text-white p-1.5 rounded-lg flex items-center justify-center">
+                    <i class="ph-fill ph-buildings text-xl"></i>
+                </div>
+                <h1 class="font-bold text-xl text-primary tracking-tight">CampusHQ</h1>
+            </div>
+
+            <!-- Navigation -->
+            <nav class="space-y-1">
+                <a href="#" class="flex items-center justify-between px-4 py-3 bg-primaryLight text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-squares-four text-lg"></i>
+                        <span>Dashboard</span>
+                    </div>
+                </a>
+                
+                <a href="#" class="flex items-center justify-between px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-book-open text-lg"></i>
+                        <span>Program</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center justify-between px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-chalkboard-teacher text-lg"></i>
+                        <span>Faculty</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-users-three text-lg"></i>
+                        <span>Counselling</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-shield-check text-lg"></i>
+                        <span>QMS</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-user text-lg"></i>
+                        <span>Profile</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors mt-4">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-megaphone text-lg"></i>
+                        <span>News & Notice</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-calendar-blank text-lg"></i>
+                        <span>Calendar</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-identification-card text-lg"></i>
+                        <span>Admission</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center justify-between px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-exam text-lg"></i>
+                        <span>Entrance Exam</span>
+                    </div>
+                </a>
+                
+                 <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-medal text-lg"></i>
+                        <span>Scholarship</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-gear text-lg"></i>
+                        <span>Settings</span>
+                    </div>
+                </a>
+
+                <a href="#" class="flex items-center px-4 py-3 text-textMuted hover:bg-gray-50 hover:text-primary rounded-xl font-medium transition-colors mb-6">
+                    <div class="flex items-center gap-3">
+                        <i class="ph ph-chat-circle text-lg"></i>
+                        <span>Message</span>
+                    </div>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Upgrade Card -->
+        <div class="p-6">
+            <div class="bg-gradient-to-b from-violet-500 to-violet-700 rounded-2xl p-5 text-center relative overflow-hidden text-white shadow-lg">
+                <div class="absolute -top-4 -left-4 text-5xl opacity-80">🎓</div>
+                <div class="relative z-10 mt-8">
+                    <p class="text-sm font-medium mb-3">Upgrade to University Premium features.</p>
+                    <button class="bg-white text-violet-700 w-full py-2.5 rounded-xl font-semibold hover:bg-gray-50 transition-colors">Upgrade</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        
+        <!-- Header -->
+        <header class="h-20 bg-white border-b border-gray-100 flex items-center justify-between px-8 shrink-0">
+            <!-- Search -->
+            <div class="flex-1 max-w-xl">
+                <div class="relative group">
+                    <input type="text" placeholder="Search departments, courses, or students..." class="w-full bg-gray-50 text-sm rounded-full pl-5 pr-10 py-3 focus:outline-none focus:ring-2 focus:ring-primaryLight transition-all">
+                    <i class="ph ph-magnifying-glass absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-primary text-lg"></i>
+                </div>
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-6">
+                <div class="flex items-center gap-4">
+                    <button class="w-10 h-10 rounded-full hover:bg-gray-50 flex items-center justify-center text-textMuted relative transition-colors">
+                        <i class="ph ph-bell text-xl"></i>
+                        <span class="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    <button class="w-10 h-10 rounded-full hover:bg-gray-50 flex items-center justify-center text-textMuted transition-colors">
+                        <i class="ph ph-chat-teardrop-dots text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="h-8 w-px bg-gray-200"></div>
+                
+                <div class="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+                    <img src="https://i.pravatar.cc/150?img=11" alt="User" class="w-10 h-10 rounded-full object-cover">
+                    <div class="hidden sm:block text-right">
+                        <div class="text-sm font-semibold text-textMain leading-tight">Dr. Luke J.R.</div>
+                        <div class="text-xs text-textMuted">Dean of Affairs</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Scrollable Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="max-w-7xl mx-auto space-y-6">
+                
+                <!-- Welcome -->
+                <div>
+                    <h2 class="text-2xl font-bold text-textMain">Welcome back.</h2>
+                    <p class="text-textMuted text-sm mt-1">Navigate the future of higher education with CampusHQ.</p>
+                </div>
+
+                <!-- Grid Layout Base -->
+                <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-12 gap-6">
+                    
+                    <!-- KPI Cards (Row 1) -->
+                    <div class="xl:col-span-4 bg-white rounded-2xl p-6 flex items-center justify-between shadow-sm hover-card border border-gray-50">
+                        <div>
+                            <p class="text-textMuted text-sm font-medium mb-1">Total Admissions</p>
+                            <h3 class="text-3xl font-bold">5,420</h3>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center text-violet-500 text-3xl">
+                            <i class="ph-fill ph-identification-card"></i>
+                        </div>
+                    </div>
+
+                    <div class="xl:col-span-4 bg-white rounded-2xl p-6 flex items-center justify-between shadow-sm hover-card border border-gray-50">
+                        <div>
+                            <p class="text-textMuted text-sm font-medium mb-1">Active Programs</p>
+                            <h3 class="text-3xl font-bold">48</h3>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-500 text-3xl">
+                            <i class="ph-fill ph-book-open"></i>
+                        </div>
+                    </div>
+
+                    <div class="xl:col-span-4 bg-white rounded-2xl p-6 flex items-center justify-between shadow-sm hover-card border border-gray-50">
+                        <div>
+                            <p class="text-textMuted text-sm font-medium mb-1">Pending Scholarships</p>
+                            <h3 class="text-3xl font-bold">842</h3>
+                        </div>
+                        <div class="w-14 h-14 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-500 text-3xl">
+                            <i class="ph-fill ph-medal"></i>
+                        </div>
+                    </div>
+
+                    <!-- Row 2 & 3 & 4 Complex Layout -->
+                    
+                    <!-- Left Column Block -->
+                    <div class="xl:col-span-6 flex flex-col gap-6">
+                        
+                        <!-- Calendar Widget -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-50">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="font-bold text-lg">Calendar & Events</h3>
+                                <a href="#" class="text-sm text-textMuted hover:text-primary transition-colors">View Full</a>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div class="border border-gray-100 rounded-2xl p-5 relative overflow-hidden">
+                                    <div class="absolute top-0 left-0 w-full h-1 bg-blue-400"></div>
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-500">
+                                            <i class="ph ph-calendar-blank text-xl"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="font-bold text-md mb-1">Entrance Exam Day</h4>
+                                    <p class="text-xs text-textMuted mb-5">Main campus testing centers open.</p>
+                                    <button class="w-full bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">View Schedule</button>
+                                </div>
+                                <div class="border border-gray-100 rounded-2xl p-5 relative overflow-hidden">
+                                    <div class="absolute top-0 left-0 w-full h-1 bg-yellow-400"></div>
+                                    <div class="flex justify-between items-start mb-4">
+                                        <div class="w-10 h-10 rounded-xl bg-yellow-50 flex items-center justify-center text-yellow-500">
+                                            <i class="ph ph-users text-xl"></i>
+                                        </div>
+                                    </div>
+                                    <h4 class="font-bold text-md mb-1">Freshman Orientation</h4>
+                                    <p class="text-xs text-textMuted mb-5">Welcome event for the new intake.</p>
+                                    <button class="w-full bg-gray-800 hover:bg-gray-900 text-white text-sm font-medium py-2.5 rounded-xl transition-colors">Manage Event</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Admissions Pipeline -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-50 flex-1">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="font-bold text-lg">Admissions Pipeline</h3>
+                                <button class="text-gray-400 hover:text-gray-600"><i class="ph ph-dots-three-vertical text-xl"></i></button>
+                            </div>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr class="text-sm text-textMuted border-b border-gray-100">
+                                            <th class="pb-3 pl-2 font-medium w-10"></th>
+                                            <th class="pb-3 font-medium">Applicant</th>
+                                            <th class="pb-3 font-medium">Program</th>
+                                            <th class="pb-3 font-medium text-right pr-2">Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="text-sm">
+                                        <tr class="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                                            <td class="py-3 pl-2">
+                                                <label class="custom-checkbox flex items-center cursor-pointer">
+                                                    <input type="checkbox" class="hidden peer">
+                                                    <div class="w-5 h-5 rounded border border-gray-300 flex items-center justify-center transition-colors"></div>
+                                                </label>
+                                            </td>
+                                            <td class="py-3 flex items-center gap-3">
+                                                <img src="https://i.pravatar.cc/150?img=5" alt="Applicant" class="w-8 h-8 rounded-full object-cover">
+                                                <span class="font-medium text-textMain">Evelyn Harper</span>
+                                            </td>
+                                            <td class="py-3 text-textMuted">MBA Exec</td>
+                                            <td class="py-3 font-medium text-right pr-2 text-yellow-600">Under Review</td>
+                                        </tr>
+                                        <tr class="bg-purple-50 rounded-lg">
+                                            <td class="py-3 pl-2 rounded-l-xl">
+                                                <label class="custom-checkbox flex items-center cursor-pointer">
+                                                    <input type="checkbox" class="hidden peer" checked>
+                                                    <div class="w-5 h-5 rounded border border-gray-300 flex items-center justify-center transition-colors">
+                                                        <i class="ph-bold ph-check text-white text-xs hidden"></i>
+                                                    </div>
+                                                </label>
+                                            </td>
+                                            <td class="py-3 flex items-center gap-3">
+                                                <img src="https://i.pravatar.cc/150?img=9" alt="Applicant" class="w-8 h-8 rounded-full object-cover">
+                                                <span class="font-medium text-textMain">Diana Plenty</span>
+                                            </td>
+                                            <td class="py-3 text-textMuted">Comp Sci</td>
+                                            <td class="py-3 font-medium text-right pr-2 text-green-600 rounded-r-xl">Accepted</td>
+                                        </tr>
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="py-3 pl-2">
+                                                <label class="custom-checkbox flex items-center cursor-pointer">
+                                                    <input type="checkbox" class="hidden peer">
+                                                    <div class="w-5 h-5 rounded border border-gray-300 flex items-center justify-center transition-colors"></div>
+                                                </label>
+                                            </td>
+                                            <td class="py-3 flex items-center gap-3">
+                                                <img src="https://i.pravatar.cc/150?img=12" alt="Applicant" class="w-8 h-8 rounded-full object-cover">
+                                                <span class="font-medium text-textMain">John Millar</span>
+                                            </td>
+                                            <td class="py-3 text-textMuted">Engineering</td>
+                                            <td class="py-3 font-medium text-right pr-2 text-blue-600">Interview</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <!-- News & Notice -->
+                        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-50">
+                            <div class="flex items-center justify-between mb-6">
+                                <h3 class="font-bold text-lg">News & Notice</h3>
+                                <a href="#" class="text-sm text-textMuted hover:text-primary transition-colors">View All</a>
+                            </div>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-gray-100">
+                                    <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0 overflow-hidden relative">
+                                        <i class="ph ph-megaphone text-xl text-blue-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-semibold text-textMain mb-1">Updated Scholarship Policy</h4>
+                                        <div class="flex items-center gap-3 text-xs text-textMuted">
+                                            <span class="flex items-center gap-1"><i class="ph ph-clock"></i> 10:00 AM</span>
+                                            <span class="flex items-center gap-1"><i class="ph ph-calendar-blank"></i> Today</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4 p-3 hover:bg-gray-50 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-gray-100">
+                                    <div class="w-12 h-12 rounded-xl bg-purple-100 flex items-center justify-center shrink-0 overflow-hidden">
+                                        <i class="ph ph-shield-check text-xl text-purple-600"></i>
+                                    </div>
+                                    <div class="flex-1">
+                                        <h4 class="text-sm font-semibold text-textMain mb-1">QMS Annual Audit Notice</h4>
+                                        <div class="flex items-center gap-3 text-xs text-textMuted">
+                                            <span class="flex items-center gap-1"><i class="ph ph-clock"></i> 9:00 AM</span>
+                                            <span class="flex items-center gap-1"><i class="ph ph-calendar-blank"></i> Tomorrow</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Right Block Wrapper -->
+                    <div class="xl:col-span-6 grid grid-cols-1 md:grid-cols-2 gap-6 content-start">
+                        
+                        <!-- Middle Column -->
+                        <div class="flex flex-col gap-6">
+                            <!-- Counselling Services -->
+                            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-50 hover-card">
+                                <div class="flex items-center justify-between mb-5">
+                                    <h3 class="font-bold text-lg">Counselling</h3>
+                                    <a href="#" class="text-sm text-textMuted hover:text-primary transition-colors">Sessions</a>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="flex items-center justify-between group cursor-pointer">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-orange-50 flex items-center justify-center shrink-0 text-xl overflow-hidden">👨‍🏫</div>
+                                            <div>
+                                                <h4 class="text-sm font-semibold text-textMain">Academic Advising</h4>
+                                                <p class="text-xs text-textMuted">42 pending</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between group cursor-pointer">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 text-xl">💼</div>
+                                            <div>
+                                                <h4 class="text-sm font-semibold text-textMain">Career Guidance</h4>
+                                                <p class="text-xs text-textMuted">18 scheduled</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center justify-between group cursor-pointer">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-10 h-10 rounded-lg bg-yellow-50 flex items-center justify-center shrink-0 text-xl">🧠</div>
+                                            <div>
+                                                <h4 class="text-sm font-semibold text-textMain">Mental Health</h4>
+                                                <p class="text-xs text-textMuted">Confidential</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Entrance Exams -->
+                            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-50 flex-1 flex flex-col justify-center">
+                                <div class="flex items-center justify-between mb-2">
+                                    <h3 class="font-bold text-lg">Entrance Exams</h3>
+                                    <div class="flex items-center gap-1 text-xs font-semibold text-green-500 bg-green-50 px-2 py-1 rounded-full">
+                                        <i class="ph-bold ph-trend-up"></i> +8%
+                                    </div>
+                                </div>
+                                <h2 class="text-4xl font-bold mb-3 text-textMain">3,240</h2>
+                                <p class="text-sm text-textMuted leading-relaxed">Total registrations for the upcoming central entrance examination. <a href="#" class="text-violet-600 font-semibold hover:underline">Manage</a></p>
+                            </div>
+                        </div>
+
+                        <!-- Right Column -->
+                        <div class="flex flex-col gap-6">
+                            <!-- Scholarship Chart -->
+                            <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-50 text-center flex flex-col hover-card">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="font-bold text-lg">Scholarships</h3>
+                                </div>
+                                
+                                <div class="relative w-48 h-48 mx-auto flex-1 flex items-center justify-center">
+                                    <canvas id="scholarshipChart"></canvas>
+                                    <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                        <span class="text-sm text-textMuted font-medium">Awarded</span>
+                                        <span class="text-2xl font-bold text-textMain">1,240</span>
+                                    </div>
+                                </div>
+
+                                <div class="flex justify-center gap-4 mt-6 text-xs text-textMuted">
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-orange-400"></div> Merit
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-violet-600"></div> Need
+                                    </div>
+                                    <div class="flex items-center gap-1.5">
+                                        <div class="w-2.5 h-2.5 rounded-full bg-green-400"></div> Sports
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- QMS Promo Card -->
+                            <div class="bg-[#fcf8ff] rounded-2xl p-6 border border-purple-100 flex items-center gap-4 hover-card transition-all">
+                                <div class="w-20 h-20 bg-gradient-to-br from-violet-600 to-indigo-700 rounded-xl shadow-lg flex items-center justify-center shrink-0 relative overflow-hidden text-white text-3xl">
+                                    <i class="ph ph-shield-check"></i>
+                                </div>
+                                <div>
+                                    <span class="text-xs font-semibold text-violet-600 tracking-wider uppercase mb-1 block">QMS Audit</span>
+                                    <h4 class="font-bold text-textMain leading-tight mb-3">ISO 9001:2015 Preparation</h4>
+                                    <button class="bg-gray-900 hover:bg-black text-white text-xs font-semibold py-2 px-4 rounded-lg transition-colors">Start Review</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Program Performance -->
+                        <div class="md:col-span-2 bg-white rounded-2xl p-6 shadow-sm border border-gray-50 flex flex-col">
+                            <div class="flex items-center justify-between mb-8">
+                                <h3 class="font-bold text-lg">Top Programs</h3>
+                                <button class="flex items-center gap-1 text-sm text-textMuted bg-gray-50 px-3 py-1.5 rounded-lg hover:bg-gray-100 transition-colors">By Enrollment</button>
+                            </div>
+
+                            <div class="relative flex-1 min-h-[220px]">
+                                <!-- Chart Area -->
+                                <div class="absolute inset-0 flex flex-col justify-between pb-8">
+                                    <div class="flex items-center relative h-10">
+                                        <div class="w-20 text-xs text-textMuted shrink-0">Comp. Sci</div>
+                                        <div class="flex-1 relative h-full">
+                                            <div class="absolute top-1/2 -translate-y-1/2 h-8 rounded-full bg-gradient-to-r from-violet-500 via-violet-300 to-violet-50 flex items-center justify-between pl-3 pr-0 shadow-sm" style="left: 0%; width: 85%;">
+                                                <span class="text-white text-xs font-medium">B.Sc. CSIT</span>
+                                                <div class="bg-white rounded-full text-[10px] font-bold px-2 py-0.5 text-gray-700 shadow border border-gray-100 mr-0.5">1.2K</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center relative h-10">
+                                        <div class="w-20 text-xs text-textMuted shrink-0">Business</div>
+                                        <div class="flex-1 relative h-full">
+                                            <div class="absolute top-1/2 -translate-y-1/2 h-8 rounded-full bg-gradient-to-r from-orange-400 via-orange-200 to-orange-50 flex items-center justify-between pl-3 pr-0 shadow-sm" style="left: 0%; width: 65%;">
+                                                <span class="text-white text-xs font-medium">BBA</span>
+                                                <div class="bg-white rounded-full text-[10px] font-bold px-2 py-0.5 text-gray-700 shadow border border-gray-100 mr-0.5">850</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center relative h-10">
+                                        <div class="w-20 text-xs text-textMuted shrink-0">Engineering</div>
+                                        <div class="flex-1 relative h-full">
+                                            <div class="absolute top-1/2 -translate-y-1/2 h-8 rounded-full bg-gradient-to-r from-blue-400 via-blue-200 to-blue-50 flex items-center justify-between pl-3 pr-0 shadow-sm" style="left: 0%; width: 75%;">
+                                                <span class="text-white text-xs font-medium">B.E. Civil</span>
+                                                <div class="bg-white rounded-full text-[10px] font-bold px-2 py-0.5 text-gray-700 shadow border border-gray-100 mr-0.5">920</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center relative h-10">
+                                        <div class="w-20 text-xs text-textMuted shrink-0">Humanities</div>
+                                        <div class="flex-1 relative h-full">
+                                            <div class="absolute top-1/2 -translate-y-1/2 h-8 rounded-full bg-gradient-to-r from-red-500 via-red-300 to-red-50 flex items-center justify-between pl-3 pr-0 shadow-sm" style="left: 0%; width: 45%;">
+                                                <span class="text-white text-xs font-medium">BA Sociology</span>
+                                                <div class="bg-white rounded-full text-[10px] font-bold px-2 py-0.5 text-gray-700 shadow border border-gray-100 mr-0.5">430</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="absolute bottom-0 left-20 right-0 flex justify-between px-4 text-xs text-textMuted font-medium pt-2 border-t border-gray-100">
+                                    <span>0</span>
+                                    <span>500</span>
+                                    <span>1000</span>
+                                    <span>1500</span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Chart.js Initialization -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('scholarshipChart').getContext('2d');
+            
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Merit', 'Need-based', 'Sports'],
+                    datasets: [{
+                        data: [55, 30, 15],
+                        backgroundColor: [
+                            '#fb923c', // Orange
+                            '#7c3aed', // Violet
+                            '#4ade80'  // Green
+                        ],
+                        borderWidth: 0,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '80%', // Thin donut
+                    plugins: {
+                        legend: {
+                            display: false // We built a custom legend in HTML
+                        },
+                        tooltip: {
+                            enabled: false // Disable tooltips to match static image look
+                        }
+                    },
+                    layout: {
+                        padding: 10
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>

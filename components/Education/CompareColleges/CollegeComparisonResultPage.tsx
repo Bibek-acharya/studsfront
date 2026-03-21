@@ -583,14 +583,11 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                   </span>
                 </div>
 
-                <div className="inline-flex items-center gap-1.5 bg-green-50 text-green-700 px-2 py-1 rounded text-[13px] font-medium border border-green-100/50">
-                  <i className="fa-solid fa-arrow-up text-[11px]"></i>
-                  <span>Rated 4% above the avg.</span>
-                </div>
+              
               </div>
             </div>
 
-            <div className="flex border-t border-gray-100 flex-col sm:flex-row h-auto sm:h-12">
+            {/* <div className="flex border-t border-gray-100 flex-col sm:flex-row h-auto sm:h-12">
               <div
                 ref={leftDropdownRef}
                 className="relative flex-1 border-b sm:border-b-0 sm:border-r border-gray-100"
@@ -666,7 +663,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 </div>
                 <i className="fa-solid fa-chevron-down text-[11px] text-gray-400"></i>
               </button>
-            </div>
+            </div> */}
           </div>
 
           <div className="flex-1 flex flex-col relative border-t md:border-t-0 border-gray-200">
@@ -700,14 +697,11 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                   <span className="text-[#64748b] text-sm">(980 Reviews)</span>
                 </div>
 
-                <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 px-2 py-1 rounded text-[13px] font-medium border border-red-100/50">
-                  <i className="fa-solid fa-arrow-down text-[11px]"></i>
-                  <span>Rated 2% below the avg.</span>
-                </div>
+                
               </div>
             </div>
 
-            <div className="flex border-t border-gray-100 flex-col sm:flex-row h-auto sm:h-12">
+            {/* <div className="flex border-t border-gray-100 flex-col sm:flex-row h-auto sm:h-12">
               <div
                 ref={rightDropdownRef}
                 className="relative flex-1 border-b sm:border-b-0 sm:border-r border-gray-100"
@@ -779,7 +773,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
                 </div>
                 <i className="fa-solid fa-chevron-down text-[11px] text-gray-400"></i>
               </button>
-            </div>
+            </div> */}
           </div>
         </div>
 

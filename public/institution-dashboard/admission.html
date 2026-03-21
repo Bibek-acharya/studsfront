@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admission Dashboard - Shiksha System</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            200: '#bbf7d0',
+                            300: '#86efac',
+                            400: '#4ade80',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; height: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Hide scrollbar for clean horizontal scrolling */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .toast-enter { animation: slideIn 0.3s ease-out forwards; }
+        .toast-exit { animation: slideOut 0.3s ease-in forwards; }
+
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="text-slate-800 h-screen flex overflow-hidden">
+
+    <!-- Sidebar (Collapsible on mobile) -->
+    <aside id="sidebar" class="bg-slate-900 text-slate-300 w-64 flex-shrink-0 flex flex-col h-full transition-transform duration-300 fixed md:relative z-40 -translate-x-full md:translate-x-0">
+        <div class="p-4 border-b border-slate-800 flex items-center justify-between">
+            <div class="flex items-center gap-2 text-white font-bold text-xl">
+                <i class="ph-fill ph-student text-brand-500 text-2xl"></i>
+                Shiksha<span class="text-brand-500">System</span>
+            </div>
+            <button class="md:hidden text-slate-400 hover:text-white" onclick="toggleSidebar()">
+                <i class="ph ph-x text-xl"></i>
+            </button>
+        </div>
+        
+        <div class="p-4 flex-1 overflow-y-auto custom-scrollbar">
+            <nav class="space-y-1">
+                <a href="#" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-600/10 text-brand-500 font-medium">
+                    <i class="ph ph-squares-four text-lg"></i> Admission Overview
+                </a>
+            </nav>
+        </div>
+    </aside>
+
+    <!-- Overlay for mobile sidebar -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-900/50 z-30 hidden md:hidden backdrop-blur-sm transition-opacity" onclick="toggleSidebar()"></div>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden bg-slate-50 relative">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 h-16 flex items-center justify-between px-4 lg:px-8 flex-shrink-0 z-10">
+            <div class="flex items-center gap-4">
+                <button class="md:hidden text-slate-500 hover:text-slate-700" onclick="toggleSidebar()">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+                <h1 class="text-xl font-semibold text-slate-800 hidden sm:block">Admission Overview</h1>
+            </div>
+            
+            <div class="flex items-center gap-4 lg:gap-6">
+                <div class="relative hidden sm:block">
+                    <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" placeholder="Quick search..." class="pl-9 pr-4 py-2 bg-slate-100 border-none rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 w-64">
+                </div>
+                <button class="text-slate-500 hover:text-brand-600 relative">
+                    <i class="ph ph-bell text-xl"></i>
+                    <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[10px] text-white flex items-center justify-center border-2 border-white">3</span>
+                </button>
+                <button class="text-slate-500 hover:text-brand-600">
+                    <i class="ph ph-gear text-xl"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Content Area -->
+        <div class="flex-1 overflow-y-auto p-4 lg:p-8 custom-scrollbar">
+            
+            <!-- Academic Level Tabs -->
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                <div class="bg-white rounded-lg p-1 shadow-sm border border-slate-200 inline-flex overflow-x-auto hide-scrollbar max-w-full">
+                    <button onclick="setLevel('+2')" id="tab-+2" class="px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap bg-brand-50 text-brand-700">
+                        +2 Programs
+                    </button>
+                    <button onclick="setLevel('Bachelor')" id="tab-Bachelor" class="px-4 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap">
+                        Bachelor's
+                    </button>
+                    <button onclick="setLevel('Master')" id="tab-Master" class="px-4 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap">
+                        Master's
+                    </button>
+                    <button onclick="setLevel('Diploma')" id="tab-Diploma" class="px-4 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap">
+                        Diploma
+                    </button>
+                    <!-- New Shortlisted Tab -->
+                    <div class="w-px h-6 bg-slate-300 mx-2 self-center"></div>
+                    <button onclick="setLevel('ShortlistedOnly')" id="tab-ShortlistedOnly" class="px-4 py-2 rounded-md text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors whitespace-nowrap flex items-center gap-2">
+                        <i class="ph-fill ph-bookmark-simple"></i> Shortlisted List
+                    </button>
+                </div>
+
+                <div class="flex gap-2">
+                    <button class="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium shadow-sm hover:bg-slate-50 transition-colors flex items-center gap-2">
+                        <i class="ph ph-download-simple"></i> Export CSV
+                    </button>
+                    <button class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm font-medium shadow-sm hover:bg-brand-700 transition-colors flex items-center gap-2">
+                        <i class="ph ph-plus"></i> Manual Entry
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Overview -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6 mb-8">
+                <!-- Total Applications -->
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-slate-500 mb-1">Total Applications</p>
+                            <h3 class="text-2xl font-bold text-slate-800" id="stat-total">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+                            <i class="ph ph-files text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-brand-600 font-medium flex items-center gap-1">
+                            <i class="ph ph-trend-up"></i> 12%
+                        </span>
+                        <span class="text-slate-400 ml-2">vs last week</span>
+                    </div>
+                </div>
+
+                <!-- Shortlisted -->
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-slate-500 mb-1">Shortlisted</p>
+                            <h3 class="text-2xl font-bold text-slate-800" id="stat-shortlisted">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600">
+                            <i class="ph ph-bookmark-simple text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 mt-1">
+                            <div class="bg-brand-500 h-1.5 rounded-full" id="stat-shortlisted-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pending Review -->
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-slate-500 mb-1">Pending Review</p>
+                            <h3 class="text-2xl font-bold text-slate-800" id="stat-pending">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                            <i class="ph ph-hourglass-high text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-slate-500">Requires immediate action</span>
+                    </div>
+                </div>
+
+                <!-- Rejected -->
+                <div class="bg-white rounded-xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <p class="text-sm font-medium text-slate-500 mb-1">Rejected</p>
+                            <h3 class="text-2xl font-bold text-slate-800" id="stat-rejected">0</h3>
+                        </div>
+                        <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+                            <i class="ph ph-x-circle text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-sm">
+                        <span class="text-red-500 font-medium flex items-center gap-1">
+                            <i class="ph ph-trend-down"></i> 3%
+                        </span>
+                        <span class="text-slate-400 ml-2">vs last week</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Section (Hidden when in Shortlisted list view) -->
+            <div id="chartsSection" class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Applications by Program -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <h3 class="text-base font-semibold text-slate-800 mb-4">Applications by Program</h3>
+                    <div class="h-64">
+                        <canvas id="programChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Demographic Map/Province -->
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                    <h3 class="text-base font-semibold text-slate-800 mb-4">Applicant Origin (Province)</h3>
+                    <div class="h-64">
+                        <canvas id="provinceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Table Section -->
+            <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 flex flex-col">
+                <!-- Filters -->
+                <div class="p-4 border-b border-slate-200 flex flex-wrap gap-4 items-end bg-slate-50/50 rounded-t-xl">
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Search Applicants</label>
+                        <div class="relative">
+                            <i class="ph ph-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                            <input type="text" id="filterSearch" onkeyup="updateFilters()" placeholder="Name, Email, Phone..." class="w-full pl-9 pr-4 py-2 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white shadow-sm">
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-[150px]">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Province</label>
+                        <select id="filterProvince" onchange="updateFilters()" class="w-full text-sm rounded-lg border-slate-300 border py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+                            <option value="All">All Provinces</option>
+                            <option value="Koshi">Koshi</option>
+                            <option value="Madhesh">Madhesh</option>
+                            <option value="Bagmati">Bagmati</option>
+                            <option value="Gandaki">Gandaki</option>
+                            <option value="Lumbini">Lumbini</option>
+                            <option value="Karnali">Karnali</option>
+                            <option value="Sudurpashchim">Sudurpashchim</option>
+                        </select>
+                    </div>
+                    <div class="flex-1 min-w-[200px]">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">District</label>
+                        <select id="filterDistrict" onchange="updateFilters()" class="w-full text-sm rounded-lg border-slate-300 border py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+                            <option value="All">All Districts</option>
+                            <!-- Districts populated dynamically based on Province -->
+                        </select>
+                    </div>
+                    <div class="flex-1 min-w-[100px]">
+                        <label class="block text-xs font-medium text-slate-500 mb-1">Min GPA</label>
+                        <input type="number" id="filterGPA" oninput="updateFilters()" step="0.1" min="0" max="4.0" placeholder="e.g. 2.5" class="w-full text-sm rounded-lg border-slate-300 border py-2 px-3 focus:outline-none focus:ring-2 focus:ring-brand-500 bg-white">
+                    </div>
+                    <div>
+                        <button onclick="resetFilters()" class="py-2 px-4 bg-white border border-slate-300 text-slate-600 rounded-lg text-sm hover:bg-slate-50 transition-colors flex items-center gap-2">
+                            <i class="ph ph-arrows-counter-clockwise"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Bulk Actions Toolbar -->
+                <div id="bulkActionsToolbar" class="hidden px-4 py-3 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between transition-all">
+                    <span class="text-sm text-indigo-800 font-medium flex items-center gap-2">
+                        <i class="ph-fill ph-check-square"></i>
+                        <span id="selectedCount">0</span> applicants selected
+                    </span>
+                    <div class="flex gap-2">
+                        <button onclick="performBulkAction('Shortlisted')" class="px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded shadow-sm hover:bg-blue-700 transition-colors flex items-center gap-1"><i class="ph ph-bookmark-simple"></i> Shortlist</button>
+                        <button onclick="performBulkAction('Approved')" class="px-3 py-1.5 text-xs font-semibold bg-brand-600 text-white rounded shadow-sm hover:bg-brand-700 transition-colors flex items-center gap-1"><i class="ph ph-check-circle"></i> Approve</button>
+                        <button onclick="performBulkAction('Rejected')" class="px-3 py-1.5 text-xs font-semibold bg-red-600 text-white rounded shadow-sm hover:bg-red-700 transition-colors flex items-center gap-1"><i class="ph ph-x-circle"></i> Reject</button>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="overflow-x-auto custom-scrollbar">
+                    <table class="w-full text-left border-collapse whitespace-nowrap text-sm">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-medium">
+                                <th class="p-4 py-3 w-12 text-center">
+                                    <input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 cursor-pointer">
+                                </th>
+                                <th class="p-4 py-3">Full Name</th>
+                                <th class="p-4 py-3">Program</th>
+                                <th class="p-4 py-3 cursor-pointer hover:text-brand-600" onclick="alert('Sorting by GPA to be implemented')">
+                                    <div class="flex items-center gap-1">GPA <i class="ph ph-caret-up-down"></i></div>
+                                </th>
+                                <th class="p-4 py-3">Previous Institution</th>
+                                <th class="p-4 py-3">Contact Info</th>
+                                <th class="p-4 py-3">Location</th>
+                                <th class="p-4 py-3">Status</th>
+                                <th class="p-4 py-3 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="applicantTableBody" class="divide-y divide-slate-100">
+                            <!-- Rows populated by JS -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="p-4 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4 bg-slate-50/30 rounded-b-xl">
+                    <p class="text-sm text-slate-500" id="recordCount">Showing 0 to 0 of 0 records</p>
+                    <div class="flex items-center gap-2">
+                        <button id="btnPrevPage" onclick="changePage(-1)" class="p-2 rounded border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="ph ph-caret-left"></i>
+                        </button>
+                        
+                        <!-- Numbered Page Buttons Container -->
+                        <div id="pageNumbersContainer" class="flex gap-1">
+                            <!-- Populated by JS -->
+                        </div>
+
+                        <button id="btnNextPage" onclick="changePage(1)" class="p-2 rounded border border-slate-200 text-slate-600 hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="ph ph-caret-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        
+        </div>
+    </main>
+
+    <!-- Message Modal -->
+    <div id="messageModal" class="fixed inset-0 bg-slate-900/50 z-50 hidden flex items-center justify-center backdrop-blur-sm p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-lg overflow-hidden transform transition-all scale-95 opacity-0" id="messageModalContent">
+            <div class="px-6 py-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+                <h3 class="text-lg font-semibold text-slate-800 flex items-center gap-2">
+                    <i class="ph ph-chat-circle-text text-brand-600 text-xl"></i>
+                    Message Applicant
+                </h3>
+                <button onclick="closeMessageModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-slate-600 mb-4">Send a direct message or SMS to <strong id="modalApplicantName" class="text-slate-800">Student Name</strong>.</p>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Template</label>
+                    <select id="messageTemplate" onchange="applyTemplate()" class="w-full border-slate-300 rounded-lg text-sm focus:ring-brand-500 focus:border-brand-500 py-2 px-3 border">
+                        <option value="">-- Custom Message --</option>
+                        <option value="shortlist">Shortlist Notification</option>
+                        <option value="interview">Interview Invitation</option>
+                        <option value="reject">Rejection Notice</option>
+                        <option value="missing">Missing Documents Request</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-slate-700 mb-1">Message <span class="text-red-500">*</span></label>
+                    <textarea id="messageBody" rows="4" class="w-full border-slate-300 rounded-lg text-sm focus:ring-brand-500 focus:border-brand-500 py-2 px-3 border" placeholder="Type your message here..."></textarea>
+                </div>
+
+                <div class="flex items-center gap-4 mb-2">
+                    <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                        <input type="checkbox" id="sendEmail" checked class="rounded border-slate-300 text-brand-500 focus:ring-brand-500">
+                        Send via Email
+                    </label>
+                    <label class="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                        <input type="checkbox" id="sendSMS" class="rounded border-slate-300 text-brand-500 focus:ring-brand-500">
+                        Send via SMS
+                    </label>
+                </div>
+            </div>
+            <div class="px-6 py-4 border-t border-slate-200 bg-slate-50 flex justify-end gap-3">
+                <button onclick="closeMessageModal()" class="px-4 py-2 text-sm font-medium text-slate-600 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">Cancel</button>
+                <button onclick="sendMessage()" class="px-4 py-2 text-sm font-medium text-white bg-brand-600 rounded-lg hover:bg-brand-700 shadow-sm transition-colors flex items-center gap-2">
+                    <i class="ph ph-paper-plane-right"></i> Send Message
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <script>
+        // --- 1. Mock Data ---
+        // Expanded realistic Nepal data including Provinces and Districts
+        const nepalLocations = {
+            'Koshi': ['Morang', 'Sunsari', 'Jhapa', 'Dhankuta', 'Ilam'],
+            'Madhesh': ['Parsa', 'Bara', 'Rautahat', 'Sarlahi', 'Dhanusha', 'Siraha', 'Saptari'],
+            'Bagmati': ['Kathmandu', 'Lalitpur', 'Bhaktapur', 'Kavrepalanchok', 'Chitwan', 'Makwanpur'],
+            'Gandaki': ['Kaski', 'Tanahun', 'Syangja', 'Nawalpur', 'Gorkha'],
+            'Lumbini': ['Rupandehi', 'Kapilvastu', 'Banke', 'Dang', 'Palpa'],
+            'Karnali': ['Surkhet', 'Dailekh', 'Jumla', 'Salyan'],
+            'Sudurpashchim': ['Kailali', 'Kanchanpur', 'Dadeldhura', 'Baitadi']
+        };
+
+        const programs = {
+            '+2': ['Science', 'Management', 'Humanities', 'Law'],
+            'Bachelor': ['BSc. CSIT', 'BCA', 'BBM', 'BBS', 'BA', 'B.Ed'],
+            'Master': ['MBA', 'MBS', 'MSc. IT', 'MA'],
+            'Diploma': ['Civil Eng.', 'Computer Eng.', 'Nursing', 'Agriculture']
+        };
+
+        const firstNames = ['Aarav', 'Bikash', 'Sita', 'Nisha', 'Rohan', 'Pradeep', 'Anjali', 'Kiran', 'Sujan', 'Puja', 'Ram', 'Hari', 'Gita', 'Manish', 'Rina', 'Sandeep', 'Nabin', 'Sunita', 'Kamal', 'Bina'];
+        const lastNames = ['Sharma', 'Thapa', 'Shrestha', 'Maharjan', 'Gurung', 'Tamang', 'Rai', 'Magar', 'Adhikari', 'Karki', 'Bhattarai', 'Chaudhary', 'Yadav', 'Gautam', 'Khadka', 'Poudel', 'Dahal', 'Lama'];
+        const institutions = ['Sagarmatha College', 'Kathmandu Model College', 'Trinity Int. College', 'St. Xavier\'s', 'GoldenGate Int.', 'Global College', 'NIST', 'Himalayan WhiteHouse', 'Little Angels'];
+        const statuses = ['Pending', 'Shortlisted', 'Approved', 'Rejected'];
+
+        let mockData = [];
+        
+        // Generate realistic mock data
+        function generateData(count) {
+            let idCounter = 1;
+            const data = [];
+            const levels = Object.keys(programs);
+            
+            for (let i = 0; i < count; i++) {
+                const level = levels[Math.floor(Math.random() * levels.length)];
+                const progs = programs[level];
+                const program = progs[Math.floor(Math.random() * progs.length)];
+                
+                const provinces = Object.keys(nepalLocations);
+                const province = provinces[Math.floor(Math.random() * provinces.length)];
+                const districts = nepalLocations[province];
+                const district = districts[Math.floor(Math.random() * districts.length)];
+                
+                const isShortlisted = Math.random() > 0.7; // Bias to create some initial shortlists
+                const gpa = (Math.random() * (4.0 - 2.0) + 2.0);
+
+                data.push({
+                    id: idCounter++,
+                    name: `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`,
+                    gender: Math.random() > 0.4 ? 'Male' : 'Female',
+                    dob: `200${Math.floor(Math.random() * 5)}-0${Math.floor(Math.random() * 8)+1}-1${Math.floor(Math.random() * 8)}`,
+                    level: level,
+                    program: program,
+                    gpa: gpa,
+                    prevInstitution: institutions[Math.floor(Math.random() * institutions.length)],
+                    email: `student${idCounter}@example.com`,
+                    phone: `98${Math.floor(Math.random() * 90000000 + 10000000)}`,
+                    province: province,
+                    district: district,
+                    address: ['Ward-5', 'Ward-12', 'Chowk', 'Bazar'][Math.floor(Math.random() * 4)],
+                    status: isShortlisted ? 'Shortlisted' : statuses[Math.floor(Math.random() * statuses.length)],
+                    appliedDate: new Date(Date.now() - Math.floor(Math.random() * 10000000000)).toISOString().split('T')[0]
+                });
+            }
+            // Ensure sorting by ID descending initially
+            return data.sort((a,b) => b.id - a.id);
+        }
+
+        mockData = generateData(125);
+
+        // --- 2. State Variables ---
+        let currentLevel = '+2'; // Can be '+2', 'Bachelor', 'Master', 'Diploma', 'ShortlistedOnly'
+        let currentFilters = { search: '', province: 'All', district: 'All', gpa: 0 };
+        let currentPage = 1;
+        const itemsPerPage = 7; // Show slightly more per page
+        let programChartInstance = null;
+        let provinceChartInstance = null;
+        let selectedStudentIds = new Set();
+
+        // --- 3. Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initDistrictDropdown();
+            renderDashboard();
+        });
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            
+            if (sidebar.classList.contains('-translate-x-full')) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // --- 4. Filtering & Logic ---
+
+        function setLevel(level) {
+            currentLevel = level;
+            currentPage = 1;
+            selectedStudentIds.clear();
+            updateBulkActionsUI();
+            
+            // Update Tab UI
+            ['+2', 'Bachelor', 'Master', 'Diploma', 'ShortlistedOnly'].forEach(l => {
+                const tab = document.getElementById(`tab-${l}`);
+                if (tab) {
+                    if (l === level) {
+                        if(l === 'ShortlistedOnly') {
+                           tab.className = "px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap flex items-center gap-2 bg-blue-100 text-blue-800";
+                        } else {
+                           tab.className = "px-4 py-2 rounded-md text-sm font-medium transition-colors whitespace-nowrap bg-brand-50 text-brand-700";
+                        }
+                    } else {
+                         if(l === 'ShortlistedOnly') {
+                             tab.className = "px-4 py-2 rounded-md text-sm font-medium text-blue-600 hover:bg-blue-50 transition-colors whitespace-nowrap flex items-center gap-2";
+                         } else {
+                             tab.className = "px-4 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors whitespace-nowrap";
+                         }
+                    }
+                }
+            });
+
+            // Toggle Charts Visibility
+            const chartsSection = document.getElementById('chartsSection');
+            if(level === 'ShortlistedOnly') {
+                chartsSection.classList.add('hidden');
+            } else {
+                chartsSection.classList.remove('hidden');
+            }
+
+            renderDashboard();
+        }
+
+        function updateFilters() {
+            currentFilters.search = document.getElementById('filterSearch') ? document.getElementById('filterSearch').value.toLowerCase() : '';
+            currentFilters.province = document.getElementById('filterProvince').value;
+            
+            // Update district dropdown based on province
+            if (document.activeElement.id === 'filterProvince') {
+                initDistrictDropdown();
+            }
+            
+            currentFilters.district = document.getElementById('filterDistrict').value;
+            currentFilters.gpa = parseFloat(document.getElementById('filterGPA').value) || 0;
+            
+            currentPage = 1;
+            selectedStudentIds.clear();
+            updateBulkActionsUI();
+            renderDashboard();
+        }
+
+        function resetFilters() {
+            if(document.getElementById('filterSearch')) document.getElementById('filterSearch').value = '';
+            document.getElementById('filterProvince').value = 'All';
+            initDistrictDropdown();
+            document.getElementById('filterGPA').value = '';
+            
+            currentFilters = { search: '', province: 'All', district: 'All', gpa: 0 };
+            currentPage = 1;
+            selectedStudentIds.clear();
+            updateBulkActionsUI();
+            renderDashboard();
+        }
+
+        function initDistrictDropdown() {
+            const provSelect = document.getElementById('filterProvince');
+            const distSelect = document.getElementById('filterDistrict');
+            if(!provSelect || !distSelect) return;
+
+            const selectedProv = provSelect.value;
+            
+            distSelect.innerHTML = '<option value="All">All Districts</option>';
+            
+            if (selectedProv !== 'All' && nepalLocations[selectedProv]) {
+                nepalLocations[selectedProv].forEach(dist => {
+                    distSelect.innerHTML += `<option value="${dist}">${dist}</option>`;
+                });
+            }
+        }
+
+        function getFilteredData() {
+            return mockData.filter(student => {
+                // Level / Tab Filter
+                let levelMatch = false;
+                if (currentLevel === 'ShortlistedOnly') {
+                    levelMatch = student.status === 'Shortlisted';
+                } else {
+                    levelMatch = student.level === currentLevel;
+                }
+
+                if (!levelMatch) return false;
+
+                // Search Filter
+                const searchMatch = !currentFilters.search || 
+                                    student.name.toLowerCase().includes(currentFilters.search) || 
+                                    student.email.toLowerCase().includes(currentFilters.search) ||
+                                    student.phone.includes(currentFilters.search);
+                
+                // Location Filters
+                const provMatch = currentFilters.province === 'All' || student.province === currentFilters.province;
+                const distMatch = currentFilters.district === 'All' || student.district === currentFilters.district;
+                
+                // GPA Filter
+                const gpaMatch = student.gpa >= currentFilters.gpa;
+
+                return searchMatch && provMatch && distMatch && gpaMatch;
+            });
+        }
+
+        // --- 5. Render Functions ---
+
+        function renderTable(data, totalCount, startIndex, endIndex) {
+            const tbody = document.getElementById('applicantTableBody');
+            tbody.innerHTML = '';
+            
+            const displayStart = totalCount === 0 ? 0 : startIndex + 1;
+            const displayEnd = Math.min(endIndex, totalCount);
+            document.getElementById('recordCount').innerText = `Showing ${displayStart} to ${displayEnd} of ${totalCount} records`;
+
+            // Update Select All checkbox state
+            const selectAllCheckbox = document.getElementById('selectAll');
+            if (selectAllCheckbox) {
+                selectAllCheckbox.checked = data.length > 0 && data.every(s => selectedStudentIds.has(s.id));
+            }
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-500">No applicants found matching the criteria.</td></tr>`;
+                return;
+            }
+
+            const badgeColors = {
+                'Pending': 'bg-slate-100 text-slate-700 border-slate-200',
+                'Shortlisted': 'bg-blue-100 text-blue-700 border-blue-200',
+                'Approved': 'bg-brand-100 text-brand-700 border-brand-200',
+                'Rejected': 'bg-red-100 text-red-700 border-red-200'
+            };
+
+            data.forEach(student => {
+                const statusColor = badgeColors[student.status] || badgeColors['Pending'];
+                
+                // Format Address strictly
+                const addressStr = `${student.address}, ${student.district}, ${student.province}`;
+                const isSelected = selectedStudentIds.has(student.id);
+
+                const row = document.createElement('tr');
+                row.className = `hover:bg-slate-50 transition-colors group ${isSelected ? 'bg-indigo-50/30' : ''}`;
+                row.innerHTML = `
+                    <td class="p-4 py-3 text-center">
+                        <input type="checkbox" value="${student.id}" onchange="toggleStudentSelection(this)" ${isSelected ? 'checked' : ''} class="rounded border-slate-300 text-brand-500 focus:ring-brand-500 cursor-pointer">
+                    </td>
+                    <td class="p-4 py-3">
+                        <div class="font-medium text-slate-800">${student.name}</div>
+                        <div class="text-xs text-slate-500 flex gap-2">
+                            <span>${student.gender}</span> • <span>DOB: ${student.dob}</span>
+                        </div>
+                    </td>
+                    <td class="p-4 py-3">
+                        <span class="inline-flex items-center px-2 py-1 rounded-md bg-slate-100 text-slate-700 text-xs font-medium border border-slate-200">
+                            ${currentLevel === 'ShortlistedOnly' ? student.level + ' - ' : ''}${student.program}
+                        </span>
+                    </td>
+                    <td class="p-4 py-3 font-semibold text-slate-700">${student.gpa.toFixed(1)}</td>
+                    <td class="p-4 py-3 text-slate-600">
+                        <div class="truncate max-w-[150px]" title="${student.prevInstitution}">${student.prevInstitution}</div>
+                    </td>
+                    <td class="p-4 py-3 text-slate-600 text-xs">
+                        <div>${student.email}</div>
+                        <div>${student.phone}</div>
+                    </td>
+                    <td class="p-4 py-3 text-slate-600 text-xs">
+                        <div class="truncate max-w-[150px]" title="${addressStr}">${addressStr}</div>
+                    </td>
+                    <td class="p-4 py-3">
+                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${statusColor}">
+                            ${student.status}
+                        </span>
+                    </td>
+                    <td class="p-4 py-3 text-center">
+                        <div class="flex items-center justify-center gap-1">
+                            <button onclick="updateStatus(${student.id}, 'Shortlisted')" class="p-1.5 rounded transition-colors ${student.status === 'Shortlisted' ? 'text-blue-600 bg-blue-50 cursor-default' : 'text-slate-400 hover:text-blue-600 hover:bg-blue-50'}" title="Shortlist" ${student.status === 'Shortlisted' ? 'disabled' : ''}>
+                                <i class="ph ${student.status === 'Shortlisted' ? 'ph-bookmark-simple-fill' : 'ph-bookmark-simple'} text-lg"></i>
+                            </button>
+                            <button onclick="updateStatus(${student.id}, 'Approved')" class="p-1.5 rounded transition-colors ${student.status === 'Approved' ? 'text-brand-600 bg-brand-50 cursor-default' : 'text-slate-400 hover:text-brand-600 hover:bg-brand-50'}" title="Approve" ${student.status === 'Approved' ? 'disabled' : ''}>
+                                <i class="ph ${student.status === 'Approved' ? 'ph-check-circle-fill' : 'ph-check-circle'} text-lg"></i>
+                            </button>
+                            <button onclick="updateStatus(${student.id}, 'Rejected')" class="p-1.5 rounded transition-colors ${student.status === 'Rejected' ? 'text-red-600 bg-red-50 cursor-default' : 'text-slate-400 hover:text-red-600 hover:bg-red-50'}" title="Reject" ${student.status === 'Rejected' ? 'disabled' : ''}>
+                                <i class="ph ${student.status === 'Rejected' ? 'ph-x-circle-fill' : 'ph-x-circle'} text-lg"></i>
+                            </button>
+                            <div class="w-px h-4 bg-slate-200 mx-1"></div>
+                            <button onclick="openMessageModal(${student.id}, '${student.name}')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded transition-colors" title="Send Message">
+                                <i class="ph ph-chat-circle-text text-lg"></i>
+                            </button>
+                            <a href="https://wa.me/977${student.phone}" target="_blank" class="p-1.5 text-slate-400 hover:text-green-600 hover:bg-green-50 rounded transition-colors" title="WhatsApp">
+                                <i class="ph ph-whatsapp-logo text-lg"></i>
+                            </a>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function renderPagination(totalCount) {
+            const totalPages = Math.ceil(totalCount / itemsPerPage);
+            const btnPrev = document.getElementById('btnPrevPage');
+            const btnNext = document.getElementById('btnNextPage');
+            const pageContainer = document.getElementById('pageNumbersContainer');
+            
+            if(!btnPrev || !btnNext || !pageContainer) return;
+
+            btnPrev.disabled = currentPage === 1;
+            btnNext.disabled = currentPage >= totalPages || totalPages === 0;
+
+            pageContainer.innerHTML = '';
+
+            // Generate Page Numbers Logic (Show up to 5 numbers)
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4) {
+                startPage = Math.max(1, endPage - 4);
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const btn = document.createElement('button');
+                btn.innerText = i;
+                if (i === currentPage) {
+                    btn.className = "w-8 h-8 rounded border border-brand-500 bg-brand-50 text-brand-700 font-medium text-sm flex items-center justify-center transition-colors";
+                } else {
+                    btn.className = "w-8 h-8 rounded border border-slate-200 text-slate-600 hover:bg-slate-100 font-medium text-sm flex items-center justify-center transition-colors";
+                    btn.onclick = () => { currentPage = i; renderDashboard(); };
+                }
+                pageContainer.appendChild(btn);
+            }
+        }
+
+        function updateStats(data) {
+            // Stats should reflect the CURRENT level tab (unless in Shortlisted tab, then show overall or specific)
+            let contextData = mockData;
+            if(currentLevel !== 'ShortlistedOnly') {
+                contextData = mockData.filter(s => s.level === currentLevel);
+            }
+
+            const total = contextData.length;
+            const shortlisted = contextData.filter(s => s.status === 'Shortlisted').length;
+            const pending = contextData.filter(s => s.status === 'Pending').length;
+            const rejected = contextData.filter(s => s.status === 'Rejected').length;
+
+            document.getElementById('stat-total').innerText = total;
+            document.getElementById('stat-shortlisted').innerText = shortlisted;
+            document.getElementById('stat-pending').innerText = pending;
+            document.getElementById('stat-rejected').innerText = rejected;
+
+            const shortlistPercent = total === 0 ? 0 : (shortlisted / total) * 100;
+            document.getElementById('stat-shortlisted-bar').style.width = `${shortlistPercent}%`;
+        }
+
+        function updateCharts(data) {
+            if(currentLevel === 'ShortlistedOnly') return; // Don't update charts if hidden
+
+            // Prepare Program Data
+            const programCounts = {};
+            data.forEach(s => {
+                programCounts[s.program] = (programCounts[s.program] || 0) + 1;
+            });
+
+            // Prepare Province Data
+            const provinceCounts = {};
+            data.forEach(s => {
+                provinceCounts[s.province] = (provinceCounts[s.province] || 0) + 1;
+            });
+
+            // Chart Colors matching brand theme
+            const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#f43f5e'];
+
+            // Update or Create Program Chart
+            const ctxProg = document.getElementById('programChart');
+            if(ctxProg) {
+                if (programChartInstance) programChartInstance.destroy();
+                programChartInstance = new Chart(ctxProg, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(programCounts),
+                        datasets: [{
+                            label: 'Applicants',
+                            data: Object.values(programCounts),
+                            backgroundColor: '#22c55e',
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } } }
+                    }
+                });
+            }
+
+            // Update or Create Province Chart
+            const ctxProv = document.getElementById('provinceChart');
+            if(ctxProv) {
+                 if (provinceChartInstance) provinceChartInstance.destroy();
+                 provinceChartInstance = new Chart(ctxProv, {
+                    type: 'doughnut',
+                    data: {
+                        labels: Object.keys(provinceCounts),
+                        datasets: [{
+                            data: Object.values(provinceCounts),
+                            backgroundColor: colors,
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'right', labels: { boxWidth: 12, usePointStyle: true } } },
+                        cutout: '65%'
+                    }
+                });
+            }
+        }
+
+        function renderDashboard() {
+            const filteredData = getFilteredData();
+            
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = filteredData.slice(startIndex, endIndex);
+
+            renderTable(paginatedData, filteredData.length, startIndex, endIndex);
+            renderPagination(filteredData.length);
+            updateStats(mockData); // Keep stats updated based on full context
+            updateCharts(mockData.filter(s => s.level === currentLevel)); // Charts based on level
+        }
+
+        function changePage(delta) {
+            currentPage += delta;
+            selectedStudentIds.clear(); // Clear selection on page change
+            updateBulkActionsUI();
+            renderDashboard();
+        }
+
+        // --- 6. Actions & Interactions ---
+
+        function toggleSelectAll(checkbox) {
+            const data = getFilteredData();
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = data.slice(startIndex, endIndex);
+
+            if (checkbox.checked) {
+                paginatedData.forEach(s => selectedStudentIds.add(s.id));
+            } else {
+                paginatedData.forEach(s => selectedStudentIds.delete(s.id));
+            }
+            updateBulkActionsUI();
+            renderDashboard(); 
+        }
+
+        function toggleStudentSelection(checkbox) {
+            const id = parseInt(checkbox.value);
+            if (checkbox.checked) {
+                selectedStudentIds.add(id);
+            } else {
+                selectedStudentIds.delete(id);
+            }
+            updateBulkActionsUI();
+            
+            // Visually update Select All checkbox without full re-render
+            const data = getFilteredData();
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedData = data.slice(startIndex, endIndex);
+            
+            const selectAllBtn = document.getElementById('selectAll');
+            if (selectAllBtn) {
+                selectAllBtn.checked = paginatedData.length > 0 && paginatedData.every(s => selectedStudentIds.has(s.id));
+            }
+            
+            // Toggle row background color
+            const row = checkbox.closest('tr');
+            if(checkbox.checked) {
+                row.classList.add('bg-indigo-50/30');
+            } else {
+                row.classList.remove('bg-indigo-50/30');
+            }
+        }
+
+        function updateBulkActionsUI() {
+            const toolbar = document.getElementById('bulkActionsToolbar');
+            const countSpan = document.getElementById('selectedCount');
+            
+            if (selectedStudentIds.size > 0) {
+                countSpan.innerText = selectedStudentIds.size;
+                toolbar.classList.remove('hidden');
+            } else {
+                toolbar.classList.add('hidden');
+            }
+        }
+
+        function performBulkAction(newStatus) {
+            if (selectedStudentIds.size === 0) return;
+            
+            let updateCount = 0;
+            mockData.forEach(student => {
+                if (selectedStudentIds.has(student.id)) {
+                    student.status = newStatus;
+                    updateCount++;
+                }
+            });
+            
+            selectedStudentIds.clear();
+            updateBulkActionsUI();
+            renderDashboard();
+            showToast(`${updateCount} applicants marked as ${newStatus}`, 'success');
+        }
+
+        function updateStatus(id, newStatus) {
+            const student = mockData.find(s => s.id === id);
+            if(student && student.status !== newStatus) {
+                student.status = newStatus;
+                
+                // If we are IN the shortlisted tab and we un-shortlist someone, we need to refresh to hide them
+                if(currentLevel === 'ShortlistedOnly' && newStatus !== 'Shortlisted') {
+                    // Check if current page is now empty
+                    const data = getFilteredData();
+                    const totalPages = Math.ceil(data.length / itemsPerPage);
+                    if(currentPage > totalPages && currentPage > 1) {
+                        currentPage--;
+                    }
+                }
+                
+                renderDashboard();
+                showToast(`Application for ${student.name} marked as ${newStatus}`, 'success');
+            }
+        }
+
+        let currentMessageUserId = null;
+        function openMessageModal(id, name) {
+            currentMessageUserId = id;
+            document.getElementById('modalApplicantName').innerText = name;
+            document.getElementById('messageBody').value = '';
+            document.getElementById('messageTemplate').value = '';
+            
+            const modal = document.getElementById('messageModal');
+            const content = document.getElementById('messageModalContent');
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                content.classList.remove('scale-95', 'opacity-0');
+                content.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        }
+
+        function closeMessageModal() {
+            const modal = document.getElementById('messageModal');
+            const content = document.getElementById('messageModalContent');
+            
+            content.classList.remove('scale-100', 'opacity-100');
+            content.classList.add('scale-95', 'opacity-0');
+            
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                currentMessageUserId = null;
+            }, 200);
+        }
+
+        function applyTemplate() {
+            const template = document.getElementById('messageTemplate').value;
+            const name = document.getElementById('modalApplicantName').innerText;
+            const textarea = document.getElementById('messageBody');
+            
+            const templates = {
+                'shortlist': `Dear ${name},\n\nCongratulations! You have been shortlisted for admission at Shiksha System. Please check your portal for the next steps regarding the interview process.\n\nRegards,\nAdmission Office`,
+                'interview': `Dear ${name},\n\nWe would like to invite you for an interview regarding your application on [Date] at [Time]. Please bring your original documents.\n\nRegards,\nAdmission Office`,
+                'reject': `Dear ${name},\n\nThank you for applying. We regret to inform you that we cannot offer you admission at this time. We wish you the best in your future endeavors.\n\nRegards,\nAdmission Office`,
+                'missing': `Dear ${name},\n\nYour application is pending because we are missing your recent transcript. Please upload it via the portal at your earliest convenience.\n\nRegards,\nAdmission Office`
+            };
+
+            textarea.value = templates[template] || '';
+        }
+
+        function sendMessage() {
+            const message = document.getElementById('messageBody').value;
+            if(!message.trim()) {
+                alert('Please enter a message');
+                return;
+            }
+            
+            const student = mockData.find(s => s.id === currentMessageUserId);
+            if(student) {
+                const viaEmail = document.getElementById('sendEmail').checked;
+                const viaSMS = document.getElementById('sendSMS').checked;
+                let methods = [];
+                if(viaEmail) methods.push('Email');
+                if(viaSMS) methods.push('SMS');
+                
+                showToast(`Message sent to ${student.name} via ${methods.join(' & ')}`, 'success');
+            }
+            
+            closeMessageModal();
+        }
+
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            
+            const colors = {
+                success: 'bg-green-600 text-white',
+                info: 'bg-blue-600 text-white',
+                error: 'bg-red-600 text-white'
+            };
+            const icons = {
+                success: 'ph-check-circle',
+                info: 'ph-info',
+                error: 'ph-warning-circle'
+            };
+
+            toast.className = `toast-enter flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg ${colors[type]} pointer-events-auto`;
+            toast.innerHTML = `
+                <i class="ph ${icons[type]} text-xl"></i>
+                <p class="text-sm font-medium">${message}</p>
+                <button onclick="this.parentElement.remove()" class="ml-auto text-white/80 hover:text-white">
+                    <i class="ph ph-x"></i>
+                </button>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                if(toast.parentElement) {
+                    toast.classList.replace('toast-enter', 'toast-exit');
+                    setTimeout(() => toast.remove(), 300);
+                }
+            }, 3000);
+        }
+
+    </script>
+</body>
+</html>

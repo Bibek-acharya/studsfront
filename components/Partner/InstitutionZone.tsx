@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { apiService } from "../../services/api";
 
 interface InstitutionZoneProps {
   onNavigate?: (view: any, data?: any) => void;
@@ -269,6 +270,16 @@ const InstitutionZone: React.FC<InstitutionZoneProps> = ({ onNavigate }) => {
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [showRegisterConfirmPassword, setShowRegisterConfirmPassword] = useState(false);
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPassword, setLoginPassword] = useState("");
+  const [registerInstitutionName, setRegisterInstitutionName] = useState("");
+  const [registerNumber, setRegisterNumber] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [registerConfirmPassword, setRegisterConfirmPassword] = useState("");
+  const [authLoading, setAuthLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authSuccess, setAuthSuccess] = useState<string | null>(null);
 
   const contactDropdownRef = useRef<HTMLDivElement | null>(null);
 
@@ -313,6 +324,102 @@ const InstitutionZone: React.FC<InstitutionZoneProps> = ({ onNavigate }) => {
 
   const handlePricingOverlayClose = () => {
     setShowPricingOverlay(false);
+  };
+
+  const clearAuthMessages = () => {
+    setAuthError(null);
+    setAuthSuccess(null);
+  };
+
+  const handleInstitutionLogin = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (!loginEmail.trim() || !loginPassword.trim()) {
+      setAuthError("Email and password are required.");
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const response = await apiService.institutionLogin({
+        email: loginEmail.trim(),
+        password: loginPassword,
+      });
+
+      const token = response.data?.token;
+      const user = response.data?.user;
+
+      if (!token || !user) {
+        throw new Error("Invalid login response from server");
+      }
+
+      apiService.setInstitutionToken(token);
+      apiService.setInstitutionUser(user);
+      setAuthSuccess("Login successful. Your institution account is now connected.");
+      setLoginPassword("");
+      onNavigate?.("institutionDashboard");
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Login failed. Please try again.");
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleInstitutionRegister = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    clearAuthMessages();
+
+    if (
+      !registerInstitutionName.trim() ||
+      !registerNumber.trim() ||
+      !registerEmail.trim() ||
+      !registerPassword.trim() ||
+      !registerConfirmPassword.trim()
+    ) {
+      setAuthError("Please fill all required fields.");
+      return;
+    }
+
+    if (registerPassword.length < 6) {
+      setAuthError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (registerPassword !== registerConfirmPassword) {
+      setAuthError("Passwords do not match.");
+      return;
+    }
+
+    setAuthLoading(true);
+    try {
+      const response = await apiService.institutionRegister({
+        institution_name: registerInstitutionName.trim(),
+        registration_number: registerNumber.trim(),
+        email: registerEmail.trim(),
+        password: registerPassword,
+      });
+
+      const token = response.data?.token;
+      const user = response.data?.user;
+
+      if (!token || !user) {
+        throw new Error("Invalid registration response from server");
+      }
+
+      apiService.setInstitutionToken(token);
+      apiService.setInstitutionUser(user);
+      setAuthSuccess("Registration successful. Your institution account is now connected.");
+      setRegisterPassword("");
+      setRegisterConfirmPassword("");
+      setAuthSubTab("login");
+      setLoginEmail(user.email);
+      onNavigate?.("institutionDashboard");
+    } catch (error) {
+      setAuthError(error instanceof Error ? error.message : "Registration failed. Please try again.");
+    } finally {
+      setAuthLoading(false);
+    }
   };
 
   return (
@@ -477,13 +584,21 @@ const InstitutionZone: React.FC<InstitutionZoneProps> = ({ onNavigate }) => {
                   </div>
                 ) : authSubTab === "login" ? (
                   <div className="fade-in">
-                    <form onSubmit={(event) => event.preventDefault()}>
+                    <form onSubmit={handleInstitutionLogin}>
                       <div className="space-y-4">
-                        <input type="email" placeholder="Enter your email" className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] focus:ring-2 focus:ring-[#2D68FE]/20 outline-none" />
+                        <input
+                          type="email"
+                          placeholder="Enter your email"
+                          value={loginEmail}
+                          onChange={(event) => setLoginEmail(event.target.value)}
+                          className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] focus:ring-2 focus:ring-[#2D68FE]/20 outline-none"
+                        />
                         <div className="relative">
                           <input
                             type={showLoginPassword ? "text" : "password"}
                             placeholder="Enter your password"
+                            value={loginPassword}
+                            onChange={(event) => setLoginPassword(event.target.value)}
                             className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none"
                           />
                           <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" onClick={() => setShowLoginPassword((prev) => !prev)}>
@@ -494,7 +609,9 @@ const InstitutionZone: React.FC<InstitutionZoneProps> = ({ onNavigate }) => {
                       <div className="flex justify-end mt-3 mb-6">
                         <button type="button" className="text-[15px] text-[#2D68FE] font-semibold hover:text-blue-800">Forgot password?</button>
                       </div>
-                      <button type="submit" className="w-full bg-[#2D68FE] hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl">Log in</button>
+                      {authError ? <p className="mb-3 text-sm font-medium text-red-500">{authError}</p> : null}
+                      {authSuccess ? <p className="mb-3 text-sm font-medium text-emerald-600">{authSuccess}</p> : null}
+                      <button type="submit" disabled={authLoading} className="w-full bg-[#2D68FE] hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl">{authLoading ? "Logging in..." : "Log in"}</button>
                       <div className="flex items-center my-5"><div className="flex-grow border-t border-gray-200"></div><span className="px-4 text-xs text-gray-400 font-semibold">Or</span><div className="flex-grow border-t border-gray-200"></div></div>
                       <button type="button" className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 hover:bg-gray-50 text-[15px] font-semibold text-gray-700 py-3.5 rounded-xl shadow-sm">Log in with Google</button>
                     </form>
@@ -502,25 +619,57 @@ const InstitutionZone: React.FC<InstitutionZoneProps> = ({ onNavigate }) => {
                   </div>
                 ) : (
                   <div className="fade-in">
-                    <form onSubmit={(event) => event.preventDefault()}>
+                    <form onSubmit={handleInstitutionRegister}>
                       <div className="space-y-4">
-                        <input type="text" placeholder="College name" className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none" />
-                        <input type="text" placeholder="Institution registration number" className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white" />
-                        <input type="email" placeholder="Work email" className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white" />
+                        <input
+                          type="text"
+                          placeholder="College name"
+                          value={registerInstitutionName}
+                          onChange={(event) => setRegisterInstitutionName(event.target.value)}
+                          className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none"
+                        />
+                        <input
+                          type="text"
+                          placeholder="Institution registration number"
+                          value={registerNumber}
+                          onChange={(event) => setRegisterNumber(event.target.value)}
+                          className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white"
+                        />
+                        <input
+                          type="email"
+                          placeholder="Work email"
+                          value={registerEmail}
+                          onChange={(event) => setRegisterEmail(event.target.value)}
+                          className="w-full px-4 py-3.5 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white"
+                        />
                         <div className="relative">
-                          <input type={showRegisterPassword ? "text" : "password"} placeholder="Create password" className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white" />
+                          <input
+                            type={showRegisterPassword ? "text" : "password"}
+                            placeholder="Create password"
+                            value={registerPassword}
+                            onChange={(event) => setRegisterPassword(event.target.value)}
+                            className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white"
+                          />
                           <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" onClick={() => setShowRegisterPassword((prev) => !prev)}>
                             <i className={`fa-solid ${showRegisterPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
                           </button>
                         </div>
                         <div className="relative">
-                          <input type={showRegisterConfirmPassword ? "text" : "password"} placeholder="Re-enter password" className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white" />
+                          <input
+                            type={showRegisterConfirmPassword ? "text" : "password"}
+                            placeholder="Re-enter password"
+                            value={registerConfirmPassword}
+                            onChange={(event) => setRegisterConfirmPassword(event.target.value)}
+                            className="w-full px-4 py-3.5 pr-12 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white"
+                          />
                           <button type="button" className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" onClick={() => setShowRegisterConfirmPassword((prev) => !prev)}>
                             <i className={`fa-solid ${showRegisterConfirmPassword ? "fa-eye-slash" : "fa-eye"}`}></i>
                           </button>
                         </div>
                       </div>
-                      <button type="submit" className="w-full mt-6 bg-[#2D68FE] hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl">Sign up</button>
+                      {authError ? <p className="mt-4 text-sm font-medium text-red-500">{authError}</p> : null}
+                      {authSuccess ? <p className="mt-4 text-sm font-medium text-emerald-600">{authSuccess}</p> : null}
+                      <button type="submit" disabled={authLoading} className="w-full mt-6 bg-[#2D68FE] hover:bg-blue-700 disabled:opacity-60 text-white font-bold py-3.5 rounded-xl">{authLoading ? "Creating account..." : "Sign up"}</button>
                     </form>
                     <div className="mt-8 text-center text-[15px] text-gray-500 font-medium">Already have an account? <button type="button" onClick={() => setAuthSubTab("login")} className="text-[#2D68FE] font-semibold hover:underline">Log in</button></div>
                   </div>

@@ -1,0 +1,767 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College QMS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Custom scrollbar for chats */
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 20px; }
+        
+        /* Hide scrollbar for tabs but keep functionality */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Typing indicator animation */
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
+        }
+
+        .unread-bg { background-color: #f0f5ff; }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden text-slate-800 relative">
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col hidden md:flex transition-all duration-300 z-20 shadow-xl">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800">
+            <div class="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center mr-3 shadow-lg shadow-indigo-500/30">
+                <i data-lucide="graduation-cap" class="w-5 h-5 text-white"></i>
+            </div>
+            <span class="text-white font-semibold text-lg tracking-wide">UniConnect</span>
+        </div>
+        <nav class="flex-1 py-6 px-4 space-y-2">
+            <a href="#" class="flex items-center px-4 py-3 text-sm font-medium rounded-xl bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 shadow-sm transition-colors">
+                <i data-lucide="inbox" class="w-5 h-5 mr-3"></i> Query Inbox
+            </a>
+        </nav>
+        <div class="p-4 border-t border-slate-800" id="userProfileSidebar">
+            <!-- Populated via JS -->
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen w-full relative bg-slate-50">
+        <!-- Top Header -->
+        <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 shadow-sm z-10 shrink-0">
+            <div class="flex items-center">
+                <button class="md:hidden mr-4 text-slate-500 hover:text-slate-700 bg-slate-100 p-2 rounded-lg">
+                    <i data-lucide="menu" class="w-5 h-5"></i>
+                </button>
+                <h1 class="text-xl font-bold text-slate-800" id="headerTitle">Support Messages</h1>
+            </div>
+            
+            <!-- DEMO ROLE SWITCHER -->
+            <div class="flex items-center bg-slate-100 p-1.5 rounded-xl border border-slate-200 shadow-inner">
+                <span class="text-xs font-semibold text-slate-400 mr-2 uppercase tracking-wider pl-2">View As:</span>
+                <button onclick="switchRole('student')" id="btnRoleStudent" class="px-4 py-1.5 text-sm font-semibold rounded-lg bg-white shadow-sm text-indigo-600 transition-all">Student</button>
+                <button onclick="switchRole('admin')" id="btnRoleAdmin" class="px-4 py-1.5 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-700 transition-all">College Admin</button>
+            </div>
+        </header>
+
+        <!-- Dynamic View Container -->
+        <div id="appContainer" class="flex-1 overflow-hidden p-4 md:p-6">
+            <!-- Content injected by JS -->
+        </div>
+    </main>
+
+    <!-- ==========================================
+         STUDENT VIEW TEMPLATE
+         ========================================== -->
+    <template id="studentViewTemplate">
+        <div class="h-full flex flex-col lg:flex-row gap-6">
+            <!-- Left Column: Chat List & Tabs -->
+            <div class="w-full lg:w-1/3 xl:w-1/4 flex flex-col gap-4 overflow-hidden fade-in shrink-0">
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden h-full">
+                    
+                    <!-- Dynamic Filter Tabs -->
+                    <div class="p-4 border-b border-slate-100 bg-white shrink-0">
+                        <h3 class="font-bold text-slate-800 text-lg mb-3">Conversations</h3>
+                        <div id="s-filter-tabs" class="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                    
+                    <div id="studentQueryList" class="flex-1 overflow-y-auto chat-scroll divide-y divide-slate-100">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Chat Interface -->
+            <div class="w-full lg:w-2/3 xl:w-3/4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden fade-in relative" id="studentChatArea">
+                
+                <!-- Chat placeholder if no query selected -->
+                <div id="studentChatPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10 text-slate-400">
+                    <div class="w-20 h-20 bg-white shadow-sm border border-slate-100 rounded-full flex items-center justify-center mb-5">
+                        <i data-lucide="message-square" class="w-10 h-10 text-indigo-300"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-slate-700 mb-2">Your Inbox</h2>
+                    <p class="font-medium text-slate-500 text-center max-w-sm">Select a conversation from the sidebar to view responses or send updates.</p>
+                </div>
+
+                <!-- Active Chat Content -->
+                <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-white shadow-sm z-0 shrink-0">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-indigo-100 rounded-full flex items-center justify-center text-indigo-600 shrink-0">
+                            <i data-lucide="building" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg" id="sChatCollege">College Support</h3>
+                            <p class="text-xs font-medium text-slate-500 flex items-center mt-0.5">
+                                <span class="w-2 h-2 rounded-full bg-green-500 mr-1.5" id="sChatStatusDot"></span>
+                                <span id="sChatStatusText">Status</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="sChatMessages" class="flex-1 p-6 overflow-y-auto chat-scroll flex flex-col gap-5 bg-[#f8fafc]">
+                    <!-- Messages populated by JS -->
+                </div>
+
+                <div class="p-4 bg-white border-t border-slate-100 shrink-0">
+                    <form onsubmit="handleSendMessage(event)" class="flex items-end gap-3">
+                        <div class="flex-1 relative">
+                            <textarea id="sChatInput" rows="1" class="w-full text-sm border border-slate-200 rounded-2xl pl-5 pr-12 py-3.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none bg-slate-50 hover:bg-white transition-colors chat-scroll shadow-inner" placeholder="Send an update or reply..."></textarea>
+                        </div>
+                        <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white p-3.5 rounded-2xl transition-all shadow-md flex-shrink-0 transform active:scale-95">
+                            <i data-lucide="send-horizonal" class="w-5 h-5"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- ==========================================
+         ADMIN VIEW TEMPLATE
+         ========================================== -->
+    <template id="adminViewTemplate">
+        <div class="h-full flex flex-col lg:flex-row gap-6">
+            <!-- Left Column: Inbox & Tabs -->
+            <div class="w-full lg:w-1/3 xl:w-1/4 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden fade-in shrink-0">
+                <div class="p-4 border-b border-slate-100 bg-white shrink-0">
+                    <h2 class="text-lg font-bold text-slate-800 mb-3 flex items-center">
+                        <i data-lucide="inbox" class="w-5 h-5 mr-2 text-indigo-500"></i> Admin Inbox
+                    </h2>
+                    
+                    <div class="relative mb-4">
+                        <i data-lucide="search" class="w-4 h-4 absolute left-3.5 top-2.5 text-slate-400"></i>
+                        <input type="text" id="adminSearchInput" oninput="handleAdminSearch(event)" placeholder="Search students or messages..." class="w-full text-sm border border-slate-200 rounded-xl pl-10 pr-4 py-2 focus:ring-2 focus:ring-indigo-500 outline-none bg-slate-50 transition-shadow">
+                    </div>
+
+                    <!-- Dynamic Filter Tabs -->
+                    <div id="a-filter-tabs" class="flex gap-2 overflow-x-auto scrollbar-hide pb-1">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <div id="adminQueryList" class="flex-1 overflow-y-auto chat-scroll divide-y divide-slate-100">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <!-- Right Column: Details & Chat -->
+            <div class="w-full lg:w-2/3 xl:w-3/4 flex flex-col gap-4 fade-in relative overflow-hidden" id="adminChatArea">
+                <!-- Chat placeholder if no query selected -->
+                <div id="adminChatPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 rounded-2xl border border-slate-200 z-10 text-slate-400">
+                    <div class="w-20 h-20 bg-white shadow-sm border border-slate-100 rounded-full flex items-center justify-center mb-5">
+                        <i data-lucide="mouse-pointer-click" class="w-8 h-8 text-indigo-300"></i>
+                    </div>
+                    <h2 class="text-xl font-semibold text-slate-700 mb-2">Select a Conversation</h2>
+                    <p class="font-medium text-center text-slate-500">Student details and conversation history will appear here.</p>
+                </div>
+
+                <!-- Student Info Card -->
+                <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-5 flex flex-wrap gap-6 items-center justify-between shrink-0">
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 rounded-full bg-gradient-to-br from-indigo-100 to-purple-100 text-indigo-700 flex items-center justify-center font-bold text-xl border border-indigo-200 shadow-sm shrink-0" id="aStudentInitials">
+                            --
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <h3 class="font-bold text-slate-800 text-lg" id="aStudentName">Student Name</h3>
+                                <span id="aUrgentBadge" class="hidden bg-red-100 text-red-700 text-[10px] px-2 py-0.5 rounded font-bold uppercase tracking-wider border border-red-200">Urgent</span>
+                            </div>
+                            <div class="flex items-center gap-4 mt-1 text-xs text-slate-500 font-medium">
+                                <span class="flex items-center bg-slate-100 px-2 py-1 rounded-md"><i data-lucide="mail" class="w-3.5 h-3.5 mr-1.5 text-slate-400"></i> <span id="aStudentEmail">email@domain.com</span></span>
+                                <span class="flex items-center bg-slate-100 px-2 py-1 rounded-md"><i data-lucide="phone" class="w-3.5 h-3.5 mr-1.5 text-slate-400"></i> <span id="aStudentPhone">+123456789</span></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-right flex flex-col items-end">
+                        <span class="bg-indigo-50 text-indigo-700 text-xs px-3 py-1.5 rounded-lg font-bold border border-indigo-100 flex items-center mb-2 shadow-sm">
+                            <i data-lucide="building" class="w-3.5 h-3.5 mr-1.5"></i> <span id="aCollegeDept">Department</span>
+                        </span>
+                        <div class="flex items-center gap-2">
+                             <button onclick="markAsResolved()" id="resolveBtn" class="text-sm bg-white hover:bg-green-50 text-slate-600 hover:text-green-700 px-4 py-2 rounded-xl font-semibold transition-colors border border-slate-200 shadow-sm flex items-center group">
+                                 <i data-lucide="check-circle" class="w-4 h-4 mr-2 text-slate-400 group-hover:text-green-600"></i> Mark Resolved
+                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Area -->
+                <div class="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col overflow-hidden">
+                    <div id="aChatMessages" class="flex-1 p-6 overflow-y-auto chat-scroll flex flex-col gap-5 bg-[#f8fafc]">
+                        <!-- Messages populated by JS -->
+                    </div>
+                    
+                    <div class="p-4 bg-white border-t border-slate-100 shrink-0">
+                        <form onsubmit="handleSendMessage(event)" class="flex items-end gap-3">
+                            <div class="flex-1 relative">
+                                <textarea id="aChatInput" rows="2" class="w-full text-sm border border-slate-200 rounded-2xl pl-5 pr-5 py-3.5 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none resize-none bg-slate-50 hover:bg-white transition-colors chat-scroll shadow-inner" placeholder="Type your response to the student..."></textarea>
+                            </div>
+                            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-4 rounded-2xl transition-all shadow-md flex items-center font-bold h-full transform active:scale-95">
+                                <span>Reply</span>
+                                <i data-lucide="send-horizonal" class="w-4 h-4 ml-2"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script>
+        // --- STATE MANAGEMENT ---
+        const state = {
+            role: 'student', // 'student' or 'admin'
+            activeQueryId: null,
+            searchQuery: '',
+            activeFilter: 'all', // 'all', 'unread', 'pending', 'resolved', 'urgent'
+            currentUser: {
+                student: { name: "Jagdish Ji", initials: "JJ", roleText: "Student" },
+                admin: { name: "Sarah Collins", initials: "SC", roleText: "Admissions Officer" }
+            },
+            queries: [
+                {
+                    id: 1,
+                    studentName: "Jagdish Ji",
+                    email: "jagdish@example.com",
+                    phone: "+977 980-0000000",
+                    college: "School of Engineering",
+                    status: "resolved", 
+                    priority: "normal",
+                    unreadStudent: false,
+                    unreadAdmin: false,
+                    timestamp: new Date(Date.now() - 86400000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), 
+                    messages: [
+                        { id: 101, sender: 'student', text: "Hello, what is the deadline for the Civil Engineering internal assessment?", time: "09:00 AM" },
+                        { id: 102, sender: 'admin', text: "Hi Jagdish. The deadline is next Friday. Please submit it via the portal.", time: "10:15 AM" },
+                        { id: 103, sender: 'student', text: "Thank you!", time: "10:30 AM" }
+                    ]
+                },
+                {
+                    id: 2,
+                    studentName: "Jagdish Ji",
+                    email: "jagdish@example.com",
+                    phone: "+977 980-0000000",
+                    college: "Financial Aid",
+                    status: "open",
+                    priority: "normal",
+                    unreadStudent: true, // Student hasn't read the response yet
+                    unreadAdmin: false,
+                    timestamp: new Date(Date.now() - 3600000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), 
+                    messages: [
+                        { id: 201, sender: 'student', text: "I have submitted my scholarship form online. When will the interview be scheduled?", time: new Date(Date.now() - 3600000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) },
+                        { id: 202, sender: 'admin', text: "Hello Jagdish! The committee is reviewing forms now. You will get an email with the interview date by tomorrow evening.", time: new Date(Date.now() - 1800000).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }
+                    ]
+                },
+                {
+                    id: 3,
+                    studentName: "Emily Davis",
+                    email: "emily.d@test.com",
+                    phone: "+44 7700 900077",
+                    college: "Admissions Office",
+                    status: "open",
+                    priority: "urgent", 
+                    unreadStudent: false,
+                    unreadAdmin: true, // Admin hasn't read this new query
+                    timestamp: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), 
+                    messages: [
+                        { id: 301, sender: 'student', text: "URGENT: My application portal is locked and today is the last day to submit the fee! Please help me reset it.", time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }
+                    ]
+                }
+            ]
+        };
+
+        // --- FILTER & TABS LOGIC ---
+        function setFilter(filterId) {
+            state.activeFilter = filterId;
+            renderFilters();
+            renderQueryList();
+        }
+
+        function getBaseQueries() {
+            let base = state.queries;
+            if (state.role === 'student') {
+                base = base.filter(q => q.studentName === state.currentUser.student.name);
+            }
+            if (state.searchQuery) {
+                const term = state.searchQuery.toLowerCase();
+                base = base.filter(q => 
+                    q.studentName.toLowerCase().includes(term) || 
+                    q.college.toLowerCase().includes(term) ||
+                    q.messages.some(m => m.text.toLowerCase().includes(term))
+                );
+            }
+            return base;
+        }
+
+        function getVisibleQueries() {
+            let visible = getBaseQueries();
+            
+            // Apply current tab filter
+            if (state.activeFilter !== 'all') {
+                if (state.activeFilter === 'unread') {
+                    visible = visible.filter(q => state.role === 'student' ? q.unreadStudent : q.unreadAdmin);
+                } else if (state.activeFilter === 'pending') {
+                    visible = visible.filter(q => q.status === 'open');
+                } else if (state.activeFilter === 'resolved') {
+                    visible = visible.filter(q => q.status === 'resolved');
+                } else if (state.activeFilter === 'urgent') {
+                    visible = visible.filter(q => q.priority === 'urgent');
+                }
+            }
+            return visible.sort((a,b) => b.id - a.id); // Show newest first
+        }
+
+        function renderFilters() {
+            const prefix = state.role === 'student' ? 's' : 'a';
+            const container = document.getElementById(`${prefix}-filter-tabs`);
+            if (!container) return;
+
+            const baseQueries = getBaseQueries();
+            
+            const counts = {
+                all: baseQueries.length,
+                unread: baseQueries.filter(q => state.role === 'student' ? q.unreadStudent : q.unreadAdmin).length,
+                pending: baseQueries.filter(q => q.status === 'open').length,
+                resolved: baseQueries.filter(q => q.status === 'resolved').length,
+                urgent: baseQueries.filter(q => q.priority === 'urgent').length
+            };
+
+            const tabs = [
+                { id: 'all', label: 'All' },
+                { id: 'unread', label: 'Unread' },
+                { id: 'pending', label: 'Pending' },
+                { id: 'resolved', label: 'Resolved' },
+                { id: 'urgent', label: 'Urgent' }
+            ];
+
+            container.innerHTML = tabs.map(tab => {
+                const isActive = state.activeFilter === tab.id;
+                const count = counts[tab.id];
+                
+                const activeClasses = isActive 
+                    ? 'bg-indigo-600 text-white shadow-md border-indigo-600' 
+                    : 'bg-slate-50 text-slate-600 hover:bg-slate-100 border-slate-200';
+                
+                const badgeClasses = isActive
+                    ? 'bg-white/20 text-white'
+                    : (count > 0 && tab.id === 'unread' ? 'bg-indigo-500 text-white' : 'bg-slate-200 text-slate-500');
+
+                return `
+                    <button onclick="setFilter('${tab.id}')" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all flex items-center gap-1.5 border ${activeClasses}">
+                        ${tab.label}
+                        <span class="px-1.5 py-0.5 rounded-lg text-[10px] min-w-[20px] text-center ${badgeClasses}">${count}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        // --- UI UTILITIES ---
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-emerald-600' : 'bg-indigo-600';
+            const icon = type === 'success' ? 'check-circle' : 'info';
+            
+            toast.className = `px-4 py-3.5 rounded-xl shadow-xl text-sm font-semibold text-white transform transition-all duration-300 translate-y-10 opacity-0 flex items-center gap-3 ${bgColor}`;
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-5 h-5"></i> ${message}`;
+            
+            container.appendChild(toast);
+            lucide.createIcons({ root: toast });
+            
+            requestAnimationFrame(() => toast.classList.remove('translate-y-10', 'opacity-0'));
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // --- INITIALIZATION ---
+        document.addEventListener("DOMContentLoaded", () => {
+            renderApp();
+        });
+
+        function renderApp() {
+            // Update Toggle UI
+            document.getElementById('btnRoleStudent').className = state.role === 'student' ? 
+                'px-4 py-1.5 text-sm font-bold rounded-lg bg-white shadow-sm text-indigo-600 transition-all' : 
+                'px-4 py-1.5 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-700 transition-all';
+            
+            document.getElementById('btnRoleAdmin').className = state.role === 'admin' ? 
+                'px-4 py-1.5 text-sm font-bold rounded-lg bg-white shadow-sm text-indigo-600 transition-all' : 
+                'px-4 py-1.5 text-sm font-semibold rounded-lg text-slate-500 hover:text-slate-700 transition-all';
+
+            // Update Sidebar Profile
+            const user = state.role === 'student' ? state.currentUser.student : state.currentUser.admin;
+            document.getElementById('userProfileSidebar').innerHTML = `
+                <div class="flex items-center">
+                    <div class="w-11 h-11 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center font-bold text-indigo-300 shadow-inner shrink-0">
+                        ${user.initials}
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-bold text-white">${user.name}</p>
+                        <p class="text-xs font-medium text-slate-400 mt-0.5">${user.roleText}</p>
+                    </div>
+                </div>
+            `;
+
+            // Render View
+            const container = document.getElementById('appContainer');
+            container.innerHTML = '';
+            
+            const templateId = state.role === 'student' ? 'studentViewTemplate' : 'adminViewTemplate';
+            const template = document.getElementById(templateId);
+            container.appendChild(template.content.cloneNode(true));
+
+            renderFilters();
+            renderQueryList();
+            
+            if (state.activeQueryId) {
+                const queryExists = getVisibleQueries().find(q => q.id === state.activeQueryId);
+                if (queryExists) {
+                    renderChatDetails(state.activeQueryId);
+                } else {
+                    renderChatDetails(null); 
+                }
+            }
+            lucide.createIcons();
+        }
+
+        function switchRole(role) {
+            state.role = role;
+            state.activeQueryId = null; 
+            state.searchQuery = ''; 
+            state.activeFilter = 'all'; // Reset filter on role change
+            renderApp();
+        }
+
+        function handleAdminSearch(e) {
+            state.searchQuery = e.target.value;
+            renderFilters();
+            renderQueryList();
+        }
+
+        // --- RENDERING LISTS ---
+        function renderQueryList() {
+            const queries = getVisibleQueries();
+            renderFilters(); // Ensure counts are updated
+            
+            const listEl = document.getElementById(state.role === 'student' ? 'studentQueryList' : 'adminQueryList');
+            
+            // Check if active query is hidden by filter
+            if (state.activeQueryId && !queries.find(q => q.id === state.activeQueryId)) {
+                state.activeQueryId = null;
+                renderChatDetails(null);
+            }
+
+            if (queries.length === 0) {
+                const msg = state.searchQuery || state.activeFilter !== 'all' 
+                    ? "No conversations match your filter." 
+                    : "No active conversations.";
+                listEl.innerHTML = `
+                    <div class="p-8 text-center flex flex-col items-center justify-center text-slate-400 h-full">
+                        <i data-lucide="inbox" class="w-8 h-8 mb-3 opacity-50"></i>
+                        <p class="text-sm font-medium">${msg}</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            listEl.innerHTML = queries.map(q => {
+                const lastMsg = q.messages.length > 0 ? q.messages[q.messages.length - 1].text : "Submitted...";
+                const isActive = state.activeQueryId === q.id;
+                
+                // Determine unread status based on role
+                const isUnread = state.role === 'student' ? q.unreadStudent : q.unreadAdmin;
+                const unreadClass = isUnread ? 'unread-bg border-l-4 border-indigo-500' : 'bg-white border-l-4 border-transparent';
+                const activeClass = isActive ? 'bg-slate-100 border-l-4 border-slate-400' : 'hover:bg-slate-50';
+
+                // Badges
+                const statusBadge = `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase ${q.status === 'resolved' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}">${q.status}</span>`;
+                const urgentBadge = q.priority === 'urgent' ? `<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold tracking-wide uppercase bg-red-100 text-red-700 ml-1">Urgent</span>` : '';
+                const unreadDot = isUnread ? `<span class="w-2 h-2 rounded-full bg-indigo-500 shrink-0" title="Unread Message"></span>` : '';
+
+                if (state.role === 'student') {
+                    return `
+                    <div onclick="selectQuery(${q.id})" class="p-4 cursor-pointer transition-all ${isActive ? activeClass : unreadClass}">
+                        <div class="flex justify-between items-start mb-1.5">
+                            <h4 class="font-bold text-sm text-slate-800 truncate pr-2 flex items-center gap-1.5">
+                                ${q.college} ${unreadDot}
+                            </h4>
+                            <span class="text-[11px] font-medium text-slate-400 whitespace-nowrap bg-white px-1.5 rounded">${q.timestamp}</span>
+                        </div>
+                        <p class="text-xs ${isUnread ? 'text-slate-700 font-semibold' : 'text-slate-500'} truncate mb-2.5">${lastMsg}</p>
+                        <div class="flex items-center gap-1">
+                            ${statusBadge} ${urgentBadge}
+                        </div>
+                    </div>`;
+                } else {
+                    return `
+                    <div onclick="selectQuery(${q.id})" class="p-4 cursor-pointer transition-all ${isActive ? activeClass : unreadClass}">
+                        <div class="flex justify-between items-start mb-1.5">
+                            <h4 class="font-bold text-sm text-slate-800 flex items-center gap-1.5 truncate">
+                                ${q.studentName} ${unreadDot}
+                            </h4>
+                            <span class="text-[11px] font-medium text-slate-400 whitespace-nowrap bg-white px-1.5 rounded">${q.timestamp}</span>
+                        </div>
+                        <div class="text-[11px] font-bold text-indigo-600 mb-1.5 flex items-center truncate">
+                            <i data-lucide="building" class="w-3 h-3 mr-1 shrink-0"></i> ${q.college}
+                        </div>
+                        <p class="text-xs ${isUnread ? 'text-slate-800 font-semibold' : 'text-slate-500'} line-clamp-2 mb-2.5 leading-relaxed">${lastMsg}</p>
+                        <div class="flex items-center gap-1">
+                            ${statusBadge} ${urgentBadge}
+                        </div>
+                    </div>`;
+                }
+            }).join('');
+            lucide.createIcons();
+        }
+
+        // --- ACTIONS ---
+        function selectQuery(id) {
+            state.activeQueryId = id;
+            
+            // Mark as read based on role
+            const queryIndex = state.queries.findIndex(q => q.id === id);
+            if (queryIndex !== -1) {
+                if (state.role === 'student') {
+                    state.queries[queryIndex].unreadStudent = false;
+                } else {
+                    state.queries[queryIndex].unreadAdmin = false;
+                }
+            }
+
+            renderFilters();
+            renderQueryList(); 
+            renderChatDetails(id);
+        }
+
+        function renderChatDetails(id) {
+            if (!id) {
+                // Show Placeholders if id is null
+                if (state.role === 'student') {
+                    document.getElementById('studentChatPlaceholder').classList.remove('hidden');
+                } else {
+                    document.getElementById('adminChatPlaceholder').classList.remove('hidden');
+                }
+                return;
+            }
+
+            const query = state.queries.find(q => q.id === id);
+            if (!query) return;
+
+            if (state.role === 'student') {
+                document.getElementById('studentChatPlaceholder').classList.add('hidden');
+                document.getElementById('sChatCollege').innerText = query.college;
+                
+                const statusDot = document.getElementById('sChatStatusDot');
+                const statusText = document.getElementById('sChatStatusText');
+                if (query.status === 'resolved') {
+                    statusDot.className = 'w-2 h-2 rounded-full bg-green-500 mr-1.5';
+                    statusText.innerText = 'Resolved';
+                } else {
+                    statusDot.className = 'w-2 h-2 rounded-full bg-amber-500 mr-1.5';
+                    statusText.innerText = 'Pending';
+                }
+                renderMessages('sChatMessages', query);
+
+            } else {
+                document.getElementById('adminChatPlaceholder').classList.add('hidden');
+                
+                // Populate student info
+                document.getElementById('aStudentName').innerText = query.studentName;
+                document.getElementById('aStudentEmail').innerText = query.email;
+                document.getElementById('aStudentPhone').innerText = query.phone;
+                document.getElementById('aCollegeDept').innerText = query.college;
+                
+                // Urgent badge toggle
+                const badge = document.getElementById('aUrgentBadge');
+                if(query.priority === 'urgent') badge.classList.remove('hidden');
+                else badge.classList.add('hidden');
+
+                // Resolve button state
+                const resolveBtn = document.getElementById('resolveBtn');
+                if(query.status === 'resolved') {
+                    resolveBtn.innerHTML = '<i data-lucide="check" class="w-4 h-4 mr-2"></i> Resolved';
+                    resolveBtn.className = "text-sm bg-green-50 text-green-700 px-4 py-2 rounded-xl font-bold border border-green-200 shadow-sm flex items-center";
+                    resolveBtn.disabled = true;
+                } else {
+                    resolveBtn.innerHTML = '<i data-lucide="check-circle" class="w-4 h-4 mr-2 text-slate-400 group-hover:text-green-600"></i> Mark Resolved';
+                    resolveBtn.className = "text-sm bg-white hover:bg-green-50 text-slate-600 hover:text-green-700 px-4 py-2 rounded-xl font-semibold transition-colors border border-slate-200 shadow-sm flex items-center group cursor-pointer";
+                    resolveBtn.disabled = false;
+                }
+                
+                // Initials
+                const initials = query.studentName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+                document.getElementById('aStudentInitials').innerText = initials;
+
+                renderMessages('aChatMessages', query);
+                lucide.createIcons();
+            }
+        }
+
+        function renderMessages(containerId, query) {
+            const container = document.getElementById(containerId);
+            
+            if (query.messages.length === 0) {
+                container.innerHTML = `<div class="flex-1 flex flex-col items-center justify-center text-slate-400 h-full py-10"><i data-lucide="clock" class="w-8 h-8 mb-2 opacity-50"></i><p class="text-sm font-medium">Awaiting first message...</p></div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            container.innerHTML = query.messages.map(msg => {
+                const isMe = msg.sender === state.role;
+                const bubbleClass = isMe 
+                    ? 'bg-indigo-600 text-white rounded-2xl rounded-tr-sm shadow-md' 
+                    : 'bg-white border border-slate-200 text-slate-800 rounded-2xl rounded-tl-sm shadow-sm';
+                
+                const alignmentClass = isMe ? 'self-end items-end' : 'self-start items-start';
+                const senderLabel = msg.sender === 'student' ? query.studentName : (query.college + ' Support');
+
+                return `
+                    <div class="flex flex-col ${alignmentClass} max-w-[85%] lg:max-w-[75%] fade-in">
+                        <span class="text-[11px] text-slate-400 mb-1.5 px-1 font-semibold tracking-wide">${senderLabel} • ${msg.time}</span>
+                        <div class="${bubbleClass} px-5 py-3 text-sm leading-relaxed max-w-full break-words">
+                            ${msg.text.replace(/\n/g, '<br/>')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function handleSendMessage(e) {
+            e.preventDefault();
+            if (!state.activeQueryId) return;
+
+            const inputId = state.role === 'student' ? 'sChatInput' : 'aChatInput';
+            const inputEl = document.getElementById(inputId);
+            const text = inputEl.value.trim();
+            
+            if (!text) return;
+
+            const queryIndex = state.queries.findIndex(q => q.id === state.activeQueryId);
+            if (queryIndex === -1) return;
+            const query = state.queries[queryIndex];
+
+            // Add new message
+            const newMessage = {
+                id: Date.now(),
+                sender: state.role,
+                text: text,
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+            };
+            query.messages.push(newMessage);
+            
+            // Manage status and unread flags
+            if (state.role === 'admin') {
+                query.unreadStudent = true; // Mark unread for student
+                if (query.status === 'resolved') query.status = 'open'; // Re-open
+                showToast("Reply sent.", "info");
+            } else {
+                query.unreadAdmin = true; // Mark unread for admin
+                if (query.status === 'resolved') query.status = 'open'; // Re-open
+            }
+
+            inputEl.value = '';
+            renderFilters();
+            renderQueryList();
+            renderChatDetails(state.activeQueryId);
+
+            // --- AUTO REPLY SYSTEM (Triggered if student sends a message and there are no admin replies yet) ---
+            const adminReplies = query.messages.filter(m => m.sender === 'admin');
+            if (state.role === 'student' && adminReplies.length === 0) {
+                // Show typing indicator
+                const container = document.getElementById('sChatMessages');
+                const typingId = 'typing-' + Date.now();
+                container.innerHTML += `
+                    <div id="${typingId}" class="flex flex-col self-start items-start max-w-[85%] fade-in mt-2">
+                        <span class="text-[11px] text-slate-400 mb-1.5 px-1 font-semibold tracking-wide">${query.college} Support • Typing...</span>
+                        <div class="bg-white border border-slate-200 rounded-2xl rounded-tl-sm shadow-sm px-5 py-4 flex gap-1">
+                            <div class="w-1.5 h-1.5 bg-slate-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-slate-400 rounded-full typing-dot"></div>
+                            <div class="w-1.5 h-1.5 bg-slate-400 rounded-full typing-dot"></div>
+                        </div>
+                    </div>
+                `;
+                container.scrollTop = container.scrollHeight;
+
+                // Simulate Delay and Send Specific Auto Reply requested
+                setTimeout(() => {
+                    const activeQ = state.queries.find(q => q.id === state.activeQueryId);
+                    if (activeQ) {
+                        const firstName = activeQ.studentName.split(' ')[0];
+                        activeQ.messages.push({
+                            id: Date.now() + 1,
+                            sender: 'admin',
+                            text: `Hello ${firstName} ji! Thank you for your queries. We will respond to you at 2:00 AM. Stay tuned.`,
+                            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                        });
+                        activeQ.unreadStudent = true; // Auto-reply marks it unread for student
+                        
+                        if (state.activeQueryId === activeQ.id && state.role === 'student') {
+                            renderFilters();
+                            renderQueryList();
+                            renderChatDetails(activeQ.id);
+                        }
+                    }
+                }, 2000); 
+            }
+        }
+
+        function markAsResolved() {
+            if (!state.activeQueryId || state.role !== 'admin') return;
+            const queryIndex = state.queries.findIndex(q => q.id === state.activeQueryId);
+            if (queryIndex !== -1) {
+                state.queries[queryIndex].status = 'resolved';
+                state.queries[queryIndex].unreadStudent = true; // Notification for student
+                
+                renderFilters();
+                renderQueryList();
+                renderChatDetails(state.activeQueryId); 
+                showToast("Query marked as resolved successfully!");
+            }
+        }
+    </script>
+</body>
+</html>

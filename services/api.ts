@@ -201,6 +201,13 @@ export interface College {
   profile_tags?: string[];
 }
 
+export interface ForumCommunity {
+  id: number;
+  name: string;
+  emoji?: string;
+  bg_color?: string;
+}
+
 export interface ForumPost {
   id: number;
   user_id: number;
@@ -209,9 +216,17 @@ export interface ForumPost {
     last_name: string;
     email: string;
   };
+  community_id?: number;
+  community?: ForumCommunity;
   category: string;
   title: string;
   content: string;
+  image_url?: string;
+  video_url?: string;
+  poll_options?: string; // JSON string from backend
+  poll_results?: Record<number, number>;
+  total_votes?: number;
+  voted_option?: number;
   upvotes: number;
   comment_count: number;
   is_poll: boolean;
@@ -232,6 +247,7 @@ export interface ForumComment {
     email: string;
   };
   content: string;
+  parent_id?: number;
   created_at: string;
 }
 
@@ -878,20 +894,46 @@ class ApiService {
   }
 
   // --- Forum Endpoints ---
-  async getForumPosts(category?: string, token?: string): Promise<ForumPost[]> {
+  async getForumPosts(
+    category?: string,
+    token?: string,
+    communityId?: number,
+  ): Promise<ForumPost[]> {
+    const params: any = {};
+    if (category) params.category = category;
+    if (communityId) params.community_id = communityId;
+
     const res = await this.request<{ data: ForumPost[] }>(
       {
         method: "GET",
-        url: `/forum/posts${category ? `?category=${encodeURIComponent(category)}` : ""}`,
+        url: "/forum/posts",
+        params,
       },
       token,
     );
     return res.data;
   }
 
+  async getForumCommunities(): Promise<ForumCommunity[]> {
+    const res = await this.request<{ data: ForumCommunity[] }>({
+      method: "GET",
+      url: "/forum/communities",
+    });
+    return res.data;
+  }
+
   async createForumPost(
     token: string,
-    data: { category: string; title: string; content: string },
+    data: { 
+      community_id?: number;
+      category: string; 
+      title: string; 
+      content: string;
+      image_url?: string;
+      video_url?: string;
+      poll_options?: string[];
+      is_poll?: boolean;
+    },
   ): Promise<ForumPost> {
     const res = await this.request<{ data: ForumPost }>(
       {
@@ -952,10 +994,17 @@ class ApiService {
     );
   }
 
-  async getForumPostComments(id: number): Promise<ForumComment[]> {
-    const res = await this.request<{ data: ForumComment[] }>({
+  async getForumPostComments(
+    id: number,
+    limit: number = 10,
+    offset: number = 0,
+  ): Promise<{ comments: ForumComment[]; total_count: number }> {
+    const res = await this.request<{
+      data: { comments: ForumComment[]; total_count: number };
+    }>({
       method: "GET",
       url: `/forum/posts/${id}/comments`,
+      params: { limit, offset },
     });
     return res.data;
   }
@@ -963,13 +1012,25 @@ class ApiService {
   async createForumComment(
     token: string,
     id: number,
-    data: { content: string },
+    data: { content: string; parent_id?: number },
   ): Promise<ForumComment> {
     const res = await this.request<{ data: ForumComment }>(
       {
         method: "POST",
         url: `/forum/posts/${id}/comments`,
         data,
+      },
+      token,
+    );
+    return res.data;
+  }
+
+  async voteForumPoll(token: string, id: number, optionIdx: number): Promise<ForumPost> {
+    const res = await this.request<{ data: ForumPost }>(
+      {
+        method: "POST",
+        url: `/forum/posts/${id}/poll/vote`,
+        data: { option_idx: optionIdx },
       },
       token,
     );
@@ -991,6 +1052,14 @@ class ApiService {
     localStorage.removeItem("authUser");
   }
 
+  setScholarshipProviderToken(token: string) {
+    localStorage.setItem("scholarshipProviderToken", token);
+  }
+
+  getScholarshipProviderToken(): string | null {
+    return localStorage.getItem("scholarshipProviderToken");
+  }
+
   // Store user data in localStorage
   setUser(user: any) {
     localStorage.setItem("authUser", JSON.stringify(user));
@@ -1010,14 +1079,40 @@ class ApiService {
     return res.data;
   }
 
+  setScholarshipProviderUser(user: any) {
+    localStorage.setItem("scholarshipProviderUser", JSON.stringify(user));
+  }
+
+  getScholarshipProviderUser() {
+    const user = localStorage.getItem("scholarshipProviderUser");
+    return user ? JSON.parse(user) : null;
+  }
+
+  async scholarshipProviderLogin(data: any): Promise<any> {
+    return this.request<any>({
+      method: "POST",
+      url: "/scholarship-providers/auth/login",
+      data,
+    });
+  }
+
   // Check if user is authenticated
   isAuthenticated(): boolean {
     return !!this.getToken();
   }
 
+  isAuthenticatedScholarshipProvider(): boolean {
+    return !!this.getScholarshipProviderToken();
+  }
+
   // Clear all auth data
   logout() {
     this.removeToken();
+  }
+
+  scholarshipProviderLogout() {
+    localStorage.removeItem("scholarshipProviderToken");
+    localStorage.removeItem("scholarshipProviderUser");
   }
 }
 

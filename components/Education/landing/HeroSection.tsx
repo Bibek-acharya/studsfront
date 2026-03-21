@@ -80,7 +80,9 @@ const HeroSection = ({ onNavigate }: any) => {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            onNavigate("findCollege", { search: searchTerm });
+            if (searchTerm.trim()) {
+              onNavigate(`search?q=${encodeURIComponent(searchTerm)}`);
+            }
           }}
           className="w-full max-w-[700px] bg-white rounded-2xl p-2 flex items-center shadow-lg hover:shadow-xl transition-shadow duration-300"
         >

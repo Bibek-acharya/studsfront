@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Profile Dashboard</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for a cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        .toast-enter {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .toast-enter-active {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 0.3s ease-out;
+        }
+        .toast-leave {
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 0.3s ease-in;
+        }
+
+        /* Editing state styles */
+        [contenteditable="true"] {
+            outline: 2px dashed #3b82f6;
+            outline-offset: -2px;
+            background-color: #ffffff;
+            border-radius: 4px;
+            padding: 2px 6px;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 h-screen flex overflow-hidden font-sans">
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-20 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside id="sidebar" class="bg-white w-64 h-full border-r border-gray-200 flex flex-col fixed md:relative z-30 transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <div class="h-16 flex items-center px-6 border-b border-gray-200">
+            <i class="ph-fill ph-graduation-cap text-primary-600 text-3xl mr-2"></i>
+            <span class="text-xl font-bold text-gray-900 tracking-tight">Studsphere</span>
+        </div>
+        
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-3" id="sidebarNav">
+                <li>
+                    <a href="#" class="nav-link flex items-center px-3 py-2.5 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors group">
+                        <i class="ph ph-squares-four text-xl mr-3 group-hover:text-primary-600"></i>
+                        <span class="font-medium">Dashboard</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link active-nav flex items-center px-3 py-2.5 text-primary-700 bg-primary-50 rounded-lg transition-colors group">
+                        <i class="ph ph-buildings text-xl mr-3 text-primary-600"></i>
+                        <span class="font-medium">College Profile</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link flex items-center px-3 py-2.5 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors group">
+                        <i class="ph ph-books text-xl mr-3 group-hover:text-primary-600"></i>
+                        <span class="font-medium">Courses</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link flex items-center px-3 py-2.5 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors group">
+                        <i class="ph ph-users text-xl mr-3 group-hover:text-primary-600"></i>
+                        <span class="font-medium">Faculty</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="#" class="nav-link flex items-center px-3 py-2.5 text-gray-600 hover:text-primary-600 hover:bg-primary-50 rounded-lg transition-colors group">
+                        <i class="ph ph-gear text-xl mr-3 group-hover:text-primary-600"></i>
+                        <span class="font-medium">Settings</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="p-4 border-t border-gray-200">
+            <button id="logoutBtn" class="flex items-center w-full px-3 py-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                <i class="ph ph-sign-out text-xl mr-3"></i>
+                <span class="font-medium">Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col h-full overflow-hidden">
+        
+        <!-- Top Navbar -->
+        <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-4 sm:px-6 lg:px-8 z-10">
+            <div class="flex items-center">
+                <button onclick="toggleSidebar()" class="md:hidden text-gray-500 hover:text-gray-700 focus:outline-none p-2 mr-2 rounded-md hover:bg-gray-100">
+                    <i class="ph ph-list text-2xl"></i>
+                </button>
+                <h1 class="text-xl font-semibold text-gray-800">Complete Profile</h1>
+            </div>
+            
+            <div class="flex items-center space-x-4">
+                <button id="notificationBtn" class="text-gray-500 hover:text-gray-700 relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+                    <i class="ph ph-bell text-xl"></i>
+                    <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
+                <button id="profileBtn" class="h-8 w-8 rounded-full bg-primary-100 border border-primary-200 flex items-center justify-center text-primary-700 font-bold hover:bg-primary-200 transition-colors">
+                    C
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Form Area -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-gray-50">
+            
+            <div class="max-w-5xl mx-auto">
+                
+                <!-- Progress Header -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-4">
+                        <div>
+                            <h2 class="text-lg font-bold text-gray-900">Profile Completion</h2>
+                            <p class="text-sm text-gray-500 mt-1">Complete your college profile to get verified and visible to students.</p>
+                        </div>
+                        <div class="mt-4 sm:mt-0 text-right">
+                            <span id="progressText" class="text-3xl font-bold text-primary-600">0%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full bg-gray-100 rounded-full h-2.5">
+                        <div id="progressBar" class="bg-primary-600 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <!-- Main Form -->
+                <form id="collegeProfileForm">
+                    
+                    <!-- Section 1: General Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-info text-primary-600 mr-2 text-xl"></i> General Information
+                            </h3>
+                            <!-- Open for Counselling Toggle -->
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="counsellingToggle" value="" class="sr-only peer" checked>
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-600"></div>
+                                <span class="ml-3 text-sm font-semibold text-gray-700">Open for Counselling</span>
+                            </label>
+                        </div>
+                        
+                        <!-- Media Uploads (Cover & Logo) -->
+                        <div class="relative">
+                            <!-- Cover Photo Dropzone -->
+                            <div id="coverContainer" class="h-48 sm:h-64 w-full bg-gray-100 flex flex-col justify-center items-center border-b border-gray-200 cursor-pointer hover:bg-gray-200 transition group relative overflow-hidden bg-cover bg-center">
+                                <input type="file" id="coverUpload" class="absolute inset-0 opacity-0 cursor-pointer z-20" accept="image/*">
+                                <div id="coverPlaceholder" class="flex flex-col items-center">
+                                    <i class="ph ph-image text-4xl text-gray-400 mb-2 group-hover:text-primary-500 transition-colors"></i>
+                                    <span class="text-sm font-medium text-gray-600 group-hover:text-primary-600 transition-colors">Upload Cover Photo</span>
+                                    <span class="text-xs text-gray-400 mt-1">Recommended size: 1440px x 580px</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Logo Dropzone -->
+                            <div id="logoContainer" class="absolute -bottom-12 left-6 sm:left-10 w-28 h-28 bg-white rounded-full border-4 border-white shadow-md flex justify-center items-center cursor-pointer hover:bg-gray-50 transition z-10 group overflow-hidden bg-cover bg-center">
+                                <input type="file" id="logoUpload" class="absolute inset-0 opacity-0 cursor-pointer z-20" accept="image/*">
+                                <div id="logoPlaceholder" class="flex flex-col items-center">
+                                    <i class="ph ph-camera text-3xl text-gray-400 group-hover:text-primary-500 transition-colors"></i>
+                                    <span class="text-[10px] font-medium text-gray-500 mt-1 uppercase tracking-wider group-hover:text-primary-600">Logo</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- General Details Form -->
+                        <div class="p-6 pt-16 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="col-span-1 md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">College Name <span class="text-red-500">*</span></label>
+                                <input type="text" id="collegeName" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="Enter full college name">
+                            </div>
+
+                            <div class="col-span-1 md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">College Address <span class="text-red-500">*</span></label>
+                                <input type="text" id="generalAddress" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="Enter main campus address">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">College Website</label>
+                                <div class="flex rounded-lg shadow-sm">
+                                    <span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">https://</span>
+                                    <input type="text" id="generalWebsite" class="flex-1 block w-full px-4 py-2 border border-gray-300 rounded-none rounded-r-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="www.college.edu">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Upload Brochure (PDF)</label>
+                                <div class="relative w-full">
+                                    <input type="file" id="brochure" accept=".pdf" class="hidden">
+                                    <label for="brochure" class="flex items-center justify-center w-full px-4 py-2 border border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-primary-50 hover:border-primary-500 transition-colors bg-white">
+                                        <i class="ph ph-file-pdf text-xl text-red-500 mr-2"></i>
+                                        <span id="brochureLabel" class="text-sm font-medium text-gray-600">Select PDF File</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: About Section -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-book-open text-primary-600 mr-2 text-xl"></i> About Section
+                            </h3>
+                        </div>
+                        <div class="p-6 space-y-6">
+                            
+                            <!-- Videos Grid -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Chairman Video Link (URL)</label>
+                                    <div class="flex relative mb-2">
+                                        <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-white text-gray-500">
+                                            <i class="ph ph-youtube-logo text-lg"></i>
+                                        </span>
+                                        <input type="url" class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-none rounded-r-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="https://youtube.com/...">
+                                    </div>
+                                    <input type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm outline-none transition-all" placeholder="Chairman Name / Subheading (e.g., Message from our Chairman)">
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">College Tour Video Link (URL)</label>
+                                    <div class="flex relative">
+                                        <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-white text-gray-500">
+                                            <i class="ph ph-video-camera text-lg"></i>
+                                        </span>
+                                        <input type="url" class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-none rounded-r-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="https://youtube.com/...">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-2"><i class="ph ph-info mr-1"></i> Add a virtual tour or campus overview video to attract students.</p>
+                                </div>
+                            </div>
+
+                            <!-- Text Areas -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">About College</label>
+                                <textarea rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="Write a comprehensive description about the college..."></textarea>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Our Mission</label>
+                                    <textarea rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="State the college's mission..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Our Vision</label>
+                                    <textarea rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 outline-none transition-all" placeholder="State the college's vision..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: College Overview & Leadership -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-chart-bar text-primary-600 mr-2 text-xl"></i> College Overview & Leadership
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Overview Details</h4>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Established Year</label>
+                                    <input type="number" min="1800" max="2030" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="e.g. 1995">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="City, State">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Campus Size</label>
+                                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="e.g. 50 Acres">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Institution Type</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none bg-white">
+                                        <option value="" disabled selected>Select type</option>
+                                        <option value="public">Public</option>
+                                        <option value="private">Private</option>
+                                        <option value="autonomous">Autonomous</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                                    <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none bg-white">
+                                        <option value="" disabled selected>Select status</option>
+                                        <option value="affiliated">Affiliated</option>
+                                        <option value="deemed">Deemed University</option>
+                                        <option value="autonomous">Autonomous</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Ranking / Grade</label>
+                                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="e.g. NAAC A++, NIRF 50">
+                                </div>
+                            </div>
+
+                            <h4 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 border-b pb-2">Leadership & Administration</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">College Director</label>
+                                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Name of Director">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Principal</label>
+                                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Name of Principal">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Admission Head</label>
+                                    <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Name of Admission Head">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Contact Information -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-address-book text-primary-600 mr-2 text-xl"></i> Contact Information
+                            </h3>
+                        </div>
+                        <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                            
+                            <div class="col-span-1 md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Full Communication Address</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Street, Building, Landmark, City, State, ZIP">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                <input type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="+1 (555) 000-0000">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                                <input type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="admissions@college.edu">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Official Website</label>
+                                <div class="flex rounded-lg shadow-sm">
+                                    <span class="inline-flex items-center px-4 rounded-l-lg border border-r-0 border-gray-300 bg-gray-50 text-gray-500 text-sm">https://</span>
+                                    <input type="text" class="flex-1 block w-full px-4 py-2 border border-gray-300 rounded-none rounded-r-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="www.college.edu">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Google Maps Location Link</label>
+                                <div class="flex relative">
+                                    <span class="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-gray-300 bg-white text-gray-500">
+                                        <i class="ph ph-map-pin text-lg"></i>
+                                    </span>
+                                    <input type="url" class="flex-1 block w-full px-3 py-2 border border-gray-300 rounded-none rounded-r-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="https://maps.google.com/...">
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Courses & Fees -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-books text-primary-600 mr-2 text-xl"></i> Courses & Fees
+                            </h3>
+                            <button type="button" id="addCourseBtn" class="text-sm bg-white border border-gray-300 px-3 py-1.5 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center transition-colors">
+                                <i class="ph ph-plus mr-1"></i> Add Course
+                            </button>
+                        </div>
+                        <div class="p-0">
+                            <!-- Tabs -->
+                            <div class="flex border-b border-gray-200 px-6 bg-white overflow-x-auto">
+                                <button type="button" onclick="switchTab('course', 'plus2')" data-tab-btn-group="course" data-tab-target="plus2" class="px-4 py-3 border-b-2 border-primary-600 text-primary-600 font-medium text-sm whitespace-nowrap">
+                                    +2 (High School)
+                                </button>
+                                <button type="button" onclick="switchTab('course', 'bachelor')" data-tab-btn-group="course" data-tab-target="bachelor" class="px-4 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap">
+                                    Bachelor's Degree
+                                </button>
+                                <button type="button" onclick="switchTab('course', 'master')" data-tab-btn-group="course" data-tab-target="master" class="px-4 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap">
+                                    Master's Degree
+                                </button>
+                            </div>
+
+                            <!-- Tab Content: +2 -->
+                            <div id="course-plus2" data-tab-group="course" class="p-6 overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden" id="table-course-plus2">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Name</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fees</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Eligibility</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seats</th>
+                                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm text-gray-900 font-medium">Science (+2)</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">2 Years</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">$2,000 / yr</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">Min 60% in Grade 10</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">120</td>
+                                            <td class="px-4 py-3 text-sm text-right">
+                                                <button type="button" class="action-edit text-blue-600 hover:text-blue-900 mr-2"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                                <button type="button" class="action-delete text-red-600 hover:text-red-900"><i class="ph ph-trash text-lg"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Tab Content: Bachelor -->
+                            <div id="course-bachelor" data-tab-group="course" class="p-6 overflow-x-auto hidden">
+                                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden" id="table-course-bachelor">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Name</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fees</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Eligibility</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seats</th>
+                                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <!-- Rows added dynamically -->
+                                    </tbody>
+                                </table>
+                                <div id="empty-course-bachelor" class="text-center py-8 text-gray-500">No Bachelor courses added yet. Click "Add Course" to begin.</div>
+                            </div>
+
+                            <!-- Tab Content: Master -->
+                            <div id="course-master" data-tab-group="course" class="p-6 overflow-x-auto hidden">
+                                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden hidden" id="table-course-master">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course Name</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Duration</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fees</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Eligibility</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Seats</th>
+                                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <!-- Rows added dynamically -->
+                                    </tbody>
+                                </table>
+                                <div id="empty-course-master" class="text-center py-8 text-gray-500">No Master courses added yet. Click "Add Course" to begin.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Programs Offered -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-graduation-cap text-primary-600 mr-2 text-xl"></i> Programs Offered
+                            </h3>
+                            <button type="button" id="addProgramBtn" class="text-sm bg-white border border-gray-300 px-3 py-1.5 rounded-lg text-gray-700 hover:bg-gray-50 flex items-center transition-colors">
+                                <i class="ph ph-plus mr-1"></i> Add Program
+                            </button>
+                        </div>
+                        <div class="p-0">
+                            <!-- Tabs -->
+                            <div class="flex border-b border-gray-200 px-6 bg-white overflow-x-auto">
+                                <button type="button" onclick="switchTab('program', 'bachelor')" data-tab-btn-group="program" data-tab-target="bachelor" class="px-4 py-3 border-b-2 border-primary-600 text-primary-600 font-medium text-sm whitespace-nowrap">
+                                    Bachelor's Programs
+                                </button>
+                                <button type="button" onclick="switchTab('program', 'master')" data-tab-btn-group="program" data-tab-target="master" class="px-4 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap">
+                                    Master's Programs
+                                </button>
+                                <button type="button" onclick="switchTab('program', 'plus2')" data-tab-btn-group="program" data-tab-target="plus2" class="px-4 py-3 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-medium text-sm whitespace-nowrap">
+                                    +2 Programs
+                                </button>
+                            </div>
+
+                            <!-- Tab Content: Bachelor -->
+                            <div id="program-bachelor" data-tab-group="program" class="p-6 overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden" id="table-program-bachelor">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Name</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Affiliation</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details Link</th>
+                                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm text-gray-900 font-medium">B.Sc. Computer Science</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">Undergraduate</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">State University</td>
+                                            <td class="px-4 py-3 text-sm">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">Ongoing</span>
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-blue-600 hover:underline"><a href="#">View Details</a></td>
+                                            <td class="px-4 py-3 text-sm text-right">
+                                                <button type="button" class="action-edit text-blue-600 hover:text-blue-900 mr-2"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                                <button type="button" class="action-delete text-red-600 hover:text-red-900"><i class="ph ph-trash text-lg"></i></button>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-3 text-sm text-gray-900 font-medium">B.A. Literature</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">Undergraduate</td>
+                                            <td class="px-4 py-3 text-sm text-gray-500">State University</td>
+                                            <td class="px-4 py-3 text-sm">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-red-100 text-red-800">Closed</span>
+                                            </td>
+                                            <td class="px-4 py-3 text-sm text-blue-600 hover:underline"><a href="#">View Details</a></td>
+                                            <td class="px-4 py-3 text-sm text-right">
+                                                <button type="button" class="action-edit text-blue-600 hover:text-blue-900 mr-2"><i class="ph ph-pencil-simple text-lg"></i></button>
+                                                <button type="button" class="action-delete text-red-600 hover:text-red-900"><i class="ph ph-trash text-lg"></i></button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Tab Content: Master -->
+                            <div id="program-master" data-tab-group="program" class="p-6 overflow-x-auto hidden">
+                                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden hidden" id="table-program-master">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Name</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Affiliation</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details Link</th>
+                                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                    </tbody>
+                                </table>
+                                <div id="empty-program-master" class="text-center py-8 text-gray-500">No Master programs added yet.</div>
+                            </div>
+
+                            <!-- Tab Content: +2 -->
+                            <div id="program-plus2" data-tab-group="program" class="p-6 overflow-x-auto hidden">
+                                <table class="min-w-full divide-y divide-gray-200 border border-gray-200 rounded-lg overflow-hidden hidden" id="table-program-plus2">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Program Name</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Level</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Affiliation</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details Link</th>
+                                            <th class="px-4 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                    </tbody>
+                                </table>
+                                <div id="empty-program-plus2" class="text-center py-8 text-gray-500">No +2 programs added yet.</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 7: College Facilities -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-buildings text-primary-600 mr-2 text-xl"></i> College Facilities
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <!-- Add Facility Form -->
+                            <div class="flex flex-col sm:flex-row gap-4 mb-6 pb-6 border-b border-gray-200">
+                                <div class="flex-1">
+                                    <input type="text" id="facilityHeading" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Facility Heading (e.g. Modern Library)">
+                                </div>
+                                <div class="flex-1">
+                                    <input type="text" id="facilityDesc" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Subheading / Short Description">
+                                </div>
+                                <button type="button" id="addFacilityBtn" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 whitespace-nowrap transition-colors">
+                                    Add Facility
+                                </button>
+                            </div>
+                            
+                            <!-- Added Facilities List -->
+                            <div class="space-y-3" id="facilitiesList">
+                                <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-lg group">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">State-of-the-art Laboratories</h4>
+                                        <p class="text-sm text-gray-500">Equipped with the latest technology for practical learning.</p>
+                                    </div>
+                                    <button type="button" class="action-delete text-red-500 hover:text-red-700 p-2"><i class="ph ph-trash text-lg"></i></button>
+                                </div>
+                                <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-lg group">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-800">Sports Complex</h4>
+                                        <p class="text-sm text-gray-500">Includes an indoor stadium, swimming pool, and athletic track.</p>
+                                    </div>
+                                    <button type="button" class="action-delete text-red-500 hover:text-red-700 p-2"><i class="ph ph-trash text-lg"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 8: Alumni -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-users-three text-primary-600 mr-2 text-xl"></i> Notable Alumni
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <!-- Add Alumni Form -->
+                            <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6 pb-6 border-b border-gray-200 items-end">
+                                <div class="col-span-1 md:col-span-1">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                                    <input type="file" id="alumniImage" class="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 cursor-pointer" accept="image/*">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                                    <input type="text" id="alumniName" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="John Doe">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
+                                    <input type="text" id="alumniPosition" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Software Engineer">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Company</label>
+                                    <input type="text" id="alumniCompany" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Google">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Batch</label>
+                                    <div class="flex space-x-2">
+                                        <input type="text" id="alumniBatch" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="2018">
+                                        <button type="button" id="addAlumniBtn" class="px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors">Add</button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Added Alumni Grid -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4" id="alumniGrid">
+                                <!-- Alumni Card -->
+                                <div class="flex items-center space-x-4 p-4 bg-gray-50 border border-gray-200 rounded-xl relative group">
+                                    <button type="button" class="action-delete absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><i class="ph ph-x-circle text-xl"></i></button>
+                                    <img src="https://ui-avatars.com/api/?name=Jane+Smith&background=random" alt="Alumni" class="w-14 h-14 rounded-full object-cover">
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 text-sm">Jane Smith</h4>
+                                        <p class="text-xs text-gray-500">Data Scientist at Meta</p>
+                                        <p class="text-xs text-primary-600 font-medium mt-0.5">Batch of 2019</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 9: Gallery -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-images text-primary-600 mr-2 text-xl"></i> Campus Gallery
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <!-- Drag and Drop Area -->
+                            <div class="w-full border-2 border-dashed border-gray-300 rounded-xl p-8 text-center hover:bg-gray-50 transition-colors cursor-pointer relative mb-6">
+                                <input type="file" id="galleryUpload" multiple class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*">
+                                <i class="ph ph-upload-simple text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-600 font-medium">Click to upload or drag & drop images here</p>
+                                <p class="text-sm text-gray-400 mt-1">PNG, JPG, up to 5MB</p>
+                            </div>
+
+                            <!-- Uploaded Images Grid -->
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4" id="galleryGrid">
+                                <div class="relative group rounded-lg overflow-hidden aspect-square bg-gray-200 gallery-item">
+                                    <img src="https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Gallery 1" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button type="button" class="action-delete text-white hover:text-red-400"><i class="ph ph-trash text-2xl"></i></button>
+                                    </div>
+                                </div>
+                                <div class="relative group rounded-lg overflow-hidden aspect-square bg-gray-200 gallery-item">
+                                    <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=300&q=80" alt="Gallery 2" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                        <button type="button" class="action-delete text-white hover:text-red-400"><i class="ph ph-trash text-2xl"></i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 10: Downloads -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden mb-6">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-200">
+                            <h3 class="text-lg font-semibold text-gray-800 flex items-center">
+                                <i class="ph ph-download-simple text-primary-600 mr-2 text-xl"></i> Downloads / Resources
+                            </h3>
+                        </div>
+                        <div class="p-6">
+                            <!-- Add Document Form -->
+                            <div class="flex flex-col sm:flex-row gap-4 mb-6 pb-6 border-b border-gray-200 items-center">
+                                <div class="flex-1 w-full">
+                                    <input type="text" id="docTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 outline-none" placeholder="Document Title (e.g. Academic Calendar 2024)">
+                                </div>
+                                <div class="flex-1 w-full">
+                                    <input type="file" id="docFile" class="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer border border-gray-300 rounded-lg" accept=".pdf,.doc,.docx">
+                                </div>
+                                <button type="button" id="uploadDocBtn" class="w-full sm:w-auto px-6 py-2.5 bg-gray-900 text-white rounded-lg hover:bg-gray-800 whitespace-nowrap transition-colors">
+                                    Upload
+                                </button>
+                            </div>
+
+                            <!-- List of Documents -->
+                            <ul class="divide-y divide-gray-100" id="docList">
+                                <li class="flex items-center justify-between py-3">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded bg-red-50 flex items-center justify-center text-red-500 mr-4">
+                                            <i class="ph ph-file-pdf text-2xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">College Prospectus 2024</p>
+                                            <p class="text-xs text-gray-500">2.4 MB • PDF</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="action-delete text-gray-400 hover:text-red-500 p-2"><i class="ph ph-trash text-lg"></i></button>
+                                </li>
+                                <li class="flex items-center justify-between py-3">
+                                    <div class="flex items-center">
+                                        <div class="w-10 h-10 rounded bg-blue-50 flex items-center justify-center text-blue-500 mr-4">
+                                            <i class="ph ph-file-doc text-2xl"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">Admission Form</p>
+                                            <p class="text-xs text-gray-500">840 KB • DOCX</p>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="action-delete text-gray-400 hover:text-red-500 p-2"><i class="ph ph-trash text-lg"></i></button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="flex items-center justify-end space-x-4 mb-8">
+                        <button type="button" id="cancelBtn" class="px-6 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                            Cancel
+                        </button>
+                        <button type="submit" id="saveBtn" class="px-6 py-2.5 bg-primary-600 text-white font-medium rounded-lg hover:bg-primary-700 transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 flex items-center shadow-sm">
+                            <i class="ph ph-floppy-disk mr-2 text-lg"></i> Save Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Toast Notification (Hidden by default) -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-white border border-gray-200 shadow-xl rounded-lg p-4 flex items-center space-x-3 z-50 toast-enter hidden">
+        <div id="toastIconContainer" class="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+            <i id="toastIcon" class="ph ph-check text-green-600 text-xl"></i>
+        </div>
+        <div>
+            <h4 id="toastTitle" class="text-sm font-semibold text-gray-900">Profile Saved successfully</h4>
+            <p id="toastMessage" class="text-sm text-gray-500">Your changes have been updated.</p>
+        </div>
+        <button onclick="hideToast()" class="ml-auto text-gray-400 hover:text-gray-600">
+            <i class="ph ph-x text-lg"></i>
+        </button>
+    </div>
+
+    <script>
+        // ------------------ Sidebar Toggle Logic ------------------
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+
+        function toggleSidebar() {
+            const isClosed = sidebar.classList.contains('-translate-x-full');
+            if (isClosed) {
+                sidebar.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('-translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        // ------------------ Top & Sidebar Nav Buttons ------------------
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Remove active from all
+                document.querySelectorAll('.nav-link').forEach(l => {
+                    l.classList.remove('text-primary-700', 'bg-primary-50', 'active-nav');
+                    l.classList.add('text-gray-600');
+                    // update icons color
+                    const icon = l.querySelector('i');
+                    if(icon) {
+                        icon.classList.remove('text-primary-600');
+                        icon.classList.add('group-hover:text-primary-600');
+                    }
+                });
+                
+                // Add active to clicked
+                const target = e.currentTarget;
+                target.classList.remove('text-gray-600');
+                target.classList.add('text-primary-700', 'bg-primary-50', 'active-nav');
+                const targetIcon = target.querySelector('i');
+                if(targetIcon) {
+                    targetIcon.classList.remove('group-hover:text-primary-600');
+                    targetIcon.classList.add('text-primary-600');
+                }
+                showCustomToast('Navigation', `Mapsd to ${target.innerText.trim()}`, 'info');
+            });
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => showCustomToast('Logged Out', 'You have been logged out successfully.', 'success'));
+        document.getElementById('notificationBtn').addEventListener('click', () => showCustomToast('Notifications', 'You have no new notifications.', 'info'));
+        document.getElementById('profileBtn').addEventListener('click', () => showCustomToast('Profile', 'Opening profile settings...', 'info'));
+
+        // ------------------ Progress Calculation Logic ------------------
+        const form = document.getElementById('collegeProfileForm');
+        const progressBar = document.getElementById('progressBar');
+        const progressText = document.getElementById('progressText');
+
+        function calculateProgress() {
+            const allInputs = form.querySelectorAll('input:not([type="file"]), select, textarea');
+            let totalInputs = allInputs.length;
+            let totalFilled = 0;
+
+            allInputs.forEach(input => {
+                if(input.value.trim() !== '' && input.type !== 'checkbox') {
+                    totalFilled++;
+                } else if (input.type === 'checkbox' && input.checked) {
+                    totalFilled++;
+                }
+            });
+
+            const percentage = Math.round((totalFilled / totalInputs) * 100);
+            
+            progressBar.style.width = `${percentage}%`;
+            progressText.innerText = `${percentage}%`;
+
+            if (percentage === 100) {
+                progressBar.classList.remove('bg-primary-600');
+                progressBar.classList.add('bg-green-500');
+                progressText.classList.remove('text-primary-600');
+                progressText.classList.add('text-green-600');
+            } else {
+                progressBar.classList.add('bg-primary-600');
+                progressBar.classList.remove('bg-green-500');
+                progressText.classList.add('text-primary-600');
+                progressText.classList.remove('text-green-600');
+            }
+        }
+
+        form.querySelectorAll('input, select, textarea').forEach(input => {
+            input.addEventListener('input', calculateProgress);
+            input.addEventListener('change', calculateProgress);
+        });
+        calculateProgress();
+
+        // ------------------ Toast System ------------------
+        const toast = document.getElementById('toast');
+        const toastTitle = document.getElementById('toastTitle');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIconContainer = document.getElementById('toastIconContainer');
+        const toastIcon = document.getElementById('toastIcon');
+        let toastTimeout;
+
+        function showCustomToast(title, message, type = 'success') {
+            clearTimeout(toastTimeout);
+            toastTitle.innerText = title;
+            toastMessage.innerText = message;
+            
+            // Set styles based on type
+            toastIconContainer.className = 'flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center';
+            if (type === 'success') {
+                toastIconContainer.classList.add('bg-green-100');
+                toastIcon.className = 'ph ph-check text-green-600 text-xl';
+            } else if (type === 'error') {
+                toastIconContainer.classList.add('bg-red-100');
+                toastIcon.className = 'ph ph-warning-circle text-red-600 text-xl';
+            } else if (type === 'info') {
+                toastIconContainer.classList.add('bg-blue-100');
+                toastIcon.className = 'ph ph-info text-blue-600 text-xl';
+            }
+
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.remove('toast-enter');
+                toast.classList.add('toast-enter-active');
+            }, 10);
+
+            toastTimeout = setTimeout(() => { hideToast(); }, 3000);
+        }
+
+        function hideToast() {
+            toast.classList.remove('toast-enter-active');
+            toast.classList.add('toast-leave');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+                toast.classList.remove('toast-leave');
+                toast.classList.add('toast-enter');
+            }, 300);
+        }
+
+        // ------------------ Form Submit & Cancel ------------------
+        const saveBtn = document.getElementById('saveBtn');
+        form.addEventListener('submit', (e) => {
+            e.preventDefault(); 
+            const originalContent = saveBtn.innerHTML;
+            saveBtn.innerHTML = '<i class="ph ph-spinner animate-spin mr-2 text-lg"></i> Saving...';
+            saveBtn.disabled = true;
+            saveBtn.classList.add('opacity-75', 'cursor-not-allowed');
+
+            setTimeout(() => {
+                saveBtn.innerHTML = originalContent;
+                saveBtn.disabled = false;
+                saveBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                showCustomToast('Profile Saved', 'Your profile details have been successfully updated.', 'success');
+            }, 1000);
+        });
+
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            form.reset();
+            calculateProgress();
+            
+            // reset custom previews
+            document.getElementById('coverContainer').style.backgroundImage = 'none';
+            document.getElementById('logoContainer').style.backgroundImage = 'none';
+            document.getElementById('coverPlaceholder').classList.remove('hidden');
+            document.getElementById('logoPlaceholder').classList.remove('hidden');
+            document.getElementById('brochureLabel').innerText = 'Select PDF File';
+            
+            showCustomToast('Cancelled', 'Form changes have been discarded.', 'info');
+        });
+
+        // ------------------ Image Upload Previews ------------------
+        function setupImagePreview(inputId, containerId, placeholderId) {
+            document.getElementById(inputId).addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        document.getElementById(containerId).style.backgroundImage = `url(${event.target.result})`;
+                        document.getElementById(placeholderId).classList.add('hidden');
+                        showCustomToast('Image Selected', 'Preview generated successfully.', 'success');
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+        setupImagePreview('coverUpload', 'coverContainer', 'coverPlaceholder');
+        setupImagePreview('logoUpload', 'logoContainer', 'logoPlaceholder');
+
+        // Brochure file name
+        document.getElementById('brochure').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('brochureLabel').innerText = file.name;
+            }
+        });
+
+        // ------------------ Tab Switching Logic ------------------
+        function switchTab(groupName, tabTarget) {
+            const allContents = document.querySelectorAll(`[data-tab-group="${groupName}"]`);
+            allContents.forEach(content => content.classList.add('hidden'));
+
+            const targetContent = document.getElementById(`${groupName}-${tabTarget}`);
+            if (targetContent) targetContent.classList.remove('hidden');
+
+            const allButtons = document.querySelectorAll(`[data-tab-btn-group="${groupName}"]`);
+            allButtons.forEach(btn => {
+                btn.classList.remove('border-primary-600', 'text-primary-600');
+                btn.classList.add('border-transparent', 'text-gray-500');
+            });
+
+            const targetButton = document.querySelector(`[data-tab-btn-group="${groupName}"][data-tab-target="${tabTarget}"]`);
+            if (targetButton) {
+                targetButton.classList.remove('border-transparent', 'text-gray-500');
+                targetButton.classList.add('border-primary-600', 'text-primary-600');
+            }
+        }
+
+        // ------------------ Dynamic Additions (Courses, Programs, Facilities, Alumni, Downloads) ------------------
+
+        // Global Event Delegation for Delete and Edit buttons
+        document.body.addEventListener('click', (e) => {
+            // Delete action
+            if (e.target.closest('.action-delete')) {
+                const item = e.target.closest('tr, li, .group, .gallery-item');
+                if (item) {
+                    item.remove();
+                    showCustomToast('Deleted', 'Item removed successfully.', 'info');
+                }
+            }
+
+            // Edit Action (Toggle ContentEditable for Table Rows)
+            if(e.target.closest('.action-edit')) {
+                const row = e.target.closest('tr');
+                if(row) {
+                    const cells = row.querySelectorAll('td:not(:last-child)');
+                    const isEditing = row.classList.contains('editing');
+                    const btn = e.target.closest('.action-edit');
+                    
+                    if(isEditing) {
+                        // Save State
+                        cells.forEach(cell => cell.removeAttribute('contenteditable'));
+                        row.classList.remove('editing');
+                        btn.innerHTML = '<i class="ph ph-pencil-simple text-lg"></i>';
+                        btn.classList.replace('text-green-600', 'text-blue-600');
+                        showCustomToast('Saved', 'Row changes saved.', 'success');
+                    } else {
+                        // Edit State
+                        cells.forEach(cell => cell.setAttribute('contenteditable', 'true'));
+                        row.classList.add('editing');
+                        btn.innerHTML = '<i class="ph ph-check text-lg"></i>';
+                        btn.classList.replace('text-blue-600', 'text-green-600');
+                        cells[0].focus();
+                        showCustomToast('Edit Mode', 'You can now edit the cells directly.', 'info');
+                    }
+                }
+            }
+        });
+
+        // Add Course Function
+        document.getElementById('addCourseBtn').addEventListener('click', () => {
+            // Find currently active course tab
+            const activeTabBtn = document.querySelector('[data-tab-btn-group="course"].border-primary-600');
+            if(!activeTabBtn) return;
+            const target = activeTabBtn.getAttribute('data-tab-target');
+            
+            const tableBody = document.querySelector(`#table-course-${target} tbody`);
+            const table = document.getElementById(`table-course-${target}`);
+            const emptyMsg = document.getElementById(`empty-course-${target}`);
+
+            const newRow = `
+                <tr class="editing">
+                    <td class="px-4 py-3 text-sm text-gray-900 font-medium" contenteditable="true">New Course Name</td>
+                    <td class="px-4 py-3 text-sm text-gray-500" contenteditable="true">Duration</td>
+                    <td class="px-4 py-3 text-sm text-gray-500" contenteditable="true">$0</td>
+                    <td class="px-4 py-3 text-sm text-gray-500" contenteditable="true">Eligibility</td>
+                    <td class="px-4 py-3 text-sm text-gray-500" contenteditable="true">0</td>
+                    <td class="px-4 py-3 text-sm text-right">
+                        <button type="button" class="action-edit text-green-600 hover:text-green-900 mr-2"><i class="ph ph-check text-lg"></i></button>
+                        <button type="button" class="action-delete text-red-600 hover:text-red-900"><i class="ph ph-trash text-lg"></i></button>
+                    </td>
+                </tr>`;
+            
+            if(emptyMsg) emptyMsg.classList.add('hidden');
+            if(table) table.classList.remove('hidden');
+            tableBody.insertAdjacentHTML('afterbegin', newRow);
+            showCustomToast('Course Added', 'New row created. Edit details directly.', 'success');
+        });
+
+        // Add Program Function
+        document.getElementById('addProgramBtn').addEventListener('click', () => {
+            const activeTabBtn = document.querySelector('[data-tab-btn-group="program"].border-primary-600');
+            if(!activeTabBtn) return;
+            const target = activeTabBtn.getAttribute('data-tab-target');
+            
+            const tableBody = document.querySelector(`#table-program-${target} tbody`);
+            const table = document.getElementById(`table-program-${target}`);
+            const emptyMsg = document.getElementById(`empty-program-${target}`);
+
+            const newRow = `
+                <tr class="editing">
+                    <td class="px-4 py-3 text-sm text-gray-900 font-medium" contenteditable="true">New Program</td>
+                    <td class="px-4 py-3 text-sm text-gray-500" contenteditable="true">Level</td>
+                    <td class="px-4 py-3 text-sm text-gray-500" contenteditable="true">Affiliation</td>
+                    <td class="px-4 py-3 text-sm" contenteditable="true">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">New</span>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-blue-600 hover:underline"><a href="#">Link</a></td>
+                    <td class="px-4 py-3 text-sm text-right">
+                        <button type="button" class="action-edit text-green-600 hover:text-green-900 mr-2"><i class="ph ph-check text-lg"></i></button>
+                        <button type="button" class="action-delete text-red-600 hover:text-red-900"><i class="ph ph-trash text-lg"></i></button>
+                    </td>
+                </tr>`;
+            
+            if(emptyMsg) emptyMsg.classList.add('hidden');
+            if(table) table.classList.remove('hidden');
+            tableBody.insertAdjacentHTML('afterbegin', newRow);
+            showCustomToast('Program Added', 'New row created. Edit details directly.', 'success');
+        });
+
+        // Add Facility Function
+        document.getElementById('addFacilityBtn').addEventListener('click', () => {
+            const heading = document.getElementById('facilityHeading').value;
+            const desc = document.getElementById('facilityDesc').value;
+            if(!heading) return showCustomToast('Required Error', 'Facility Heading cannot be empty.', 'error');
+
+            const newFacility = `
+                <div class="flex items-center justify-between p-4 bg-gray-50 border border-gray-100 rounded-lg group">
+                    <div>
+                        <h4 class="font-semibold text-gray-800">${heading}</h4>
+                        <p class="text-sm text-gray-500">${desc}</p>
+                    </div>
+                    <button type="button" class="action-delete text-red-500 hover:text-red-700 p-2"><i class="ph ph-trash text-lg"></i></button>
+                </div>`;
+            
+            document.getElementById('facilitiesList').insertAdjacentHTML('beforeend', newFacility);
+            document.getElementById('facilityHeading').value = '';
+            document.getElementById('facilityDesc').value = '';
+            showCustomToast('Facility Added', 'The facility has been added to the list.', 'success');
+        });
+
+        // Add Alumni Function
+        document.getElementById('addAlumniBtn').addEventListener('click', () => {
+            const name = document.getElementById('alumniName').value;
+            const position = document.getElementById('alumniPosition').value;
+            const company = document.getElementById('alumniCompany').value;
+            const batch = document.getElementById('alumniBatch').value;
+            const fileInput = document.getElementById('alumniImage');
+            
+            if(!name) return showCustomToast('Required Error', 'Alumni Name is required.', 'error');
+
+            let imageUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=random`;
+            
+            // Build card function to keep logic clean
+            const appendAlumniCard = (imgSrc) => {
+                const newCard = `
+                    <div class="flex items-center space-x-4 p-4 bg-gray-50 border border-gray-200 rounded-xl relative group">
+                        <button type="button" class="action-delete absolute top-2 right-2 text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><i class="ph ph-x-circle text-xl"></i></button>
+                        <img src="${imgSrc}" alt="Alumni" class="w-14 h-14 rounded-full object-cover">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 text-sm">${name}</h4>
+                            <p class="text-xs text-gray-500">${position} ${company ? `at ${company}` : ''}</p>
+                            <p class="text-xs text-primary-600 font-medium mt-0.5">Batch of ${batch || 'N/A'}</p>
+                        </div>
+                    </div>`;
+                document.getElementById('alumniGrid').insertAdjacentHTML('beforeend', newCard);
+                showCustomToast('Alumni Added', `${name} has been added.`, 'success');
+                
+                // Reset inputs
+                document.getElementById('alumniName').value = '';
+                document.getElementById('alumniPosition').value = '';
+                document.getElementById('alumniCompany').value = '';
+                document.getElementById('alumniBatch').value = '';
+                fileInput.value = '';
+            };
+
+            // Process image or fallback to avatar
+            if(fileInput.files && fileInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (e) => appendAlumniCard(e.target.result);
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                appendAlumniCard(imageUrl);
+            }
+        });
+
+        // Gallery Upload logic
+        document.getElementById('galleryUpload').addEventListener('change', (e) => {
+            const files = e.target.files;
+            if(files.length === 0) return;
+            
+            const grid = document.getElementById('galleryGrid');
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const newImg = `
+                        <div class="relative group rounded-lg overflow-hidden aspect-square bg-gray-200 gallery-item">
+                            <img src="${ev.target.result}" class="w-full h-full object-cover">
+                            <div class="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                <button type="button" class="action-delete text-white hover:text-red-400"><i class="ph ph-trash text-2xl"></i></button>
+                            </div>
+                        </div>`;
+                    grid.insertAdjacentHTML('beforeend', newImg);
+                };
+                reader.readAsDataURL(file);
+            });
+            showCustomToast('Images Uploaded', `${files.length} images added to gallery.`, 'success');
+        });
+
+        // Upload Document Logic
+        document.getElementById('uploadDocBtn').addEventListener('click', () => {
+            const title = document.getElementById('docTitle').value;
+            const fileInput = document.getElementById('docFile');
+            const file = fileInput.files[0];
+            
+            if(!title || !file) return showCustomToast('Error', 'Please provide a title and select a file.', 'error');
+
+            const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+            let ext = file.name.split('.').pop().toUpperCase();
+            
+            let iconClass = 'ph-file-doc text-blue-500';
+            let bgClass = 'bg-blue-50';
+            if(ext === 'PDF') {
+                iconClass = 'ph-file-pdf text-red-500';
+                bgClass = 'bg-red-50';
+            }
+
+            const newDoc = `
+                <li class="flex items-center justify-between py-3">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded ${bgClass} flex items-center justify-center mr-4">
+                            <i class="ph ${iconClass} text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm font-medium text-gray-900">${title}</p>
+                            <p class="text-xs text-gray-500">${sizeMb} MB • ${ext}</p>
+                        </div>
+                    </div>
+                    <button type="button" class="action-delete text-gray-400 hover:text-red-500 p-2"><i class="ph ph-trash text-lg"></i></button>
+                </li>`;
+            
+            document.getElementById('docList').insertAdjacentHTML('afterbegin', newDoc);
+            
+            // clear inputs
+            document.getElementById('docTitle').value = '';
+            fileInput.value = '';
+            showCustomToast('Document Uploaded', `${title} uploaded successfully.`, 'success');
+        });
+
+    </script>
+</body>
+</html>

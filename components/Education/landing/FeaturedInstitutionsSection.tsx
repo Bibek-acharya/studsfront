@@ -1,55 +1,29 @@
-const featuredColleges = [
-  {
-    image:
-      "https://scontent.fktm8-1.fna.fbcdn.net/v/t39.30808-6/514417031_1243063541165291_3100742828166290954_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=2a1932&_nc_ohc=k0LjnDUYEt0Q7kNvwHygwbl&_nc_oc=AdnM2qSCUo2yjLeLSVH5gIJ1S9jVEG8u8kusmoSP0hVbJrN1Qtnr0mlgCfovTtJeVVV_alNroR2PrKgPT2vZY9oI&_nc_zt=23&_nc_ht=scontent.fktm8-1.fna&_nc_gid=QLdkpdjhJI6DWegk360VLw&_nc_ss=8&oh=00_AfzcNVid5WztkIPEr_Tot_LIO9EsYvPdnN-Xbo4M7nXZhg&oe=69AD868C",
-    alt: "Islington Campus",
-    title: "Islington College",
-    rating: "4.5",
-    type: "Private",
-    location: "Kamalpokhari",
-    affiliations: "NEB, Tribhuwan University, Purbanchal University",
-    description:
-      "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
-  },
-  {
-    image:
-      "https://scontent.fktm8-1.fna.fbcdn.net/v/t39.30808-6/514417031_1243063541165291_3100742828166290954_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=2a1932&_nc_ohc=k0LjnDUYEt0Q7kNvwHygwbl&_nc_oc=AdnM2qSCUo2yjLeLSVH5gIJ1S9jVEG8u8kusmoSP0hVbJrN1Qtnr0mlgCfovTtJeVVV_alNroR2PrKgPT2vZY9oI&_nc_zt=23&_nc_ht=scontent.fktm8-1.fna&_nc_gid=QLdkpdjhJI6DWegk360VLw&_nc_ss=8&oh=00_AfzcNVid5WztkIPEr_Tot_LIO9EsYvPdnN-Xbo4M7nXZhg&oe=69AD868C",
-    alt: "Islington Campus",
-    title: "Islington College",
-    rating: "4.5",
-    type: "Private",
-    location: "Kamalpokhari",
-    affiliations: "NEB, Tribhuwan University, Purbanchal University",
-    description:
-      "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
-  },
-  {
-    image:
-      "https://scontent.fktm8-1.fna.fbcdn.net/v/t39.30808-6/514417031_1243063541165291_3100742828166290954_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=2a1932&_nc_ohc=k0LjnDUYEt0Q7kNvwHygwbl&_nc_oc=AdnM2qSCUo2yjLeLSVH5gIJ1S9jVEG8u8kusmoSP0hVbJrN1Qtnr0mlgCfovTtJeVVV_alNroR2PrKgPT2vZY9oI&_nc_zt=23&_nc_ht=scontent.fktm8-1.fna&_nc_gid=QLdkpdjhJI6DWegk360VLw&_nc_ss=8&oh=00_AfzcNVid5WztkIPEr_Tot_LIO9EsYvPdnN-Xbo4M7nXZhg&oe=69AD868C",
-    alt: "Islington Campus",
-    title: "Islington College",
-    rating: "4.5",
-    type: "Private",
-    location: "Kamalpokhari",
-    affiliations: "NEB, Tribhuwan University, Purbanchal University",
-    description:
-      "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
-  },
-  {
-    image:
-      "https://scontent.fktm8-1.fna.fbcdn.net/v/t39.30808-6/514417031_1243063541165291_3100742828166290954_n.jpg?_nc_cat=106&ccb=1-7&_nc_sid=2a1932&_nc_ohc=k0LjnDUYEt0Q7kNvwHygwbl&_nc_oc=AdnM2qSCUo2yjLeLSVH5gIJ1S9jVEG8u8kusmoSP0hVbJrN1Qtnr0mlgCfovTtJeVVV_alNroR2PrKgPT2vZY9oI&_nc_zt=23&_nc_ht=scontent.fktm8-1.fna&_nc_gid=QLdkpdjhJI6DWegk360VLw&_nc_ss=8&oh=00_AfzcNVid5WztkIPEr_Tot_LIO9EsYvPdnN-Xbo4M7nXZhg&oe=69AD868C",
-    alt: "Islington Campus",
-    title: "Islington College",
-    rating: "4.5",
-    type: "Private",
-    location: "Kamalpokhari",
-    affiliations: "NEB, Tribhuwan University, Purbanchal University",
-    description:
-      "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
-  },
-];
+import React, { useState, useEffect } from "react";
+import { apiService } from "../../../services/api";
 
-const FeaturedInstitutionsSection = ({ onNavigate }: any) => (
+const FeaturedInstitutionsSection = ({ onNavigate }: any) => {
+  const [featuredColleges, setFeaturedColleges] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchColleges = async () => {
+      try {
+        const res = await apiService.getColleges({ popular: true });
+        if (res.success && res.data?.colleges) {
+          setFeaturedColleges(res.data.colleges.slice(0, 4));
+        }
+      } catch (error) {
+        console.error("Error fetching colleges:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchColleges();
+  }, []);
+
+  if (loading) return <div className="w-full max-w-[1400px] mx-auto mt-24 text-center py-20">Loading featured institutions...</div>;
+
+  return (
   <div className="w-full max-w-[1400px] mx-auto mt-24">
     <div className="mb-10 text-center">
       <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
@@ -64,14 +38,14 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {featuredColleges.map((college, index) => (
         <div
-          key={`${college.title}-${index}`}
+          key={college.id || index}
           className="bg-white rounded-[16px] p-2.5 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.04)] transition-transform hover:-translate-y-1 duration-300 flex flex-col cursor-pointer h-full"
-          onClick={() => onNavigate("collegeDetails", college)}
+          onClick={() => onNavigate("collegeDetails", { name: college.name || college.title })}
         >
-          <div className="relative h-[140px] rounded-[12px] overflow-hidden shrink-0">
+          <div className="relative h-[140px] rounded-[12px] overflow-hidden shrink-0 bg-gray-100">
             <img
-              src={college.image}
-              alt={college.alt}
+              src={college.image_url || college.image || "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"}
+              alt={college.name || college.title}
               className="w-full h-full object-cover"
             />
           </div>
@@ -80,7 +54,7 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => (
             <div className="flex justify-between items-center">
               <div className="flex items-center gap-1.5 w-full">
                 <h3 className="font-bold text-[15px] text-gray-900 truncate hover:text-[#2563eb] transition-colors">
-                  {college.title}
+                  {college.name || college.title}
                 </h3>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -103,7 +77,7 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => (
                 >
                   <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
                 </svg>
-                <span className="font-bold">{college.rating}</span>
+                <span className="font-bold">{college.rating || "4.5"}</span>
               </div>
               <div className="w-[1px] h-3 bg-gray-300" />
               <div className="flex items-center gap-1">
@@ -122,7 +96,7 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => (
                   <rect x="14" y="14" width="7" height="7" />
                   <rect x="3" y="14" width="7" height="7" />
                 </svg>
-                {college.type}
+                {college.type || "Private"}
               </div>
               <div className="w-[1px] h-3 bg-gray-300" />
               <div className="flex items-center gap-1 truncate max-w-[90px]">
@@ -139,7 +113,7 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => (
                   <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
                   <circle cx="12" cy="10" r="3" />
                 </svg>
-                <span className="truncate">{college.location}</span>
+                <span className="truncate">{college.location || "Kathmandu"}</span>
               </div>
               <div className="flex items-start gap-1 w-full mt-1.5 text-gray-600">
                 <svg
@@ -155,12 +129,12 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => (
                   <circle cx="12" cy="8" r="6" />
                   <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
                 </svg>
-                <span className="leading-tight">{college.affiliations}</span>
+                <span className="leading-tight truncate">{college.affiliation || college.affiliations || "Tribhuvan University"}</span>
               </div>
             </div>
 
-            <p className="text-[11.5px] text-gray-600 mt-3 leading-relaxed">
-              {college.description}
+            <p className="text-[11.5px] text-gray-600 mt-3 leading-relaxed line-clamp-2">
+              {college.description || "Top rated college specialized in producing capable human resources. Learn the strategies."}
             </p>
 
             <div className="mt-auto pt-4">
@@ -210,6 +184,7 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => (
       ))}
     </div>
   </div>
-);
+  );
+};
 
 export default FeaturedInstitutionsSection;

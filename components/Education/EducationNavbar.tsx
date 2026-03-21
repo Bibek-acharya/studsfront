@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { SearchBar } from "./SearchBar";
 
 interface EducationNavbarProps {
   onNavigate: (view: any, data?: any) => void;
@@ -97,40 +98,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             </span>
           </Link>
 
-          <div className="mx-8 hidden max-w-[600px] flex-1 md:block">
-            <div
-              className={`relative flex h-11 items-center rounded-full border bg-white px-4 transition-all duration-200 ${
-                isScrolled
-                  ? "border-blue-200 shadow-sm"
-                  : "border-gray-300 hover:border-blue-300"
-              }`}
-            >
-              <i className="fa-solid fa-magnifying-glass min-w-[18px] text-gray-400"></i>
-              <div className="relative mx-3 flex h-full flex-1 items-center overflow-hidden">
-                {!searchQuery && (
-                  <div className="pointer-events-none absolute left-0 top-0 z-0 flex h-full w-full items-center text-[15px] text-gray-400">
-                    <span>Search&nbsp;</span>
-                    <div className="relative inline-block h-[20px] overflow-hidden align-bottom">
-                      <div className="sliding-text flex flex-col leading-[20px]">
-                        <span className="h-[20px]">Community</span>
-                        <span className="h-[20px]">Scholarships</span>
-                        <span className="h-[20px]">Colleges</span>
-                        <span className="h-[20px]">Courses</span>
-                        <span className="h-[20px]">Community</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(event) => setSearchQuery(event.target.value)}
-                  className="relative z-10 h-full w-full bg-transparent text-[15px] text-gray-700 outline-none"
-                  placeholder=" "
-                />
-              </div>
-            </div>
-          </div>
+          <SearchBar />
 
           <div className="flex items-center gap-3">
             <button
@@ -350,7 +318,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 color="text-indigo-500"
                 title="Scholarship Provider"
                 desc="List and manage scholarship programs with us."
-                onClick={() => onNavigate("scholarshipMain")}
+                onClick={() => onNavigate("scholarshipProviderZone")}
               />
             </DesktopDropdown>
 

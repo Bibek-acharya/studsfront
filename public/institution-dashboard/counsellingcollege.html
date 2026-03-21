@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>College Counselling Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons for elegant icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        college: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar for tables */
+        .custom-scrollbar::-webkit-scrollbar {
+            height: 8px;
+            width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1; 
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8; 
+        }
+        
+        /* Modal transition */
+        .modal-enter {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .modal-enter-active {
+            opacity: 1;
+            transform: scale(1);
+            transition: opacity 300ms, transform 300ms;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-college-900 text-white flex flex-col hidden md:flex transition-all duration-300">
+        <div class="p-6 flex items-center gap-3 border-b border-college-700">
+            <i class="ph-fill ph-graduation-cap text-3xl text-college-100"></i>
+            <h1 class="text-xl font-bold tracking-wide">EduCounsel</h1>
+        </div>
+        <nav class="flex-1 p-4 space-y-2">
+            <button onclick="switchTab('students')" id="tab-students" class="w-full flex items-center gap-3 px-4 py-3 bg-college-700 rounded-lg text-left transition-colors font-medium">
+                <i class="ph ph-users text-xl"></i>
+                Student Requests
+            </button>
+            <button onclick="switchTab('slots')" id="tab-slots" class="w-full flex items-center gap-3 px-4 py-3 hover:bg-college-700 rounded-lg text-left transition-colors font-medium text-gray-300 hover:text-white">
+                <i class="ph ph-calendar-check text-xl"></i>
+                Manage Slots
+            </button>
+        </nav>
+        <div class="p-4 border-t border-college-700 text-sm text-gray-400">
+            <div class="flex items-center gap-2 mb-2">
+                <div class="w-8 h-8 rounded-full bg-college-500 flex items-center justify-center text-white font-bold">A</div>
+                <div>
+                    <p class="text-white font-medium">Admin User</p>
+                    <p class="text-xs">Admissions Office</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-full overflow-hidden relative">
+        <!-- Mobile Header -->
+        <header class="md:hidden bg-college-900 text-white p-4 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <i class="ph-fill ph-graduation-cap text-2xl text-college-100"></i>
+                <h1 class="text-lg font-bold">EduCounsel</h1>
+            </div>
+            <div class="flex gap-2">
+                <button onclick="switchTab('students')" class="p-2 bg-college-700 rounded"><i class="ph ph-users"></i></button>
+                <button onclick="switchTab('slots')" class="p-2 bg-college-700 rounded"><i class="ph ph-calendar-check"></i></button>
+            </div>
+        </header>
+
+        <!-- Topbar -->
+        <header class="hidden md:flex bg-white shadow-sm border-b px-8 py-4 items-center justify-between">
+            <h2 id="page-title" class="text-2xl font-semibold text-gray-800">Student Requests</h2>
+            <div class="flex items-center gap-4 text-gray-500">
+                <button class="hover:text-college-600 transition"><i class="ph ph-bell text-xl"></i></button>
+                <button class="hover:text-college-600 transition"><i class="ph ph-gear text-xl"></i></button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            
+            <!-- STUDENTS TAB -->
+            <section id="section-students" class="block animate-fade-in">
+                
+                <!-- Stats Row -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-xl border shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                            <i class="ph ph-users text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Total Requests</p>
+                            <p class="text-2xl font-bold text-gray-800" id="stat-total">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600">
+                            <i class="ph ph-hourglass-high text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Pending Action</p>
+                            <p class="text-2xl font-bold text-gray-800" id="stat-pending">0</p>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                            <i class="ph ph-check-circle text-2xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 font-medium">Accepted/Scheduled</p>
+                            <p class="text-2xl font-bold text-gray-800" id="stat-accepted">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data Table -->
+                <div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+                    <div class="p-5 border-b flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4">
+                        <h3 class="text-lg font-semibold text-gray-800 whitespace-nowrap">Counselling Applications</h3>
+                        
+                        <!-- Filters -->
+                        <div class="flex flex-wrap items-center gap-3 w-full xl:w-auto">
+                            <!-- Program Filter -->
+                            <select id="filter-program" onchange="filterStudents()" class="p-2 border rounded-lg text-sm focus:ring-2 focus:ring-college-500 focus:outline-none bg-white text-gray-700">
+                                <option value="">All Programs</option>
+                                <option value="Undergraduate">Undergraduate</option>
+                                <option value="Postgraduate">Postgraduate</option>
+                                <option value="Diploma">Diploma</option>
+                            </select>
+
+                            <!-- Subject/Course Filter -->
+                            <select id="filter-course" onchange="filterStudents()" class="p-2 border rounded-lg text-sm focus:ring-2 focus:ring-college-500 focus:outline-none bg-white text-gray-700">
+                                <option value="">All Subjects</option>
+                                <option value="BSc Computer Science">BSc Computer Science</option>
+                                <option value="MBA">MBA</option>
+                                <option value="BBA">BBA</option>
+                                <option value="Graphic Design">Graphic Design</option>
+                                <option value="BEng Software">BEng Software</option>
+                            </select>
+
+                            <!-- Session Mode Filter -->
+                            <select id="filter-mode" onchange="filterStudents()" class="p-2 border rounded-lg text-sm focus:ring-2 focus:ring-college-500 focus:outline-none bg-white text-gray-700">
+                                <option value="">All Modes</option>
+                                <option value="Online">Online</option>
+                                <option value="Campus Visit">Campus Visit</option>
+                            </select>
+
+                            <!-- Search -->
+                            <div class="relative w-full sm:w-64">
+                                <i class="ph ph-magnifying-glass absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                                <input type="text" id="search-student" placeholder="Search students..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-college-500 focus:outline-none text-sm" onkeyup="filterStudents()">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="w-full text-left border-collapse min-w-[1000px]">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 text-sm uppercase tracking-wider">
+                                    <th class="p-4 font-semibold border-b">Applicant</th>
+                                    <th class="p-4 font-semibold border-b">Contact Info</th>
+                                    <th class="p-4 font-semibold border-b">Academic Interest</th>
+                                    <th class="p-4 font-semibold border-b">Session Mode</th>
+                                    <th class="p-4 font-semibold border-b">Status</th>
+                                    <th class="p-4 font-semibold border-b text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="students-tbody" class="divide-y divide-gray-100">
+                                <!-- JS populated rows go here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SLOTS TAB -->
+            <section id="section-slots" class="hidden animate-fade-in">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    
+                    <!-- Create Slot Form -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-xl shadow-sm border p-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                                <i class="ph ph-plus-circle text-college-600"></i>
+                                Create New Slot
+                            </h3>
+                            <form id="slot-form" onsubmit="handleSlotSubmit(event)" class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+                                    <input type="date" id="slot-date" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-college-500 focus:outline-none">
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+                                        <input type="time" id="slot-start" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-college-500 focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+                                        <input type="time" id="slot-end" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-college-500 focus:outline-none">
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Number of Slots (Capacity)</label>
+                                    <input type="number" id="slot-capacity" min="1" required class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-college-500 focus:outline-none" placeholder="e.g., 5">
+                                </div>
+                                <button type="submit" class="w-full bg-college-600 hover:bg-college-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-2">
+                                    <i class="ph ph-floppy-disk"></i> Save Slot
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Available Slots List -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl shadow-sm border overflow-hidden flex flex-col h-full">
+                            <div class="p-5 border-b">
+                                <h3 class="text-lg font-semibold text-gray-800">Current Availability</h3>
+                                <p class="text-sm text-gray-500">Manage published counselling schedules</p>
+                            </div>
+                            <div class="p-5 flex-1 overflow-y-auto custom-scrollbar bg-gray-50">
+                                <div id="slots-container" class="space-y-3">
+                                    <!-- JS populated slots go here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <!-- Modal: Provide Meeting Link -->
+    <div id="modal-meeting" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-xl shadow-2xl overflow-hidden modal-enter" id="modal-meeting-content">
+            <div class="p-5 border-b bg-gray-50 flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-800">Provide Meeting Link</h3>
+                <button onclick="closeModal('modal-meeting')" class="text-gray-400 hover:text-gray-700 transition">
+                    <i class="ph ph-x text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-4" id="modal-student-name">Sending link to: <strong>...</strong></p>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Platform</label>
+                    <select id="meeting-platform" class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-college-500 focus:outline-none">
+                        <option value="Google Meet">Google Meet</option>
+                        <option value="Zoom">Zoom</option>
+                        <option value="Microsoft Teams">Microsoft Teams</option>
+                    </select>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Meeting URL</label>
+                    <input type="url" id="meeting-url" placeholder="https://..." class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-college-500 focus:outline-none">
+                </div>
+                <div class="flex gap-3 justify-end">
+                    <button onclick="closeModal('modal-meeting')" class="px-4 py-2 border rounded-lg text-gray-600 hover:bg-gray-50 transition">Cancel</button>
+                    <button onclick="saveMeetingLink()" class="px-4 py-2 bg-college-600 hover:bg-college-700 text-white rounded-lg transition flex items-center gap-2">
+                        <i class="ph ph-paper-plane-right"></i> Send Link
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="toast" class="fixed bottom-4 right-4 bg-gray-800 text-white px-6 py-3 rounded-lg shadow-lg transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center gap-3">
+        <i id="toast-icon" class="ph ph-check-circle text-green-400 text-xl"></i>
+        <span id="toast-msg">Action successful</span>
+    </div>
+
+    <!-- Application Logic -->
+    <script>
+        // --- State Management ---
+        let currentStudentId = null;
+
+        // Mock Data for Students
+        let students = [
+            { id: 1, name: "Aarav Sharma", mobile: "9800000001", email: "aarav.s@example.com", programLevel: "Undergraduate", course: "BSc Computer Science", sessionMode: "Online", status: "Pending", meetingLink: "" },
+            { id: 2, name: "Priya Patel", mobile: "9800000002", email: "priya.p@example.com", programLevel: "Postgraduate", course: "MBA", sessionMode: "Campus Visit", status: "Accepted", meetingLink: "" },
+            { id: 3, name: "Rohan Gupta", mobile: "9800000003", email: "rohan.g@example.com", programLevel: "Undergraduate", course: "BBA", sessionMode: "Online", status: "Link Sent", meetingLink: "https://meet.google.com/abc-defg-hij" },
+            { id: 4, name: "Sita Singh", mobile: "9800000004", email: "sita.singh@example.com", programLevel: "Diploma", course: "Graphic Design", sessionMode: "Campus Visit", status: "Pending", meetingLink: "" },
+            { id: 5, name: "Kenji Tanaka", mobile: "9800000005", email: "kenji.t@example.com", programLevel: "Undergraduate", course: "BEng Software", sessionMode: "Online", status: "Pending", meetingLink: "" },
+        ];
+
+        // Mock Data for Slots
+        let slots = [
+            { id: Date.now() + 1, date: "2024-06-15", month: "June", startTime: "10:00", endTime: "12:00", capacity: 5, booked: 2 },
+            { id: Date.now() + 2, date: "2024-06-16", month: "June", startTime: "14:00", endTime: "16:00", capacity: 3, booked: 0 },
+        ];
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderStudents();
+            renderSlots();
+            updateStats();
+        });
+
+        // --- UI Navigation ---
+        function switchTab(tab) {
+            // Hide all sections
+            document.getElementById('section-students').classList.add('hidden');
+            document.getElementById('section-slots').classList.add('hidden');
+            
+            // Reset Sidebar Tabs
+            document.getElementById('tab-students').className = "w-full flex items-center gap-3 px-4 py-3 hover:bg-college-700 rounded-lg text-left transition-colors font-medium text-gray-300 hover:text-white";
+            document.getElementById('tab-slots').className = "w-full flex items-center gap-3 px-4 py-3 hover:bg-college-700 rounded-lg text-left transition-colors font-medium text-gray-300 hover:text-white";
+            
+            // Activate selected
+            if (tab === 'students') {
+                document.getElementById('section-students').classList.remove('hidden');
+                document.getElementById('tab-students').className = "w-full flex items-center gap-3 px-4 py-3 bg-college-700 rounded-lg text-left transition-colors font-medium text-white";
+                document.getElementById('page-title').innerText = "Student Requests";
+            } else if (tab === 'slots') {
+                document.getElementById('section-slots').classList.remove('hidden');
+                document.getElementById('tab-slots').className = "w-full flex items-center gap-3 px-4 py-3 bg-college-700 rounded-lg text-left transition-colors font-medium text-white";
+                document.getElementById('page-title').innerText = "Manage Slots";
+            }
+        }
+
+        // --- Students Logic ---
+        function renderStudents(data = students) {
+            const tbody = document.getElementById('students-tbody');
+            tbody.innerHTML = '';
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-gray-500">No student requests found matching your criteria.</td></tr>`;
+                return;
+            }
+
+            data.forEach(student => {
+                // Status Badge styling
+                let statusBadge = '';
+                switch (student.status) {
+                    case 'Pending':
+                        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 border border-yellow-200"><i class="ph-fill ph-clock"></i> Pending</span>`;
+                        break;
+                    case 'Accepted':
+                        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 border border-green-200"><i class="ph-fill ph-check-circle"></i> Accepted</span>`;
+                        break;
+                    case 'Link Sent':
+                        statusBadge = `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 border border-blue-200"><i class="ph-fill ph-video-camera"></i> Link Sent</span>`;
+                        break;
+                }
+
+                // Mode Icon
+                const modeIcon = student.sessionMode === 'Online' 
+                    ? `<div class="flex items-center gap-1 text-blue-600"><i class="ph ph-desktop"></i> ${student.sessionMode}</div>`
+                    : `<div class="flex items-center gap-1 text-emerald-600"><i class="ph ph-buildings"></i> ${student.sessionMode}</div>`;
+
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-gray-50/50 transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4 border-b">
+                        <div class="font-medium text-gray-900">${student.name}</div>
+                        <div class="text-xs text-gray-500 mt-1">ID: #STU-${student.id.toString().padStart(4, '0')}</div>
+                    </td>
+                    <td class="p-4 border-b">
+                        <div class="flex items-center gap-2 text-sm text-gray-600 mb-1">
+                            <i class="ph ph-phone text-gray-400"></i> ${student.mobile}
+                        </div>
+                        <div class="flex items-center gap-2 text-sm text-gray-600">
+                            <i class="ph ph-envelope-simple text-gray-400"></i> ${student.email}
+                        </div>
+                    </td>
+                    <td class="p-4 border-b">
+                        <div class="text-sm text-gray-900">${student.course}</div>
+                        <div class="text-xs text-gray-500 mt-0.5">${student.programLevel}</div>
+                    </td>
+                    <td class="p-4 border-b text-sm font-medium">
+                        ${modeIcon}
+                    </td>
+                    <td class="p-4 border-b">
+                        ${statusBadge}
+                    </td>
+                    <td class="p-4 border-b text-right">
+                        <div class="flex items-center justify-end gap-2">
+                            ${student.status === 'Pending' ? `
+                                <button onclick="acceptStudent(${student.id})" class="p-2 bg-green-50 text-green-600 hover:bg-green-100 hover:text-green-700 rounded-lg border border-green-200 transition tooltip" title="Accept Request">
+                                    <i class="ph ph-check font-bold"></i>
+                                </button>
+                            ` : ''}
+                            
+                            ${(student.sessionMode === 'Online' && student.status !== 'Link Sent') ? `
+                                <button onclick="openLinkModal(${student.id})" class="p-2 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 rounded-lg border border-blue-200 transition" title="Provide Meeting Link">
+                                    <i class="ph ph-link font-bold"></i>
+                                </button>
+                            ` : ''}
+
+                            <button onclick="sendWhatsApp(${student.id})" class="p-2 bg-emerald-50 text-emerald-600 hover:bg-emerald-100 hover:text-emerald-700 rounded-lg border border-emerald-200 transition" title="Invite via WhatsApp">
+                                <i class="ph ph-whatsapp-logo font-bold"></i>
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Updated Filter Function to include Program, Course, and Mode
+        function filterStudents() {
+            const query = document.getElementById('search-student').value.toLowerCase();
+            const programFilter = document.getElementById('filter-program').value;
+            const courseFilter = document.getElementById('filter-course').value;
+            const modeFilter = document.getElementById('filter-mode').value;
+
+            const filtered = students.filter(s => {
+                // Check Search text
+                const matchesSearch = 
+                    s.name.toLowerCase().includes(query) || 
+                    s.course.toLowerCase().includes(query) || 
+                    s.email.toLowerCase().includes(query) ||
+                    s.mobile.includes(query);
+                
+                // Check Dropdowns
+                const matchesProgram = programFilter === "" || s.programLevel === programFilter;
+                const matchesCourse = courseFilter === "" || s.course === courseFilter;
+                const matchesMode = modeFilter === "" || s.sessionMode === modeFilter;
+
+                return matchesSearch && matchesProgram && matchesCourse && matchesMode;
+            });
+            
+            renderStudents(filtered);
+        }
+
+        function updateStats() {
+            document.getElementById('stat-total').innerText = students.length;
+            document.getElementById('stat-pending').innerText = students.filter(s => s.status === 'Pending').length;
+            document.getElementById('stat-accepted').innerText = students.filter(s => s.status === 'Accepted' || s.status === 'Link Sent').length;
+        }
+
+        // --- Actions ---
+        function acceptStudent(id) {
+            const index = students.findIndex(s => s.id === id);
+            if (index !== -1) {
+                students[index].status = 'Accepted';
+                renderStudents(); // Re-render respects current filters 
+                filterStudents(); // Call filter function so UI updates while keeping active filters
+                updateStats();
+                showToast(`Accepted counselling request from ${students[index].name}`, 'success');
+            }
+        }
+
+        function openLinkModal(id) {
+            currentStudentId = id;
+            const student = students.find(s => s.id === id);
+            document.getElementById('modal-student-name').innerHTML = `Sending link to: <strong class="text-gray-900">${student.name}</strong> (${student.course})`;
+            document.getElementById('meeting-url').value = student.meetingLink || '';
+            
+            const modal = document.getElementById('modal-meeting');
+            const content = document.getElementById('modal-meeting-content');
+            modal.classList.remove('hidden');
+            
+            // Trigger animation
+            setTimeout(() => {
+                content.classList.add('modal-enter-active');
+            }, 10);
+        }
+
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            const content = modal.querySelector('div');
+            
+            content.classList.remove('modal-enter-active');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300); // match transition duration
+        }
+
+        function saveMeetingLink() {
+            const url = document.getElementById('meeting-url').value;
+            const platform = document.getElementById('meeting-platform').value;
+
+            if (!url) {
+                alert("Please enter a valid meeting URL.");
+                return;
+            }
+
+            const index = students.findIndex(s => s.id === currentStudentId);
+            if (index !== -1) {
+                students[index].status = 'Link Sent';
+                students[index].meetingLink = url;
+                
+                closeModal('modal-meeting');
+                filterStudents(); // Re-apply filters to update the table view
+                updateStats();
+                showToast(`Meeting link sent successfully via ${platform}`, 'success');
+            }
+        }
+
+        function sendWhatsApp(id) {
+            const student = students.find(s => s.id === id);
+            let message = `Hello ${student.name}, this is from EduCounsel Admissions Office. `;
+            
+            if (student.sessionMode === 'Online') {
+                if (student.meetingLink) {
+                    message += `Your online counselling session is scheduled. Here is your meeting link: ${student.meetingLink}`;
+                } else {
+                    message += `Your online counselling request for ${student.course} is received. We will send the meeting link shortly.`;
+                }
+            } else {
+                message += `We invite you to visit our campus for the counselling session regarding ${student.course}. Please confirm your availability.`;
+            }
+
+            // Encode message for URL
+            const encodedMessage = encodeURIComponent(message);
+            // Open WhatsApp
+            const whatsappUrl = `https://wa.me/${student.mobile}?text=${encodedMessage}`;
+            window.open(whatsappUrl, '_blank');
+        }
+
+        // --- Slots Logic ---
+        function handleSlotSubmit(e) {
+            e.preventDefault();
+            const dateInput = document.getElementById('slot-date').value;
+            const startInput = document.getElementById('slot-start').value;
+            const endInput = document.getElementById('slot-end').value;
+            const capacityInput = document.getElementById('slot-capacity').value;
+
+            // Extract Month from date
+            const dateObj = new Date(dateInput);
+            const monthName = dateObj.toLocaleString('default', { month: 'long' });
+
+            const newSlot = {
+                id: Date.now(),
+                date: dateInput,
+                month: monthName,
+                startTime: startInput,
+                endTime: endInput,
+                capacity: parseInt(capacityInput),
+                booked: 0
+            };
+
+            // Insert at beginning
+            slots.unshift(newSlot);
+            renderSlots();
+            e.target.reset();
+            showToast("New counselling slot added successfully.", "success");
+        }
+
+        function renderSlots() {
+            const container = document.getElementById('slots-container');
+            container.innerHTML = '';
+
+            if (slots.length === 0) {
+                container.innerHTML = `<p class="text-gray-500 text-center py-4">No slots created yet.</p>`;
+                return;
+            }
+
+            // Group slots by Month
+            const groupedSlots = slots.reduce((acc, slot) => {
+                if (!acc[slot.month]) acc[slot.month] = [];
+                acc[slot.month].push(slot);
+                return acc;
+            }, {});
+
+            for (const month in groupedSlots) {
+                // Month Header
+                const monthHeader = document.createElement('h4');
+                monthHeader.className = "text-sm font-bold text-gray-500 uppercase tracking-wider mt-4 mb-2 first:mt-0";
+                monthHeader.innerText = month;
+                container.appendChild(monthHeader);
+
+                // Month Slots
+                groupedSlots[month].forEach(slot => {
+                    // Format Date
+                    const dateObj = new Date(slot.date);
+                    const formattedDate = dateObj.toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'short' });
+                    
+                    // Format Time
+                    const formatTime = (timeStr) => {
+                        const [h, m] = timeStr.split(':');
+                        const ampm = h >= 12 ? 'PM' : 'AM';
+                        const hr = h % 12 || 12;
+                        return `${hr}:${m} ${ampm}`;
+                    };
+
+                    const availabilityRatio = slot.booked / slot.capacity;
+                    let capacityColor = "text-green-600 bg-green-50 border-green-200";
+                    if (availabilityRatio >= 1) capacityColor = "text-red-600 bg-red-50 border-red-200";
+                    else if (availabilityRatio > 0.6) capacityColor = "text-yellow-600 bg-yellow-50 border-yellow-200";
+
+                    const card = document.createElement('div');
+                    card.className = "bg-white p-4 rounded-xl border shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 hover:border-college-300 transition-colors";
+                    card.innerHTML = `
+                        <div class="flex items-start sm:items-center gap-4">
+                            <div class="bg-college-50 p-3 rounded-lg text-college-600">
+                                <i class="ph ph-calendar-blank text-2xl"></i>
+                            </div>
+                            <div>
+                                <p class="font-bold text-gray-800 text-lg">${formattedDate}</p>
+                                <div class="flex items-center gap-2 text-sm text-gray-500 mt-1">
+                                    <i class="ph ph-clock"></i>
+                                    ${formatTime(slot.startTime)} - ${formatTime(slot.endTime)}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-right">
+                                <p class="text-xs text-gray-500 uppercase font-semibold mb-1">Availability</p>
+                                <span class="px-3 py-1 rounded-full text-sm font-medium border ${capacityColor}">
+                                    ${slot.capacity - slot.booked} / ${slot.capacity} Slots Left
+                                </span>
+                            </div>
+                            <button onclick="deleteSlot(${slot.id})" class="text-gray-400 hover:text-red-500 transition p-2 bg-gray-50 hover:bg-red-50 rounded-lg">
+                                <i class="ph ph-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        }
+
+        function deleteSlot(id) {
+            if(confirm("Are you sure you want to delete this slot?")) {
+                slots = slots.filter(s => s.id !== id);
+                renderSlots();
+                showToast("Slot removed successfully.", "success");
+            }
+        }
+
+        // --- Utils ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const msg = document.getElementById('toast-msg');
+            const icon = document.getElementById('toast-icon');
+
+            msg.innerText = message;
+            
+            if (type === 'success') {
+                icon.className = "ph ph-check-circle text-green-400 text-xl";
+            } else {
+                icon.className = "ph ph-info text-blue-400 text-xl";
+            }
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

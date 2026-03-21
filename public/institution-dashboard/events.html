@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Dashboard - Create Event</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Custom scrollbar for a cleaner dashboard look */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .form-section { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 h-screen flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800">
+            <svg class="w-8 h-8 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            <span class="text-xl font-bold tracking-wider">Event<span class="text-blue-500">Hub</span></span>
+        </div>
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1 px-3">
+                <li><a href="#" class="flex items-center px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition"><svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg> Dashboard</a></li>
+                <li><a href="#" class="flex items-center px-3 py-2.5 bg-blue-600 text-white rounded-lg transition shadow-md"><svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg> Events</a></li>
+                <li><a href="#" class="flex items-center px-3 py-2.5 text-slate-300 hover:text-white hover:bg-slate-800 rounded-lg transition"><svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg> Attendees</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- Header -->
+        <header class="h-16 bg-white shadow-sm flex items-center justify-between px-6 z-10 flex-shrink-0">
+            <h1 class="text-2xl font-bold text-gray-800">Create New Event</h1>
+            <div class="flex items-center space-x-4">
+                <button type="button" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                </button>
+                <div class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center font-bold">A</div>
+            </div>
+        </header>
+
+        <!-- Form Area -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="max-w-5xl mx-auto">
+                <form id="eventForm" class="space-y-8 pb-24">
+
+                    <!-- Notification Area -->
+                    <div id="form-message" class="hidden p-4 rounded-lg font-medium"></div>
+
+                    <!-- Section 1: Basic Information -->
+                    <div class="form-section bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-5 flex items-center border-b pb-3">
+                            <span class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center mr-3">1</span> 
+                            Basic Information
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Event Title <span class="text-red-500">*</span></label>
+                                <input type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="e.g. Annual Tech Summit 2026">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Subheading</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="A brief catchy phrase">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Event Type <span class="text-red-500">*</span></label>
+                                <select required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none bg-white">
+                                    <option value="" disabled selected>Select an event type</option>
+                                    <option value="Workshop">Workshop</option>
+                                    <option value="Seminar">Seminar</option>
+                                    <option value="Hackathon">Hackathon</option>
+                                    <option value="Conference">Conference</option>
+                                    <option value="Webinar">Webinar</option>
+                                    <option value="Festival">Cultural Festival</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">College / University Name</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="e.g. Stanford University">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Status (Pricing) <span class="text-red-500">*</span></label>
+                                <div class="flex space-x-4 mt-2">
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="event_status" value="Free" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300" checked>
+                                        <span class="ml-2 text-gray-700">Free Event</span>
+                                    </label>
+                                    <label class="flex items-center cursor-pointer">
+                                        <input type="radio" name="event_status" value="Paid" class="w-4 h-4 text-blue-600 focus:ring-blue-500 border-gray-300">
+                                        <span class="ml-2 text-gray-700">Paid Event</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 2: Date, Time & Venue -->
+                    <div class="form-section bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-5 flex items-center border-b pb-3">
+                            <span class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center mr-3">2</span> 
+                            Date, Time & Location
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Primary Date <span class="text-red-500">*</span></label>
+                                <input type="date" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Detailed Date and Time</label>
+                                <input type="datetime-local" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">General Location (City/State) <span class="text-red-500">*</span></label>
+                                <input type="text" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="e.g. San Francisco, CA">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Specific Venue Name</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="e.g. Main Auditorium, Building A">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Venue Close / Nearest Landmark</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="e.g. Opposite Central Park">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Google Maps Link</label>
+                                <input type="url" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="https://maps.google.com/...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Descriptions -->
+                    <div class="form-section bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-5 flex items-center border-b pb-3">
+                            <span class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center mr-3">3</span> 
+                            Descriptions
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Short Event Description</label>
+                                <textarea rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="A brief summary of the event..."></textarea>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Events Detailed (Full Description)</label>
+                                <textarea rows="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="Provide full details, agendas, and context for the event..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 4: Media & Registration -->
+                    <div class="form-section bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-5 flex items-center border-b pb-3">
+                            <span class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center mr-3">4</span> 
+                            Media & Links
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Register Now Link <span class="text-red-500">*</span></label>
+                                <input type="url" required class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="https://forms.gle/... or website link">
+                            </div>
+
+                            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition cursor-pointer bg-gray-50 relative">
+                                    <input type="file" accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" id="eventImage" onchange="previewFileName(this, 'eventImageName')">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    <p class="text-sm font-medium text-gray-700">Upload Events Image</p>
+                                    <p class="text-xs text-gray-500 mt-1">Recommended size: 1200 x 630px (Max 2MB)</p>
+                                    <p id="eventImageName" class="text-xs text-blue-600 font-medium mt-2 truncate"></p>
+                                </div>
+
+                                <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition cursor-pointer bg-gray-50 relative">
+                                    <input type="file" accept="application/pdf,image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" id="eventPoster" onchange="previewFileName(this, 'eventPosterName')">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                                    <p class="text-sm font-medium text-gray-700">Resources: Add Poster / PDF</p>
+                                    <p class="text-xs text-gray-500 mt-1">Upload event poster or detailed brochure</p>
+                                    <p id="eventPosterName" class="text-xs text-blue-600 font-medium mt-2 truncate"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 5: Dynamic Sections (Highlights, Audience, Schedule) -->
+                    <div class="form-section bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-5 flex items-center border-b pb-3">
+                            <span class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center mr-3">5</span> 
+                            Event Structure & Highlights
+                        </h2>
+                        
+                        <!-- Key Highlights -->
+                        <div class="mb-8">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-md font-medium text-gray-800">Key Highlights Cards</h3>
+                                <button type="button" onclick="addDynamicRow('highlights-container', 'highlight')" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Add Highlight
+                                </button>
+                            </div>
+                            <div id="highlights-container" class="space-y-3">
+                                <!-- Dynamic rows go here -->
+                            </div>
+                        </div>
+
+                        <!-- Who Should Attend -->
+                        <div class="mb-8 pt-6 border-t border-gray-100">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-md font-medium text-gray-800">Who Should Attend</h3>
+                                <button type="button" onclick="addDynamicRow('audience-container', 'audience')" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Add Audience Type
+                                </button>
+                            </div>
+                            <div id="audience-container" class="space-y-3">
+                                <!-- Dynamic rows go here -->
+                            </div>
+                        </div>
+
+                        <!-- Event Schedule -->
+                        <div class="pt-6 border-t border-gray-100">
+                            <div class="flex items-center justify-between mb-3">
+                                <h3 class="text-md font-medium text-gray-800">Event Schedule</h3>
+                                <button type="button" onclick="addDynamicRow('schedule-container', 'schedule')" class="text-sm bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-1.5 rounded-lg transition flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg> Add Schedule Item
+                                </button>
+                            </div>
+                            <div id="schedule-container" class="space-y-4">
+                                <!-- Dynamic rows go here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 6: Organizer Info -->
+                    <div class="form-section bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-5 flex items-center border-b pb-3">
+                            <span class="w-8 h-8 rounded bg-blue-50 text-blue-600 flex items-center justify-center mr-3">6</span> 
+                            Organized By
+                        </h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Organizer Name</label>
+                                <input type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="Organization / Club Name">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                                <input type="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="contact@domain.com">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Contact Number</label>
+                                <input type="tel" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="+1 (555) 000-0000">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Website Link</label>
+                                <input type="url" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition outline-none" placeholder="https://www.yourwebsite.com">
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Organizer Logo</label>
+                                <div class="flex items-center space-x-4">
+                                    <div class="w-16 h-16 rounded-lg bg-gray-100 border border-gray-300 flex items-center justify-center overflow-hidden" id="logoPreviewContainer">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                                    </div>
+                                    <div class="flex-1">
+                                        <input type="file" accept="image/*" class="text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" id="organizerLogo" onchange="previewLogo(this)">
+                                        <p class="text-xs text-gray-500 mt-1">Recommended size: 200x200px (Square)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <!-- Sticky Footer for Action Buttons -->
+        <div class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-4 px-6 md:px-10 flex justify-end space-x-4 z-20 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+            <button type="button" class="px-6 py-2.5 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition">Cancel</button>
+            <button type="submit" form="eventForm" class="px-6 py-2.5 rounded-lg bg-blue-600 text-white font-medium hover:bg-blue-700 transition shadow-md flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Save & Publish Event
+            </button>
+        </div>
+    </main>
+
+    <script>
+        // Initialize with one row for each dynamic section
+        document.addEventListener('DOMContentLoaded', () => {
+            addDynamicRow('highlights-container', 'highlight');
+            addDynamicRow('audience-container', 'audience');
+            addDynamicRow('schedule-container', 'schedule');
+        });
+
+        // Function to handle showing filename on custom file upload UI
+        function previewFileName(input, targetId) {
+            const target = document.getElementById(targetId);
+            if (input.files && input.files[0]) {
+                target.textContent = input.files[0].name;
+            } else {
+                target.textContent = '';
+            }
+        }
+
+        // Preview logo image
+        function previewLogo(input) {
+            const container = document.getElementById('logoPreviewContainer');
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    container.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover" alt="Logo Preview">`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        // Logic for Dynamic Rows
+        function addDynamicRow(containerId, type) {
+            const container = document.getElementById(containerId);
+            const row = document.createElement('div');
+            row.className = 'flex flex-col md:flex-row gap-3 bg-gray-50 p-4 rounded-lg border border-gray-200 relative animate-[fadeIn_0.3s_ease-in-out]';
+            
+            let htmlContent = '';
+
+            if (type === 'highlight' || type === 'audience') {
+                htmlContent = `
+                    <div class="flex-1">
+                        <input type="text" placeholder="Heading" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 outline-none mb-2">
+                        <input type="text" placeholder="Subheading / Description" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    </div>
+                `;
+            } else if (type === 'schedule') {
+                htmlContent = `
+                    <div class="flex-1 grid grid-cols-1 md:grid-cols-12 gap-3">
+                        <div class="md:col-span-3 flex space-x-2">
+                            <div class="w-1/2">
+                                <label class="text-xs text-gray-500 block mb-1">From</label>
+                                <input type="time" class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 outline-none">
+                            </div>
+                            <div class="w-1/2">
+                                <label class="text-xs text-gray-500 block mb-1">To</label>
+                                <input type="time" class="w-full px-2 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 outline-none">
+                            </div>
+                        </div>
+                        <div class="md:col-span-9">
+                            <label class="text-xs text-gray-500 block mb-1">Activity</label>
+                            <input type="text" placeholder="Session Heading" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 outline-none mb-2">
+                            <input type="text" placeholder="Speaker / Subheading" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500 outline-none">
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Remove button
+            const removeBtn = `
+                <button type="button" onclick="this.closest('.flex').remove()" class="mt-2 md:mt-0 md:self-center text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-md transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </button>
+            `;
+
+            row.innerHTML = htmlContent + removeBtn;
+            container.appendChild(row);
+        }
+
+        // Handle Form Submission
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Show Success Message
+            const msgBox = document.getElementById('form-message');
+            msgBox.className = "p-4 rounded-lg font-medium bg-green-50 text-green-700 border border-green-200 block animate-[fadeIn_0.5s_ease-in-out]";
+            msgBox.innerHTML = `
+                <div class="flex items-center">
+                    <svg class="w-6 h-6 mr-2 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    Event has been successfully saved and added to the dashboard!
+                </div>
+            `;
+            
+            // Scroll to top to see the message
+            document.querySelector('.overflow-y-auto').scrollTo({ top: 0, behavior: 'smooth' });
+
+            // Hide after 5 seconds
+            setTimeout(() => {
+                msgBox.classList.add('hidden');
+                msgBox.classList.remove('block');
+            }, 5000);
+        });
+    </script>
+</body>
+</html>

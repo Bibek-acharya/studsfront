@@ -20,6 +20,7 @@ const AdminCollegesPage = lazy(
 const FindCollegePage = lazy(
   () => import("./components/Education/FindCollege/FindCollegePage"),
 );
+const SearchPage = lazy(() => import("./components/Education/SearchPage").then(module => ({ default: module.SearchPage })));
 const CompareCollegesPage = lazy(
   () => import("./components/Education/CompareColleges/CompareCollegesPage"),
 );
@@ -108,6 +109,15 @@ const StudentDashboard = lazy(
 const InstitutionZone = lazy(
   () => import("./components/Partner/InstitutionZone"),
 );
+const InstitutionDashboard = lazy(
+  () => import("./components/Partner/InstitutionDashboard"),
+);
+const ScholarshipProviderZone = lazy(
+  () => import("./components/Partner/ScholarshipProviderZone"),
+);
+const ScholarshipProviderDashboard = lazy(
+  () => import("./components/Education/ScholarshipProvider/ScholarshipProviderDashboard"),
+);
 const AuthContainer = lazy(() => import("./components/Auth/AuthContainer"));
 const OnboardingFlow = lazy(
   () => import("./components/Onboarding/OnboardingFlow"),
@@ -135,7 +145,7 @@ const App: React.FC = () => {
     </div>
   );
 
-  const hideNavFooter = ["/login", "/signup", "/onboarding", "/studentDashboard", "/auth/google-callback", "/institutionZone"].some(path => location.pathname.startsWith(path));
+  const hideNavFooter = ["/login", "/signup", "/onboarding", "/studentDashboard", "/auth/google-callback", "/institutionZone", "/institutionDashboard", "/scholarshipProviderZone", "/scholarshipProviderDashboard"].some(path => location.pathname.startsWith(path));
 
   return (
     <div className="min-h-screen font-sans selection:bg-blue-500 selection:text-white overflow-x-hidden bg-white">
@@ -168,6 +178,7 @@ const App: React.FC = () => {
             {/* Core Education Pages */}
             <Route path="/educationPage" element={<EducationPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/findCollege" element={<FindCollegePage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/search" element={<SearchPage />} />
             <Route path="/compareColleges" element={<CompareCollegesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/compareCollegesResult" element={<CollegeComparisonResultPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/collegeDetails" element={<CollegeDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
@@ -224,6 +235,9 @@ const App: React.FC = () => {
             <Route path="/eventsPage" element={<EventsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/eventDetails" element={<EventDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/institutionZone" element={<InstitutionZone onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/institutionDashboard" element={<InstitutionDashboard />} />
+            <Route path="/scholarshipProviderZone" element={<ScholarshipProviderZone onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/scholarshipProviderDashboard" element={<ScholarshipProviderDashboard />} />
             <Route path="/adminColleges" element={<AdminCollegesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />

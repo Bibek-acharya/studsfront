@@ -1,60 +1,57 @@
 import React, { useEffect, useState } from "react";
 
-const eventSlides = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1200",
-    alt: "AI Conference Event",
-    badgeIcon: "ph-trend-up",
-    badgeClass: "bg-green-50 border-green-100 text-green-700",
-    badgeIconClass: "text-green-600",
-    badgeText: "Trending",
-    title: "Learn today, lead tomorrow — your AI journey starts here!",
-    date: "Sat,15 Nov",
-    location: "Sallaghari,Bhaktpur",
-    interested: "100+ Interested",
-    avatars: [33, 47, 12],
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1591115765373-5207764f72e7?auto=format&fit=crop&q=80&w=1200",
-    alt: "Tech Workshop",
-    badgeIcon: "ph-star",
-    badgeClass: "bg-purple-50 border-purple-100 text-purple-700",
-    badgeIconClass: "text-purple-600",
-    badgeText: "Featured",
-    title: "Master Machine Learning — Build intelligent systems today!",
-    date: "Sun,23 Nov",
-    location: "Kathmandu, Nepal",
-    interested: "85+ Interested",
-    avatars: [5, 9],
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&q=80&w=1200",
-    alt: "Networking Event",
-    badgeIcon: "ph-users",
-    badgeClass: "bg-blue-50 border-blue-100 text-blue-700",
-    badgeIconClass: "text-blue-600",
-    badgeText: "Networking",
-    title: "Connect with Visionaries — Expand your tech network!",
-    date: "Fri,05 Dec",
-    location: "Patan, Lalitpur",
-    interested: "200+ Interested",
-    avatars: [60, 32, 11],
-  },
-];
+import { apiService } from "../../../services/api";
 
 const EventShowcaseSection = ({ onNavigate }: any) => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
+  const [eventSlides, setEventSlides] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await apiService.getEducationEvents();
+        if (res.success && res.data?.events && res.data.events.length > 0) {
+          setEventSlides(res.data.events);
+        } else {
+          // fallback mock data
+          setEventSlides([
+            {
+              image: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&q=80&w=1200",
+              alt: "AI Conference Event",
+              badgeIcon: "ph-trend-up",
+              badgeClass: "bg-green-50 border-green-100 text-green-700",
+              badgeIconClass: "text-green-600",
+              badgeText: "Trending",
+              title: "Learn today, lead tomorrow — your AI journey starts here!",
+              date: "Sat,15 Nov",
+              location: "Sallaghari,Bhaktpur",
+              interested: "100+ Interested",
+              avatars: [33, 47, 12],
+            }
+          ]);
+        }
+      } catch (err) {
+        console.error("Failed to fetch events:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    if (eventSlides.length === 0) return;
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % eventSlides.length);
     }, 5000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [eventSlides.length]);
+
+  if (loading) return null;
+  if (eventSlides.length === 0) return null;
 
   const previousSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + eventSlides.length) % eventSlides.length);
@@ -122,7 +119,7 @@ const EventShowcaseSection = ({ onNavigate }: any) => {
                   <span className="text-gray-300">|</span>
                   <div className="flex items-center gap-1.5">
                     <i className="ph-fill ph-map-pin text-lg text-gray-900" />
-                    <span>{slide.location}</span>
+                    <span>{slide.location || "Kathmandu"}</span>
                   </div>
                 </div>
 
@@ -137,7 +134,7 @@ const EventShowcaseSection = ({ onNavigate }: any) => {
 
                   <div className="flex items-center gap-3">
                     <div className="flex -space-x-3">
-                      {slide.avatars.map((avatarId) => (
+                      {(slide.avatars || [33, 47, 12]).map((avatarId: number) => (
                         <img
                           key={avatarId}
                           className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm"
@@ -147,7 +144,7 @@ const EventShowcaseSection = ({ onNavigate }: any) => {
                       ))}
                     </div>
                     <span className="text-gray-900 font-medium text-sm">
-                      {slide.interested}
+                      {slide.interested || "100+ Interested"}
                     </span>
                   </div>
                 </div>
