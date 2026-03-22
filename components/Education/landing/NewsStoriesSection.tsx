@@ -1,85 +1,46 @@
 import { useRef } from "react";
+import { ChevronLeft, ChevronRight, Clock } from "lucide-react";
 
 const newsData = [
   {
-    badgeText: "Exam",
-    badgeColorClass: "bg-orange-50 text-orange-600",
-    imgSrc:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    title: "JEE Main 2025: Registration Process Extended.",
-    description:
-      "NTA extends JEE Main 2025 registration deadline due to high volume of applications. NTA extends JEE Main 2025 registration deadline due to high volume of applications.",
-    timeAgo: "2 Days ago",
-  },
-  {
     badgeText: "Admission",
     badgeColorClass: "bg-blue-50 text-blue-600",
-    imgSrc:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    title: "Harvard University Opens Fall Admissions.",
-    description:
-      "The admissions portal for Fall 2025 is now live. Prospective international and domestic students can begin submitting their early action applications.",
-    timeAgo: "5 Days ago",
+    imgSrc: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    title: "KIST College Opens Admissions for BIM & BBA.",
+    description: "KIST College has officially opened its admission portal for the upcoming fall intake. Apply now to secure your spot in top-tier management and IT programs.",
+    timeAgo: "2 Hours ago",
+  },
+  {
+    badgeText: "Exam",
+    badgeColorClass: "bg-orange-50 text-orange-600",
+    imgSrc: "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    title: "St. Xavier's College +2 Entrance Exam Dates.",
+    description: "St. Xavier's College, Maitighar has published the official schedule for the +2 Science and Management entrance examinations. Students are advised to download their admit cards.",
+    timeAgo: "1 Day ago",
   },
   {
     badgeText: "Scholarship",
     badgeColorClass: "bg-purple-50 text-purple-600",
-    imgSrc:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    title: "Global Excellence Scholarship 2025.",
-    description:
-      "Applications are now open for the Global Excellence Scholarship, offering full tuition coverage for outstanding international students pursuing STEM degrees.",
+    imgSrc: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    title: "Kathmandu University Merit Scholarships.",
+    description: "KU announces a new tier of merit-based scholarships for undergraduate engineering and science students securing top ranks in the CBT entrance test.",
+    timeAgo: "3 Days ago",
+  },
+  {
+    badgeText: "Event",
+    badgeColorClass: "bg-blue-50 text-blue-600",
+    imgSrc: "https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    title: "Trinity International College IT Fest 2026.",
+    description: "Join us at Trinity International College for a two-day Tech Fest featuring hackathons, innovative projects, and guest lectures from industry experts.",
     timeAgo: "1 Week ago",
   },
   {
     badgeText: "Notice",
     badgeColorClass: "bg-emerald-50 text-emerald-600",
-    imgSrc:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    title: "Top Universities Announce Open Day 2025.",
-    description:
-      "Join us for an exclusive look into campus life. Several top-tier universities have jointly announced their open day schedules for prospective students.",
+    imgSrc: "https://images.unsplash.com/photo-1498243691581-b145c3f54a5a?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80",
+    title: "IOE Pulchowk Entrance Admit Cards Available.",
+    description: "The Institute of Engineering (IOE), Pulchowk Campus has officially released the admit cards for the BE/BArch entrance examination. Login to your portal to download.",
     timeAgo: "2 Weeks ago",
-  },
-  {
-    badgeText: "Exam",
-    badgeColorClass: "bg-orange-50 text-orange-600",
-    imgSrc:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    title: "NEET UG 2025 Pattern Changes Announced.",
-    description:
-      "The medical entrance examination board has released new guidelines and structural changes for the upcoming NEET UG 2025 examinations.",
-    timeAgo: "3 Weeks ago",
-  },
-  {
-    badgeText: "Notice",
-    badgeColorClass: "bg-emerald-50 text-emerald-600",
-    imgSrc:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    title: "International Student Visa Update.",
-    description:
-      "New policies regarding post-study work visas have been published. Check out how these changes might impact your international study plans.",
-    timeAgo: "1 Month ago",
-  },
-  {
-    badgeText: "Admission",
-    badgeColorClass: "bg-blue-50 text-blue-600",
-    imgSrc:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    title: "Oxford University Interview Dates Released.",
-    description:
-      "Shortlisted candidates for undergraduate programs will receive their interview invitations starting next week via the official university portal.",
-    timeAgo: "45 Days ago",
-  },
-  {
-    badgeText: "Scholarship",
-    badgeColorClass: "bg-purple-50 text-purple-600",
-    imgSrc:
-      "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    title: "Women in Tech Scholarship Winners.",
-    description:
-      "Meet the brilliant minds who secured the 2024 Women in Technology full-ride scholarships across top engineering colleges nationwide.",
-    timeAgo: "60 Days ago",
   },
 ];
 
@@ -88,178 +49,95 @@ const NewsStoriesSection = ({ onNavigate }: any) => {
 
   const scrollByWidth = (direction: -1 | 1) => {
     const container = containerRef.current;
-    if (!container) {
-      return;
-    }
+    if (!container) return;
 
+    const scrollAmount = container.clientWidth * 0.8;
     container.scrollBy({
-      left: container.clientWidth * direction,
+      left: scrollAmount * direction,
       behavior: "smooth",
     });
   };
 
   return (
-    <section className="max-w-[1400px] mx-auto relative">
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-6">
-        <div className="text-left max-w-2xl">
-          {/* <span className="text-indigo-600 font-bold tracking-wider uppercase text-sm mb-3 block">
-            Latest Updates
-          </span> */}
-          <h2 className="text-4xl md:text-[42px] font-extrabold text-slate-900 mb-4 tracking-tight">
-            Latest News &amp; Stories
-          </h2>
-          <p className="text-gray-500 text-[17px] leading-relaxed">
-            Your guide to the best academic opportunities in Nepal and beyond.
-          </p>
+    <section className="mt-24 w-full">
+      <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+        {/* Header & Controls */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+          <div className="max-w-3xl">
+            <h2 className="text-3xl md:text-[40px] font-semibold text-[#111827] mb-3 leading-tight tracking-tight">
+              Latest News & Stories
+            </h2>
+            <p className="text-[17px] text-gray-500">
+              Your guide to the best academic opportunities in Nepal and beyond.
+            </p>
+          </div>
+
+          {/* Navigation Buttons */}
+          <div className="hidden sm:flex items-center gap-3 shrink-0">
+            <button
+              onClick={() => scrollByWidth(-1)}
+              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-100"
+              aria-label="Previous"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-600" />
+            </button>
+            <button
+              onClick={() => scrollByWidth(1)}
+              className="w-12 h-12 rounded-full border border-gray-200 flex items-center justify-center hover:bg-gray-50 hover:shadow-sm transition-all focus:outline-none focus:ring-2 focus:ring-blue-100"
+              aria-label="Next"
+            >
+              <ChevronRight className="w-5 h-5 text-gray-600" />
+            </button>
+          </div>
         </div>
 
-          <div className="flex gap-4 md:pb-2">
-          <button
-            type="button"
-            onClick={() => scrollByWidth(-1)}
-            className="w-[50px] h-[50px] rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-all focus:outline-none shadow-sm"
-            aria-label="Previous"
+        {/* Carousel Container */}
+        <div className="relative w-full overflow-hidden">
+          {/* Track */}
+          <div
+            ref={containerRef}
+            className="carousel-track flex gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar pb-6 pt-2"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={20}
-              height={20}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m15 18-6-6 6-6" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={() => scrollByWidth(1)}
-            className="w-[50px] h-[50px] rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:border-gray-300 hover:bg-gray-50 transition-all focus:outline-none shadow-sm"
-            aria-label="Next"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={20}
-              height={20}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div
-        ref={containerRef}
-        className="flex gap-6 overflow-x-auto snap-x snap-mandatory no-scrollbar mt-10 pb-8 px-2 -mx-2 scroll-smooth"
-      >
-        {newsData.map((card, index) => (
-          <article
-            key={`${card.title}-${index}`}
-            className="flex-none w-[85vw] sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] snap-start bg-white rounded-3xl border border-gray-100 p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_28px_-6px_rgba(0,0,0,0.05),0_8px_12px_-6px_rgba(0,0,0,0.01)] flex flex-col h-auto shadow-[0_2px_12px_rgba(0,0,0,0.03)]"
-          >
-            <div className="mb-3">
-              <span
-                className={`inline-block px-3 py-1 text-[11px] font-bold rounded-full ${card.badgeColorClass}`}
+            {newsData.map((card, index) => (
+              <article
+                key={index}
+                className="min-w-[320px] max-w-[340px] w-full flex-shrink-0 snap-start bg-white rounded-2xl border border-gray-100 p-4 flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
+                onClick={() => onNavigate("newsDetails", card)}
               >
-                {card.badgeText}
-              </span>
-            </div>
-
-            <div className="relative w-full h-40 mb-4 rounded-2xl overflow-hidden shrink-0">
-              <img
-                src={card.imgSrc}
-                alt={card.title}
-                className="object-cover w-full h-full transition-transform duration-700 hover:scale-105"
-                loading="lazy"
-              />
-            </div>
-
-            <div className="flex flex-col flex-grow px-1">
-              <h3 className="text-[17px] leading-snug font-bold text-[#4965F6] mb-2 line-clamp-2">
-                {card.title}
-              </h3>
-
-              <p className="text-gray-500 text-[13px] leading-relaxed mb-6 line-clamp-4 flex-grow">
-                {card.description}
-              </p>
-
-              <div className="flex items-center justify-between text-[12px] font-semibold text-gray-400 mt-auto pt-4 border-t border-gray-50">
-                <div className="flex items-center gap-1.5">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={13}
-                    height={13}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx={12} cy={12} r={10} />
-                    <polyline points="12 6 12 12 16 14" />
-                  </svg>
-                  <span>{card.timeAgo}</span>
+                <div className="mb-3">
+                  <span className={`inline-flex items-center px-3 py-1 text-[11px] font-bold uppercase tracking-wider rounded-full ${card.badgeColorClass}`}>
+                    {card.badgeText}
+                  </span>
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() => onNavigate("newsPage", card)}
-                  className="text-[#4965F6] hover:text-blue-800 flex items-center gap-1 font-bold group transition-colors"
-                >
-                  View Details
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width={14}
-                    height={14}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={3}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="transition-transform group-hover:translate-x-1"
-                  >
-                    <path d="m9 18 6-6-6-6" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
-
-        <div className="text-center mb-12">
-          <button
-            type="button"
-            onClick={() => onNavigate("newsPage")}
-            className="inline-flex items-center gap-1 font-bold text-gray-900 hover:text-gray-600 transition-colors text-sm"
-          >
-            View All
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width={16}
-              height={16}
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="m9 18 6-6-6-6" />
-            </svg>
-          </button>
+                <div className="overflow-hidden rounded-xl mb-4">
+                  <img
+                    src={card.imgSrc}
+                    alt={card.title}
+                    className="w-full h-36 object-cover group-hover:scale-105 transition-transform duration-500"
+                    onError={(e: any) => { e.target.src = "https://placehold.co/600x400/f1f5f9/94a3b8?text=News"; }}
+                  />
+                </div>
+                <h3 className="text-lg font-bold text-[#111827] group-hover:text-blue-600 transition-colors mb-2 leading-snug line-clamp-2">
+                  {card.title}
+                </h3>
+                <p className="text-[14px] text-gray-500 mb-4 flex-grow line-clamp-3 leading-relaxed">
+                  {card.description}
+                </p>
+                <div className="flex items-center justify-between pt-1">
+                  <div className="flex items-center text-gray-400 gap-1.5 text-sm font-medium">
+                    <Clock className="w-4 h-4" />
+                    <span>{card.timeAgo}</span>
+                  </div>
+                  <div className="text-[#111827] font-bold text-sm flex items-center gap-1 group-hover:text-blue-600 transition-colors">
+                    View Details
+                    <ChevronRight className="w-4 h-4 stroke-[3]" />
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
+      </div>
     </section>
   );
 };

@@ -8,11 +8,20 @@ interface FindCollegePageProps {
 }
 
 export interface CollegeFilters {
-  type: string[];
-  location: string[];
   search: string;
-  quick: string[];
   academic: string[];
+  program: string[];
+  course: string[];
+  province: string[];
+  district: string[];
+  type: string[];
+  university: string[];
+  feeMax: number;
+  courseDuration: string[];
+  sortBy: string;
+  // kept for backward compat
+  location: string[];
+  quick: string[];
   stream: string[];
   facilities: string[];
   feeRange: string[];
@@ -21,11 +30,19 @@ export interface CollegeFilters {
 }
 
 export const DEFAULT_COLLEGE_FILTERS: CollegeFilters = {
-  type: [],
-  location: [],
   search: "",
-  quick: [],
   academic: [],
+  program: [],
+  course: [],
+  province: [],
+  district: [],
+  type: [],
+  university: [],
+  feeMax: 2000000,
+  courseDuration: [],
+  sortBy: "popularity",
+  location: [],
+  quick: [],
   stream: [],
   facilities: [],
   feeRange: [],

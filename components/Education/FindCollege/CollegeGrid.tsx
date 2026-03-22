@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { College, apiService } from "../../../services/api";
-import { CollegeFilters } from "./FindCollegePage";
+import { CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "./FindCollegePage";
 
 interface CollegeGridProps {
   filters: CollegeFilters;
@@ -21,12 +21,18 @@ const SEARCHABLE_FILTER_KEYS: Array<keyof CollegeFilters> = [
   "stream",
 ];
 
-const FILTER_KEYS_FOR_TAGS: Array<Exclude<keyof CollegeFilters, "search">> = [
-  "quick",
+const FILTER_KEYS_FOR_TAGS: Array<Exclude<keyof CollegeFilters, "search" | "feeMax" | "sortBy">> = [
   "academic",
+  "program",
+  "course",
+  "province",
+  "district",
+  "type",
+  "university",
+  "courseDuration",
+  "quick",
   "stream",
   "location",
-  "type",
   "facilities",
   "feeRange",
   "duration",
@@ -100,18 +106,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
   };
 
   const resetAll = () => {
-    setFilters({
-      type: [],
-      location: [],
-      search: "",
-      quick: [],
-      academic: [],
-      stream: [],
-      facilities: [],
-      feeRange: [],
-      duration: [],
-      popularity: [],
-    });
+    setFilters(DEFAULT_COLLEGE_FILTERS);
   };
 
   const toggleSavedCollege = (collegeId: number) => {

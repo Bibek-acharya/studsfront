@@ -73,27 +73,19 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
-      <div className="w-full border-b border-gray-200 px-4 py-3">
+      <div className="w-full border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-3">
         <div className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-4">
           <Link
             to="/"
-            className="flex cursor-pointer items-center"
+            className="flex items-center gap-2.5 cursor-pointer shrink-0"
             onClick={() => setActiveMenu(null)}
           >
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 32 32"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              className="mr-2"
-            >
-              <path d="M16 2L29.8564 10V22L16 30L2.14359 22V10L16 2Z" fill="#E8F0FE" />
-              <path d="M16 2L29.8564 10L16 18L2.14359 10L16 2Z" fill="#3B82F6" />
-              <path d="M2.14359 10L16 18V30L2.14359 22V10Z" fill="#2563EB" />
-              <path d="M29.8564 10L16 18V30L29.8564 22V10Z" fill="#1D4ED8" />
-            </svg>
-            <span className="text-[22px] font-bold tracking-tight text-[#1a1a1a]">
+            <img 
+              src="https://lh3.googleusercontent.com/gg-dl/AOI_d_8JQM_NjnLsLepwl71POGjhXPI49DR1EmqPWYQ2vqriU9mSLeqn6VsajlAtx2wLPEV1XCdgdW3cb3N-E4FxfUTnRxei2OwjuM9GtSMaj4H4j_xDCiGespMLtDlh7L_6vEJVIhYtI1OKZItvNIqve2qN7kY3s5Y1NEQYbNHqrBy1AaH7iA=s1024-rj" 
+              alt="Studsphere Logo" 
+              className="w-[30px] h-[30px] sm:w-[38px] sm:h-[38px] object-contain" 
+            />
+            <span className="text-[20px] sm:text-[26px] font-[700] text-[#0e5cf4] tracking-tight leading-none mt-0.5">
               Studsphere
             </span>
           </Link>
@@ -103,10 +95,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           <div className="flex items-center gap-3">
             <button
               onClick={() => onNavigate("writeReview")}
-              className="hidden items-center gap-1.5 rounded-full bg-[#4264f5] px-5 py-2.5 text-[14px] font-medium text-white transition-colors hover:bg-[#3350c7] sm:flex"
+              className="relative overflow-hidden hidden md:flex items-center gap-1.5 sm:gap-2 bg-[#4461f2] hover:bg-blue-700 text-white px-3 sm:px-4 py-2 rounded-md text-[13px] sm:text-[14px] font-medium transition-colors shadow-sm"
             >
-              <i className="fa-solid fa-plus text-sm"></i>
-              Write a Review
+              <i className="fa-solid fa-pen-to-square text-sm relative z-10"></i>
+              <span className="relative z-10">Write a Review</span>
+              <span className="shimmer-effect"></span>
             </button>
 
             <div className="relative menu-anchor">
@@ -116,10 +109,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                     prev === "notification-menu" ? null : "notification-menu",
                   )
                 }
-                className="relative flex h-10 w-10 items-center justify-center rounded-full border border-gray-300 text-gray-600 transition-colors hover:bg-gray-50"
+                className="relative p-1.5 sm:p-2 rounded-full border border-gray-200 text-[#475569] hover:bg-gray-50 transition-colors"
               >
-                <i className="fa-regular fa-bell"></i>
-                <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-red-500"></span>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-[20px] sm:h-[20px]"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+                <span className="absolute -top-1.5 -right-1.5 w-[16px] h-[16px] bg-[#ef4444] border-2 border-white rounded-full flex items-center justify-center text-white text-[9px] font-bold shadow-sm">3</span>
               </button>
 
               {activeMenu === "notification-menu" && (
@@ -163,18 +156,19 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
             <div className="ml-1 flex items-center gap-3 border-l border-gray-200 pl-4">
               {!user ? (
-                <div className="hidden items-center gap-3 sm:flex">
+                <div className="flex items-center ml-1 sm:ml-2 rounded-md overflow-hidden shadow-sm font-medium text-[13px] sm:text-[14px]">
                   <button
                     onClick={() => onNavigate("login")}
-                    className="text-[15px] font-medium text-gray-700 transition-colors hover:text-[#4264f5]"
+                    className="bg-gray-100 text-[#334155] hover:bg-gray-200 px-3 sm:px-4 py-2 transition-colors border-r border-gray-200"
                   >
                     Login
                   </button>
                   <button
                     onClick={() => onNavigate("signup")}
-                    className="rounded-full bg-[#4264f5] px-5 py-2 text-[14px] font-medium text-white shadow-sm transition-colors hover:bg-[#3350c7]"
+                    className="relative overflow-hidden bg-[#4461f2] text-white hover:bg-blue-700 px-3 sm:px-4 py-2 transition-colors"
                   >
-                    Register
+                    <span className="relative z-10">Register</span>
+                    <span className="shimmer-effect"></span>
                   </button>
                 </div>
               ) : (
@@ -262,7 +256,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         </div>
       </div>
 
-      <div className="relative w-full border-b border-gray-200 bg-[#f9fafc] px-4">
+      <div className="relative w-full border-b border-gray-200 bg-[#f9fafc] px-4 sm:px-6 lg:px-8">
         <div className="mx-auto flex h-[46px] w-full max-w-[1400px] items-center gap-4">
           <nav className="no-scrollbar flex h-full min-w-0 flex-1 items-center gap-x-5 overflow-x-auto whitespace-nowrap pr-2 text-[14px] font-medium text-[#212529] md:overflow-visible md:gap-x-7 lg:gap-x-8 lg:text-[15px]">
             <NavItem onClick={() => onNavigate("findCollege")}>Find College</NavItem>
@@ -322,7 +316,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               />
             </DesktopDropdown>
 
-            <NavItem onClick={() => onNavigate("campusForum")}>Campus Feed</NavItem>
+            <NavItem onClick={() => onNavigate("campusForum")}>
+              Campus Feed
+              <div className="relative ml-1.5 mt-0.5 block">
+                <span className="relative overflow-hidden bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white text-[10px] font-bold px-1.5 py-[3px] rounded block tracking-wider leading-none shadow-sm uppercase z-10">
+                  New 
+                  <span className="shimmer-effect"></span>
+                </span>
+              </div>
+            </NavItem>
 
             <DesktopDropdown label="Admission">
               <DropdownCard
@@ -353,12 +355,11 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
             <NavItem onClick={() => onNavigate("rankingsPage")}>
               Rankings
-              <div className="pointer-events-none relative ml-2 flex items-center">
-                <span className="rounded bg-gradient-to-r from-[#e36a95] to-[#f4737a] px-1.5 py-0.5 text-[10px] font-bold tracking-wide text-white shadow-sm">
+              <div className="relative ml-1.5 mt-0.5 block">
+                <span className="relative overflow-hidden bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white text-[10px] font-bold px-1.5 py-[3px] rounded block tracking-wider leading-none shadow-sm uppercase z-10">
                   2082
+                  <span className="shimmer-effect"></span>
                 </span>
-                <i className="fa-solid fa-sparkles sparkle absolute -right-1 -top-2 text-[10px] text-[#e36a95]"></i>
-                <i className="fa-solid fa-sparkles sparkle absolute -right-3 -top-3 text-[8px] text-[#f4737a]" style={{ animationDelay: "0.5s" }}></i>
               </div>
             </NavItem>
 
@@ -395,13 +396,15 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
           </nav>
 
           {!user && (
-            <button
-              onClick={() => onNavigate("institutionZone")}
-              className="hidden h-full shrink-0 items-center gap-2 border-l border-gray-200 pl-6 text-[10px] font-bold uppercase tracking-widest text-[#1a1a1a] transition-colors hover:text-blue-600 lg:flex"
-            >
-              Institution Zone
-              <i className="fa-solid fa-chevron-right text-[10px]"></i>
-            </button>
+            <div className="flex items-center pl-4 sm:pl-6 border-l-2 border-gray-100 py-2 ml-2 sm:ml-4 shrink-0">
+              <button
+                onClick={() => onNavigate("institutionZone")}
+                className="flex items-center gap-1.5 text-[13px] sm:text-[14px] font-semibold text-[#0f172a] hover:text-[#4461f2] transition-colors whitespace-nowrap"
+              >
+                Institution Zone
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+              </button>
+            </div>
           )}
         </div>
       </div>
@@ -486,7 +489,7 @@ const NavItem: React.FC<{ children: React.ReactNode; onClick?: () => void }> = (
 }) => (
   <button
     onClick={onClick}
-    className="flex h-full shrink-0 items-center transition-colors hover:text-[#4264f5]"
+    className="nav-link flex h-full shrink-0 items-center justify-center"
   >
     {children}
   </button>
@@ -498,9 +501,9 @@ const DesktopDropdown: React.FC<{
   alignRight?: boolean;
 }> = ({ label, children, alignRight = false }) => (
   <div className="group relative h-full shrink-0">
-    <div className="flex h-full cursor-pointer items-center transition-colors hover:text-[#4264f5]">
+    <div className="nav-link flex h-full cursor-pointer items-center gap-1">
       <span>{label}</span>
-      <i className="fa-solid fa-chevron-down ml-1 text-[12px] opacity-70 transition-transform duration-200 group-hover:-rotate-180 group-hover:opacity-100"></i>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-[#4461f2] transition-colors"><path d="m6 9 6 6 6-6"/></svg>
     </div>
     <div
       className={`invisible absolute top-[46px] z-50 mt-1 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 ${

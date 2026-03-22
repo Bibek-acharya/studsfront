@@ -1,16 +1,72 @@
 import React, { useState, useEffect } from "react";
 import { apiService } from "../../../services/api";
+import { CheckCircle2, Star, MapPin, Award, MessageSquare, ArrowRightLeft, Heart } from "lucide-react";
+
+interface College {
+  id: string | number;
+  name: string;
+  image_url: string;
+  rating?: string | number;
+  location?: string;
+  affiliation?: string;
+  description?: string;
+  type?: string;
+}
 
 const FeaturedInstitutionsSection = ({ onNavigate }: any) => {
-  const [featuredColleges, setFeaturedColleges] = useState<any[]>([]);
+  const [featuredColleges, setFeaturedColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchColleges = async () => {
       try {
         const res = await apiService.getColleges({ popular: true });
-        if (res.success && res.data?.colleges) {
+        if (res.success && res.data?.colleges && res.data.colleges.length > 0) {
           setFeaturedColleges(res.data.colleges.slice(0, 4));
+        } else {
+          // Prototype data as fallback or primary if API is empty
+          setFeaturedColleges([
+            {
+              id: 1,
+              name: "KIST College & SS",
+              image_url: "https://www.collegenp.com/uploads/2025/02/kist-college-building.jpg",
+              rating: "4.5",
+              type: "Private",
+              location: "Kamalpokhari",
+              description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
+              affiliation: "NEB, Tribhuwan University, Purbanchal University"
+            },
+            {
+              id: 2,
+              name: "KIST College & SS",
+              image_url: "https://kist-edu-np.s3.ap-south-1.amazonaws.com/uploads/album/value/e71ee13b2c733ac02f8709c49f3677c3d0f2d9d01766569944.jpg",
+              rating: "4.5",
+              type: "Private",
+              location: "Kamalpokhari",
+              description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
+              affiliation: "NEB, Tribhuwan University, Purbanchal University"
+            },
+            {
+              id: 3,
+              name: "KIST College & SS",
+              image_url: "https://www.collegenp.com/uploads/2025/02/kist-college-building.jpg",
+              rating: "4.5",
+              type: "Private",
+              location: "Kamalpokhari",
+              description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
+              affiliation: "NEB, Tribhuwan University, Purbanchal University"
+            },
+            {
+              id: 4,
+              name: "KIST College & SS",
+              image_url: "https://www.collegenp.com/uploads/2025/02/kist-college-building.jpg",
+              rating: "4.5",
+              type: "Private",
+              location: "Kamalpokhari",
+              description: "The Institute of Engineering (IOE) entrance exam is tough. Learn the strategies,",
+              affiliation: "NEB, Tribhuwan University, Purbanchal University"
+            }
+          ]);
         }
       } catch (error) {
         console.error("Error fetching colleges:", error);
@@ -21,169 +77,108 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => {
     fetchColleges();
   }, []);
 
-  if (loading) return <div className="w-full max-w-[1400px] mx-auto mt-24 text-center py-20">Loading featured institutions...</div>;
+  if (loading) return null;
 
   return (
-  <div className="w-full max-w-[1400px] mx-auto mt-24">
-    <div className="mb-10 text-center">
-      <h2 className="text-2xl md:text-3xl lg:text-4xl font-extrabold text-gray-900 tracking-tight">
-        Explore Featured Colleges &amp; Universities
-      </h2>
-      <p className="text-gray-500 mt-3 text-sm md:text-base max-w-xl mx-auto">
-        Compare top-rated programs and find the perfect institution for your
-        academic future.
-      </p>
-    </div>
+    <section className="mt-24 w-full">
+      <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+      {/* Header Section */}
+      <div className="text-center mb-12">
+        <h2 className="text-[32px] md:text-[40px] font-bold text-[#111827] mb-3 tracking-tight">
+          Explore Featured Colleges & Universities
+        </h2>
+        <p className="text-[17px] text-[#6b7280] max-w-3xl mx-auto leading-relaxed">
+          Compare top-rated programs and find the perfect institution for your academic future.
+        </p>
+      </div>
 
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {featuredColleges.map((college, index) => (
-        <div
-          key={college.id || index}
-          className="bg-white rounded-[16px] p-2.5 border border-gray-100 shadow-[0_2px_15px_rgb(0,0,0,0.04)] transition-transform hover:-translate-y-1 duration-300 flex flex-col cursor-pointer h-full"
-          onClick={() => onNavigate("collegeDetails", { name: college.name || college.title })}
-        >
-          <div className="relative h-[140px] rounded-[12px] overflow-hidden shrink-0 bg-gray-100">
-            <img
-              src={college.image_url || college.image || "https://images.unsplash.com/photo-1562774053-701939374585?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60"}
-              alt={college.name || college.title}
-              className="w-full h-full object-cover"
-            />
-          </div>
-
-          <div className="px-1.5 pt-3 pb-1 flex-grow flex flex-col">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center gap-1.5 w-full">
-                <h3 className="font-bold text-[15px] text-gray-900 truncate hover:text-[#2563eb] transition-colors">
-                  {college.name || college.title}
+      {/* Cards Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {featuredColleges.map((college) => (
+          <div 
+            key={college.id} 
+            className="bg-white rounded-2xl p-4 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] border border-gray-100 flex flex-col h-full hover:shadow-lg transition-all duration-300 group cursor-pointer"
+            onClick={() => onNavigate("collegeDetails", college)}
+          >
+            {/* Image */}
+            <div className="w-full h-44 rounded-xl overflow-hidden mb-5 bg-gray-50 relative">
+              <img 
+                src={college.image_url} 
+                alt={college.name} 
+                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                onError={(e: any) => { e.target.src='https://placehold.co/600x400/f1f5f9/94a3b8?text=Image+Unavailable' }}
+              />
+            </div>
+            
+            {/* Content */}
+            <div className="flex-grow">
+              {/* Title */}
+              <div className="flex items-center gap-1.5 mb-2.5">
+                <h3 className="text-[18px] font-bold text-[#111827] group-hover:text-[#2563eb] transition-colors line-clamp-1">
+                  {college.name}
                 </h3>
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="#0866FF"
-                  className="w-[14px] h-[14px] shrink-0"
-                >
-                  <path d="M12 2.25c1.357 0 2.573.6 3.397 1.549a4.49 4.49 0 0 1 3.498 1.307 4.491 4.491 0 0 1 1.307 3.497A4.49 4.49 0 0 1 21.75 12a4.49 4.49 0 0 1-1.549 3.397 4.491 4.491 0 0 1-1.307 3.497 4.491 4.491 0 0 1-3.497 1.307A4.49 4.49 0 0 1 12 21.75a4.49 4.49 0 0 1-3.397-1.549 4.49 4.49 0 0 1-3.498-1.306 4.491 4.491 0 0 1-1.307-3.498A4.49 4.49 0 0 1 2.25 12c0-1.357.6-2.573 1.549-3.397a4.49 4.49 0 0 1 1.307-3.497 4.49 4.49 0 0 1 3.497-1.307A4.49 4.49 0 0 1 12 2.25Zm2.39 6.936-3.236 4.53L9.53 12.09a.75.75 0 1 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25a.75.75 0 1 0-1.22-.87Z" />
-                </svg>
+                <CheckCircle2 className="w-5 h-5 text-[#0095F6] fill-current text-white stroke-[2px]" />
               </div>
+
+              {/* Meta Info 1 */}
+              <div className="flex items-center text-[13px] text-[#6b7280] gap-2 mb-2">
+                <div className="flex items-center gap-1">
+                  <Star className="w-3.5 h-3.5 text-[#f59e0b] fill-current" />
+                  <span className="font-bold text-[#374151]">{college.rating || "4.5"}</span>
+                </div>
+                <span className="text-gray-300">|</span>
+                <div className="flex items-center gap-1">
+                  <Award className="w-3.5 h-3.5" />
+                  <span>{college.type || "Private"}</span>
+                </div>
+                <span className="text-gray-300">|</span>
+                <div className="flex items-center gap-1 truncate">
+                  <MapPin className="w-3.5 h-3.5 shrink-0" />
+                  <span className="truncate">{college.location || "Kamalpokhari"}</span>
+                </div>
+              </div>
+
+              {/* Meta Info 2 */}
+              <div className="flex items-start gap-1.5 text-[13px] text-[#6b7280] mb-3.5">
+                < Award className="w-[15px] h-[15px] shrink-0 mt-[2px]" />
+                <span className="leading-relaxed line-clamp-2">{college.affiliation || "NEB, Tribhuwan University, Purbanchal University"}</span>
+              </div>
+
+              {/* Description */}
+              <p className="text-[13.5px] text-[#6b7280] leading-[1.6] line-clamp-2">
+                {college.description || "Top rated institution offering diverse programs with excellent academic standards."}
+              </p>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5 mt-1.5 text-gray-500 text-[11.5px] font-medium leading-none">
-              <div className="flex items-center gap-1 text-gray-700">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                  className="w-3.5 h-3.5 text-[#f59e0b]"
-                >
-                  <path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-                <span className="font-bold">{college.rating || "4.5"}</span>
-              </div>
-              <div className="w-[1px] h-3 bg-gray-300" />
-              <div className="flex items-center gap-1">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-3.5 h-3.5 text-gray-400"
-                >
-                  <rect x="3" y="3" width="7" height="7" />
-                  <rect x="14" y="3" width="7" height="7" />
-                  <rect x="14" y="14" width="7" height="7" />
-                  <rect x="3" y="14" width="7" height="7" />
-                </svg>
-                {college.type || "Private"}
-              </div>
-              <div className="w-[1px] h-3 bg-gray-300" />
-              <div className="flex items-center gap-1 truncate max-w-[90px]">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-3.5 h-3.5 text-gray-400 shrink-0"
-                >
-                  <path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0Z" />
-                  <circle cx="12" cy="10" r="3" />
-                </svg>
-                <span className="truncate">{college.location || "Kathmandu"}</span>
-              </div>
-              <div className="flex items-start gap-1 w-full mt-1.5 text-gray-600">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="w-3.5 h-3.5 shrink-0 mt-[2px] text-gray-400"
-                >
-                  <circle cx="12" cy="8" r="6" />
-                  <path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11" />
-                </svg>
-                <span className="leading-tight truncate">{college.affiliation || college.affiliations || "Tribhuvan University"}</span>
-              </div>
-            </div>
-
-            <p className="text-[11.5px] text-gray-600 mt-3 leading-relaxed line-clamp-2">
-              {college.description || "Top rated college specialized in producing capable human resources. Learn the strategies."}
-            </p>
-
-            <div className="mt-auto pt-4">
-              <div className="border-t-2 border-dotted border-gray-200 mb-2.5" />
-
-              <button className="w-full mb-1.5 bg-[#2563eb] text-white font-bold text-[11.5px] h-[36px] px-1 rounded-[4px] shadow-sm hover:bg-blue-700 transition-colors truncate flex items-center justify-center">
+            {/* Footer / Actions */}
+            <div className="mt-auto pt-1">
+              <div className="border-t border-dotted border-gray-200 my-4"></div>
+              
+              <button className="w-full bg-[#2563eb] hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg text-sm transition-colors mb-2.5">
                 Get counselling
               </button>
-
-              <div className="flex gap-1.5">
-                <button className="flex-1 bg-white border border-gray-200 text-gray-800 font-bold text-[11px] h-[32px] px-1 rounded-[4px] hover:bg-gray-50 transition-colors flex items-center justify-center gap-1">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-3.5 h-3.5 shrink-0 text-gray-500"
-                  >
-                    <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z" />
-                  </svg>
-                  <span className="truncate">Ask a question</span>
+              
+              <div className="flex items-center gap-2">
+                <button className="flex-1 border border-[#e5e7eb] hover:bg-gray-50 text-[#4b5563] font-medium py-2 rounded-lg text-[13px] flex items-center justify-center gap-1.5 transition-colors">
+                  <MessageSquare className="w-[15px] h-[15px]" />
+                  Ask a question
                 </button>
-                <button className="flex-1 bg-yellow-500 text-white font-bold text-[11.5px] h-[32px] px-1 rounded-[4px] shadow-sm hover:bg-yellow-600 transition-colors truncate flex items-center justify-center">
+                <button className="flex-[0.9] bg-[#eab308] hover:bg-yellow-500 text-white font-medium py-2 rounded-lg text-[13px] transition-colors">
                   Compare now
                 </button>
-                <button className="w-[32px] h-[32px] shrink-0 bg-white border border-gray-200 text-gray-600 rounded-[4px] flex items-center justify-center hover:bg-gray-50 transition-colors group">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="w-[14px] h-[14px] group-hover:text-red-500 transition-colors"
-                  >
-                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" />
-                  </svg>
+                <button 
+                  className="flex-none border border-[#e5e7eb] hover:bg-gray-50 text-gray-400 w-9 h-[38px] rounded-lg flex items-center justify-center transition-colors hover:text-red-500 group/heart"
+                  onClick={(e) => { e.stopPropagation(); }}
+                >
+                  <Heart className="w-4 h-4 group-hover/heart:fill-current" />
                 </button>
               </div>
             </div>
           </div>
-        </div>
-      ))}
-    </div>
-  </div>
+        ))}
+      </div>
+      </div>
+    </section>
   );
 };
 

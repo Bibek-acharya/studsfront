@@ -1114,6 +1114,58 @@ class ApiService {
     localStorage.removeItem("scholarshipProviderToken");
     localStorage.removeItem("scholarshipProviderUser");
   }
+
+  // --- Institution Auth ---
+  async institutionLogin(data: { email: string; password: string }): Promise<AuthResponse> {
+    return this.request<AuthResponse>({
+      method: "POST",
+      url: "/institutions/auth/login",
+      data,
+    });
+  }
+
+  async institutionRegister(data: {
+    institution_name: string;
+    registration_number: string;
+    email: string;
+    password: string;
+  }): Promise<AuthResponse> {
+    return this.request<AuthResponse>({
+      method: "POST",
+      url: "/institutions/auth/register",
+      data,
+    });
+  }
+
+  setInstitutionToken(token: string) {
+    localStorage.setItem("institutionToken", token);
+  }
+
+  getInstitutionToken(): string | null {
+    return localStorage.getItem("institutionToken");
+  }
+
+  removeInstitutionToken() {
+    localStorage.removeItem("institutionToken");
+    localStorage.removeItem("institutionUser");
+  }
+
+  setInstitutionUser(user: any) {
+    localStorage.setItem("institutionUser", JSON.stringify(user));
+  }
+
+  getInstitutionUser() {
+    const user = localStorage.getItem("institutionUser");
+    return user ? JSON.parse(user) : null;
+  }
+
+  isAuthenticatedInstitution(): boolean {
+    return !!this.getInstitutionToken();
+  }
+
+  institutionLogout() {
+    this.removeInstitutionToken();
+  }
 }
 
 export const apiService = new ApiService(API_BASE_URL);

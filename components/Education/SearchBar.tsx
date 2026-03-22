@@ -127,8 +127,8 @@ export const SearchBar: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 max-w-3xl mx-10 hidden md:block">
-      <div className="relative flex items-center w-full bg-white border border-gray-300 rounded-full focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600 transition-all h-[46px] overflow-visible">
+    <div className="flex-1 max-w-[640px] mx-4 md:mx-10 hidden md:block">
+      <div className="relative flex items-center w-full bg-white border border-gray-300 rounded-full focus-within:border-[#4461f2] focus-within:ring-1 focus-within:ring-[#4461f2] transition-all h-[40px] sm:h-[46px] overflow-visible group">
         
         {/* Location Dropdown Container */}
         <div className="relative h-full flex-shrink-0" ref={locContainerRef}>
@@ -137,16 +137,17 @@ export const SearchBar: React.FC = () => {
               setIsLocationOpen(!isLocationOpen);
               setIsSearchOpen(false);
             }} 
-            className="flex items-center gap-2 pl-4 pr-3 text-gray-600 hover:text-gray-900 transition-colors h-full bg-gray-50/30 hover:bg-gray-50 outline-none rounded-l-full"
+            className="flex items-center gap-2 pl-4 pr-3 text-[#334155] hover:bg-gray-50 transition-colors h-full bg-transparent outline-none rounded-l-full font-medium"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-[#64748b]">
               <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path>
               <circle cx="12" cy="10" r="3"></circle>
             </svg>
-            <span className={`text-[15px] whitespace-nowrap font-medium max-w-[140px] truncate ${locationText !== 'Detect Location' ? 'text-gray-900' : ''}`}>
+            <span className={`text-[15px] whitespace-nowrap max-w-[140px] truncate ${locationText !== 'Detect Location' ? 'text-gray-900' : ''}`}>
               {locationText}
             </span>
           </button>
+
 
           {isLocationOpen && (
             <div className="absolute top-[calc(100%+8px)] left-0 w-[340px] bg-white rounded-lg shadow-xl border border-gray-100 z-[200] py-2 max-h-[420px] overflow-y-auto custom-scrollbar">
@@ -181,13 +182,11 @@ export const SearchBar: React.FC = () => {
         <div className="w-[1px] h-6 bg-gray-200"></div>
 
         {/* Search Input Area */}
-        <div className="relative flex-1 flex items-center h-full px-3" ref={searchContainerRef}>
-          <div className="text-gray-400 flex-shrink-0 mr-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
+        <div className="relative flex-1 flex items-center h-full pl-3 sm:pl-3 pr-4" ref={searchContainerRef}>
+          <div className="text-gray-400 group-focus-within:text-[#4461f2] transition-colors flex-shrink-0 mr-2">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-[18px] sm:h-[18px] transition-colors"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
           </div>
+
 
           <input 
             type="text" 
