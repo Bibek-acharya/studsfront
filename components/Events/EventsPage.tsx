@@ -66,7 +66,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
   }, [activeFilter, allEvents, sortBy]);
 
   return (
-    <div className="bg-white text-gray-900 antialiased min-h-screen max-w-[1400px] mx-auto px-4 py-8">
+    <div className="bg-white text-gray-900 antialiased min-h-screen max-w-[1400px] mx-auto py-8">
       <div className=" mx-auto py-8">
         <section className="mb-10">
           <h2 className="text-xl font-bold mb-4">Browse by category</h2>
@@ -123,7 +123,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
 
         <section>
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-            <h2 className="text-xl font-bold">Latest News & stories</h2>
+            <h2 className="text-xl font-bold">Latest Events</h2>
             <div className="flex items-center text-sm text-gray-600">
               <span className="mr-3 font-semibold">Sort by:</span>
               <select
@@ -140,7 +140,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {visibleEvents.map((event) => {
               const mapped = mapCategory(event.category);
               return (

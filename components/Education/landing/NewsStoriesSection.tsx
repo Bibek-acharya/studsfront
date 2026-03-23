@@ -60,7 +60,7 @@ const NewsStoriesSection = ({ onNavigate }: any) => {
 
   return (
     <section className="mt-24 w-full">
-      <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto w-full">
         {/* Header & Controls */}
         <div className="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
           <div className="max-w-3xl">
@@ -101,7 +101,7 @@ const NewsStoriesSection = ({ onNavigate }: any) => {
             {newsData.map((card, index) => (
               <article
                 key={index}
-                className="min-w-[320px] max-w-[340px] w-full flex-shrink-0 snap-start bg-white rounded-2xl border border-gray-100 p-4 flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
+                className="min-w-[320px] max-w-[340px] w-full flex-shrink-0 snap-start bg-white rounded-2xl border border-gray-100 flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
                 onClick={() => onNavigate("newsDetails", card)}
               >
                 <div className="mb-3">

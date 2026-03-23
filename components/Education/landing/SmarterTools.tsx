@@ -1,6 +1,6 @@
 const SmarterToolsSection = ({ onNavigate }: any) => (
 <section className="w-full py-12 md:py-16">
-  <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+  <div className="max-w-[1400px] mx-auto">
   <div className="text-center mb-10 md:mb-16">
     <h2 className="text-[28px] md:text-[40px] font-bold text-[#0f172a] mb-4 tracking-tight">
       Smarter Tools, Greater Success

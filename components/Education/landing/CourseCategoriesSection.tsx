@@ -35,7 +35,7 @@ const CourseCategoriesSection = ({ onNavigate }: any) => {
 
   return (
     <section className="w-full py-12 md:py-16">
-      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
         <div>
@@ -67,7 +67,7 @@ const CourseCategoriesSection = ({ onNavigate }: any) => {
       </div>
 
       {/* Carousel Container */}
-      <div className="relative -mx-4 sm:mx-0 px-4 sm:px-0">
+      <div className="relative -mx-4 sm:mx-0 sm:px-0">
         <div
           ref={containerRef}
           className="flex gap-5 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-4 pt-1"
@@ -75,7 +75,7 @@ const CourseCategoriesSection = ({ onNavigate }: any) => {
           {courseCategories.map((course, idx) => (
             <div
               key={idx}
-              className="course-category-card flex-none w-[320px] bg-white rounded-xl p-6 snap-start group cursor-pointer border border-transparent hover:border-blue-100 hover:shadow-md transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
+              className="course-category-card flex-none w-[320px] bg-white rounded-xl snap-start group cursor-pointer border border-transparent hover:border-blue-100 hover:shadow-md transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
             >
               <div className="flex justify-between items-start mb-1">
                 <h3 className="text-[19px] font-semibold text-gray-900 group-hover:text-blue-600 transition-all duration-300 tracking-tight">

@@ -63,7 +63,7 @@ const EventShowcaseSection = ({ onNavigate }: any) => {
 
   return (
     <section className="w-full py-10 md:py-14 my-4 relative">
-      <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto w-full">
       <div className="relative w-full mx-auto">
         <div className="overflow-hidden w-full relative">
           <div
@@ -74,7 +74,7 @@ const EventShowcaseSection = ({ onNavigate }: any) => {
             {eventSlides.map((slide, index) => (
               <div
                 key={index}
-                className="w-full shrink-0 flex flex-col lg:flex-row items-center gap-10 lg:gap-16 px-6 md:px-12"
+                className="w-full shrink-0 flex flex-col lg:flex-row items-center gap-10 lg:gap-16 px-2 md:px-1"
               >
                 <div className="w-full lg:w-[55%]">
                   <img

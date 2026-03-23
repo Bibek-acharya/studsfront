@@ -84,7 +84,7 @@ const ContactPage: React.FC = () => {
       </style>
 
       <div className="min-h-screen bg-white text-gray-800 antialiased">
-        <header className="px-4 py-12 text-center sm:px-6 md:py-16 lg:px-8">
+        <header className="w-full py-12 text-center md:py-16">
           <h1 className="mb-3 text-3xl font-bold text-black md:text-4xl">
             Contact Us
           </h1>

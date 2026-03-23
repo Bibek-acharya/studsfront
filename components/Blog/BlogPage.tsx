@@ -65,7 +65,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="bg-white text-gray-800 antialiased pb-16 min-h-screen">
-      <div className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-[1400px] mx-auto py-8">
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-gray-900 mb-5">Browse by category</h2>
           <div className="flex gap-3 overflow-x-auto pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -152,7 +152,7 @@ const BlogPage: React.FC<BlogPageProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredBlogs.map((blog) => {
               const mappedCategory = categoryFromBlog(blog.category);
               return (

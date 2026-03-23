@@ -2,8 +2,8 @@ import React from "react";
 
 const RecommendedForYouSection = ({ onNavigate }: any) => {
   return (
-    <section className="mt-24 w-full">
-      <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+    <section className="mt-24 w-full mb-12">
+      <div className="max-w-[1400px] mx-auto w-full">
         {/* Banner Container */}
         <div className="bg-white border border-gray-200 rounded-[2rem] shadow-sm p-6 md:p-8 lg:p-10 flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
           {/* Left Column: Illustration */}

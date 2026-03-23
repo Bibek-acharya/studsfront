@@ -141,7 +141,7 @@ const AdCard: React.FC<{ slides: AdSlide[]; carouselIndex: number }> = ({ slides
 const AdWidgetsSection = () => {
   return (
     <section className="mt-24 w-full">
-      <div className="max-w-[1400px] mx-auto w-full px-4 sm:px-6 lg:px-8">
+      <div className="max-w-[1400px] mx-auto w-full">
         {/* Grid layout for the two ad cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {adCarousels.map((slides, index) => (

@@ -73,7 +73,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         isVisible ? "translate-y-0" : "-translate-y-full"
       }`}
     >
-      <div className="w-full border-b border-gray-200 px-4 sm:px-6 lg:px-8 py-3">
+      <div className="w-full px-4 sm:px-6 lg:px-8 py-3">
         <div className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-4">
           <Link
             to="/"
@@ -256,7 +256,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         </div>
       </div>
 
-      <div className="relative w-full border-b border-gray-200 bg-[#f9fafc] px-4 sm:px-6 lg:px-8">
+      <div className="relative w-full border-b border-gray-200 px-4 sm:px-6 lg:px-8">
         <div className="mx-auto flex h-[46px] w-full max-w-[1400px] items-center gap-4">
           <nav className="no-scrollbar flex h-full min-w-0 flex-1 items-center gap-x-5 overflow-x-auto whitespace-nowrap pr-2 text-[14px] font-medium text-[#212529] md:overflow-visible md:gap-x-7 lg:gap-x-8 lg:text-[15px]">
             <NavItem onClick={() => onNavigate("findCollege")}>Find College</NavItem>

@@ -68,7 +68,7 @@ const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
   }, [activeCategory, allNews, sortBy]);
 
   return (
-    <main className="max-w-[1200px] mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-14 bg-gray-50 min-h-screen text-slate-800">
+    <main className="max-w-[1400px] mx-auto py-10 space-y-14 bg-gray-50 min-h-screen text-slate-800">
       <section>
         <h2 className="text-2xl font-bold text-slate-900 mb-5">Browse by category</h2>
         <div className="flex items-center gap-3 overflow-x-auto pb-4 -mx-4 px-4 sm:mx-0 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
@@ -155,7 +155,7 @@ const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        <div id="news-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div id="news-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {processedNews.map((item) => {
             const uiCategory = mapNewsToUiCategory(item);
 
