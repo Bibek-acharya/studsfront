@@ -101,7 +101,7 @@ const NewsStoriesSection = ({ onNavigate }: any) => {
             {newsData.map((card, index) => (
               <article
                 key={index}
-                className="min-w-[320px] max-w-[340px] w-full flex-shrink-0 snap-start bg-white rounded-2xl border border-gray-100 flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group cursor-pointer"
+                className="min-w-[320px] max-w-[340px] w-full flex-shrink-0 snap-start bg-white rounded-2xl border border-gray-100 flex flex-col hover:shadow-lg hover:-translate-y-1 transition-all duration-300 group cursor-pointer p-4"
                 onClick={() => onNavigate("newsDetails", card)}
               >
                 <div className="mb-3">

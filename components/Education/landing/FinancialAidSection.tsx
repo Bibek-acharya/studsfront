@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { apiService } from "../../../services/api";
-import { Bookmark, MapPin, GraduationCap, Calendar, Building, CheckCircle2 } from "lucide-react";
+import { Bookmark, MapPin, GraduationCap, Calendar, Building, CheckCircle2, BadgeCheckIcon } from "lucide-react";
 
 const FinancialAidSection = ({ onNavigate }: any) => {
   const [scholarships, setScholarships] = useState<any[]>([]);
@@ -77,7 +77,7 @@ const FinancialAidSection = ({ onNavigate }: any) => {
               <div className="flex items-center text-[13.5px] text-[#64748b] mb-5">
                 <Building className="w-4 h-4 mr-1.5 shrink-0" />
                 <span className="truncate">{scholarship.provider || "Tribhuvan University, Nepal"}</span>
-                <CheckCircle2 className="w-[15px] h-[15px] text-[#2563eb] fill-current ml-1" />
+                <BadgeCheckIcon className="w-[15px] h-[15px] text-white fill-blue-500 ml-1" />
               </div>
 
               {/* Details Box */}

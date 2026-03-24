@@ -88,6 +88,9 @@ const ScholarshipFinderToolPage = lazy(
 const CollegeRecommenderToolPage = lazy(
   () => import("./components/Education/Tools/CollegeRecommenderToolPage"),
 );
+const CollegeQuizPage = lazy(
+  () => import("./components/Education/Tools/CollegeQuizPage"),
+);
 const ScholarshipDetailsPage = lazy(
   () => import("./components/Education/Scholarships/ScholarshipDetailsPage"),
 );
@@ -197,6 +200,7 @@ const App: React.FC = () => {
             <Route path="/scholarshipFinder" element={<ScholarshipFinderPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/scholarshipFinderTool" element={<ScholarshipFinderToolPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/collegeRecommenderTool" element={<CollegeRecommenderToolPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route path="/collegeQuiz" element={<CollegeQuizPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/scholarshipDetails" element={<ScholarshipDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/scholarshipHubDetails" element={<ScholarshipHubDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/scholarshipCategory" element={<ScholarshipCategoryPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />

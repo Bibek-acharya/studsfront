@@ -473,7 +473,7 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
       title: "Placement Information",
       rows: [
         {
-          label: "Hiring Companies",
+          label: "MoU Companies",
           left: "F1Soft, Leapfrog, Nabil Bank",
           right: "Local IT Firms, Commercial Banks",
         },

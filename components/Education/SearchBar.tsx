@@ -78,52 +78,74 @@ export const SearchBar: React.FC = () => {
     }
   };
 
-  const autoDetectLocation = () => {
-    if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser");
-      return;
-    }
-
+  const autoDetectLocation = async () => {
     setLocationText('Detecting...');
-    
-    // Explicitly ask for high accuracy to get precise location
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        try {
-          const { latitude, longitude } = position.coords;
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`);
-          const data = await response.json();
+
+    const fetchLocation = async (lat?: number, lon?: number) => {
+      try {
+        if (lat && lon) {
+          // Precise location via Nominatim OpenStreetMap
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=16&addressdetails=1`);
           
-          if (data && data.address) {
-            const addr = data.address;
-            const localLevel = addr.suburb || addr.neighbourhood || addr.village || addr.town;
-            const cityLevel = addr.city || addr.county || addr.state_district;
-            
-            if (localLevel && cityLevel) {
-              setLocationText(`${localLevel}, ${cityLevel}`);
-            } else if (cityLevel) {
-              setLocationText(cityLevel);
-            } else if (localLevel) {
-              setLocationText(localLevel);
-            } else {
-              setLocationText("Location Found");
+          if (response.ok) {
+            const data = await response.json();
+            if (data && data.address) {
+              const addr = data.address;
+              // Pluck the most precise neighborhood-level data it can find
+              const precise = addr.neighbourhood || addr.suburb || addr.quarter || addr.village || addr.road || addr.town;
+              const city = addr.city || addr.municipality || addr.county || addr.state_district;
+              
+              if (precise && city && precise !== city) {
+                setLocationText(`${precise}, ${city}`);
+              } else if (precise) {
+                setLocationText(precise);
+              } else if (city) {
+                setLocationText(city);
+              } else {
+                setLocationText(data.name || "Location Found");
+              }
+              setIsLocationOpen(false);
+              return; // Exit early if we successfully got precise location
             }
+          }
+        }
+        
+        // Fallback: IP-based lookup if no GPS or Nominatim failed
+        const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en`);
+        const data = await response.json();
+        
+        if (data) {
+          const locality = data.locality || data.city;
+          const city = data.city || data.principalSubdivision;
+          
+          if (locality && city && locality !== city) {
+            setLocationText(`${locality}, ${city}`);
+          } else if (city) {
+            setLocationText(city);
+          } else if (data.countryName) {
+            setLocationText(data.countryName);
           } else {
             setLocationText("Location Found");
           }
-        } catch (error) {
-          console.error("Error detecting location:", error);
-          setLocationText("Kathmandu, Nepal"); // Error fallback
+        } else {
+          setLocationText("Kathmandu, Bagmati");
         }
-        setIsLocationOpen(false);
-      },
-      (error) => {
-        console.error("Geolocation error:", error);
-        alert("Please enable location permissions in your browser to proceed.");
-        setLocationText("Detect Location");
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-    );
+      } catch (error) {
+        console.error("Error detecting location:", error);
+        setLocationText("Kathmandu, Bagmati"); // Error fallback
+      }
+      setIsLocationOpen(false);
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => fetchLocation(position.coords.latitude, position.coords.longitude),
+        () => fetchLocation(), // If blocked/error, fallback to IP
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    } else {
+      await fetchLocation(); // Fallback to IP
+    }
   };
 
   return (

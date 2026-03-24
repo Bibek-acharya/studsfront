@@ -1,5 +1,5 @@
 import React from "react";
-import { BadgeCheck, MapPin, Award, ExternalLink, Heart, Clock, GraduationCap, Users, Bell, Send, PlayCircle, Flame, Monitor, Globe, TrendingUp, Building } from "lucide-react";
+import { BadgeCheck, MapPin, Award, ExternalLink, Heart, Clock, GraduationCap, Users, Bell, Send, PlayCircle, Flame, Monitor, Globe, TrendingUp, Building, BadgeCheckIcon } from "lucide-react";
 
 const exams = [
   {
@@ -102,7 +102,7 @@ const ExamAnnouncementsSection = ({ onNavigate }: any) => {
                   <div className="flex flex-col min-w-0">
                     <h3 className="text-[15px] font-bold text-[#111827] flex items-center gap-1.5 truncate">
                       {exam.institution}
-                      {exam.verified && <BadgeCheck className="w-4 h-4 text-[#0095F6] fill-current text-white" />}
+                      {exam.verified && <BadgeCheckIcon className="w-[15px] h-[15px] text-white fill-blue-500 ml-1" />}
                     </h3>
                     <div className="flex items-center gap-2 text-[11px] text-[#6b7280] mt-0.5">
                       <span className="flex items-center gap-1"><MapPin className="w-3 h-3" /> {exam.location}</span>

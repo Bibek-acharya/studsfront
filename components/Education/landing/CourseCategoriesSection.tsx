@@ -75,7 +75,7 @@ const CourseCategoriesSection = ({ onNavigate }: any) => {
           {courseCategories.map((course, idx) => (
             <div
               key={idx}
-              className="course-category-card flex-none w-[320px] bg-white rounded-xl snap-start group cursor-pointer border border-transparent hover:border-blue-100 hover:shadow-md transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.02)]"
+              className="course-category-card flex-none w-[320px] bg-white rounded-xl snap-start group cursor-pointer border border-transparent hover:border-blue-100 hover:shadow-md transition-all duration-300 shadow-[0_2px_10px_rgba(0,0,0,0.02)] p-4"
             >
               <div className="flex justify-between items-start mb-1">
                 <h3 className="text-[19px] font-semibold text-gray-900 group-hover:text-blue-600 transition-all duration-300 tracking-tight">

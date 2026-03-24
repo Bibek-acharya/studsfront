@@ -40,10 +40,10 @@ const RecommendedForYouSection = ({ onNavigate }: any) => {
               </button>
 
               <button
-                onClick={() => onNavigate("findCollegeNearMe")}
+                onClick={() => onNavigate("collegeRecommenderTool")}
                 className="bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-medium py-3 px-6 rounded-xl w-full text-base md:text-lg shadow-sm hover:shadow-md active:scale-[0.98] transition-all"
               >
-                Find +2 College Near You
+                Try College Recommender
               </button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { apiService } from "../../../services/api";
-import { CheckCircle2, Star, MapPin, Award, MessageSquare, ArrowRightLeft, Heart } from "lucide-react";
+import { CheckCircle2, Star, MapPin, Award, MessageSquare, ArrowRightLeft, Heart, BadgeCheckIcon } from "lucide-react";
 
 interface College {
   id: string | number;
@@ -117,7 +117,7 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => {
                 <h3 className="text-[18px] font-bold text-[#111827] group-hover:text-[#2563eb] transition-colors line-clamp-1">
                   {college.name}
                 </h3>
-                <CheckCircle2 className="w-5 h-5 text-[#0095F6] fill-current text-white stroke-[2px]" />
+                <BadgeCheckIcon className="w-[15px] h-[15px] text-white fill-blue-500 ml-1" />
               </div>
 
               {/* Meta Info 1 */}
