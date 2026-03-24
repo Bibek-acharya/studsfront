@@ -338,10 +338,94 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
   const handleLocate = () => {
     if (locating) return;
     setLocating(true);
-    navigator.geolocation.getCurrentPosition(
-      () => setLocating(false),
-      () => setLocating(false)
-    );
+
+    const resolveLocation = async (lat?: number, lon?: number) => {
+      try {
+        let cityStr = "";
+
+        // 1. Try precise GPS via OpenStreetMap Nominatim (zoom=10 for city/district level)
+        if (lat && lon) {
+          const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.address) {
+              cityStr = data.address.county || data.address.city || data.address.state_district || "";
+            }
+          }
+        }
+
+        // 2. Try generic IP-based location if GPS failed or permission denied
+        if (!cityStr) {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?localityLanguage=en`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data) {
+              cityStr = data.city || data.principalSubdivision || "";
+            }
+          }
+        }
+
+        // 3. Map detected location to Province/District filters
+        if (cityStr) {
+          const normalizedSearch = cityStr.toLowerCase();
+          let foundProvId = "";
+          let foundDistId = "";
+          
+          // Match Province
+          for (const prov of PROVINCES) {
+            if (normalizedSearch.includes(prov.label.toLowerCase())) {
+              foundProvId = prov.id;
+            }
+          }
+
+          // Match District
+          for (const [provKey, districts] of Object.entries(DISTRICTS)) {
+            for (const dist of districts) {
+              const distLower = dist.label.toLowerCase();
+              if (normalizedSearch.includes(distLower) || distLower.includes(normalizedSearch)) {
+                foundDistId = dist.id;
+                foundProvId = provKey; // Auto-select parent province
+              }
+            }
+          }
+
+          setFilters((prev) => {
+            if (!foundProvId && !foundDistId) {
+              return { ...prev, search: cityStr };
+            }
+
+            const nextProv = new Set(prev.province);
+            const nextDist = new Set(prev.district);
+
+            if (foundProvId) nextProv.add(foundProvId);
+            if (foundDistId) nextDist.add(foundDistId);
+
+            return {
+              ...prev,
+              province: Array.from(nextProv),
+              district: Array.from(nextDist),
+            };
+          });
+        } else {
+          alert("Could not detect your district. Please select it manually.");
+        }
+      } catch(e) {
+        console.error(e);
+        alert("Could not detect location.");
+      } finally {
+        setLocating(false);
+      }
+    };
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => resolveLocation(pos.coords.latitude, pos.coords.longitude),
+        () => resolveLocation(), // Fallback to IP if denied
+        { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
+      );
+    } else {
+      resolveLocation(); // Fallback instantly if geolocation unavailable
+    }
   };
 
   const filteredProvinces = provinceSearch

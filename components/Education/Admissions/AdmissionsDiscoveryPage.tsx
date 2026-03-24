@@ -5,7 +5,7 @@ interface AdmissionsDiscoveryPageProps {
   onNavigate: (view: any, data?: any) => void;
 }
 
-type AdmissionLevel = "high-school" | "bachelor" | "master";
+type AdmissionLevel = "high-school" | "alevel" | "diploma" | "bachelor" | "master";
 
 interface AdmissionCard {
   id: string;
@@ -76,6 +76,66 @@ const cardsByLevel: Record<AdmissionLevel, AdmissionCard[]> = {
       featured: true,
       affiliation: "NEB",
       programs: ["+2 Science", "+2 Management"],
+      imageUrls: [
+        "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=900&q=80",
+      ],
+    },
+  ],
+  alevel: [
+    {
+      id: "al-british",
+      name: "The British College",
+      rating: 4.6,
+      type: "Private",
+      location: "Thapathali",
+      website: "www.thebritishcollege.edu.np",
+      featured: true,
+      affiliation: "Cambridge Assessment",
+      programs: ["A-Level Science", "A-Level Non-Science"],
+      imageUrls: [
+        "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?auto=format&fit=crop&w=900&q=80",
+      ],
+    },
+    {
+      id: "al-rath",
+      name: "Rato Bangala School",
+      rating: 4.8,
+      type: "Private",
+      location: "Patan",
+      website: "www.ratobangala.edu.np",
+      featured: true,
+      affiliation: "Cambridge Assessment",
+      programs: ["A-Level Science", "A-Level Arts"],
+      imageUrls: [
+        "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=900&q=80",
+      ],
+    },
+  ],
+  diploma: [
+    {
+      id: "dip-ctevt",
+      name: "Kathmandu Institute of Technology",
+      rating: 4.3,
+      type: "Private",
+      location: "Kathmandu",
+      website: "www.kit.edu.np",
+      featured: true,
+      affiliation: "CTEVT",
+      programs: ["Diploma in Civil", "Diploma in Computer"],
+      imageUrls: [
+        "https://images.unsplash.com/photo-1519452575417-564c1401ecc0?auto=format&fit=crop&w=900&q=80",
+      ],
+    },
+    {
+      id: "dip-balaju",
+      name: "Balaju School of Engineering and Technology",
+      rating: 4.5,
+      type: "Public",
+      location: "Balaju",
+      website: "www.bset.edu.np",
+      featured: true,
+      affiliation: "CTEVT",
+      programs: ["Diploma in Mechanical", "Diploma in Electrical"],
       imageUrls: [
         "https://images.unsplash.com/photo-1571260899304-425eee4c7efc?auto=format&fit=crop&w=900&q=80",
       ],
@@ -213,6 +273,16 @@ const levelMeta: Record<AdmissionLevel, { title: string; subtitle: string; searc
     subtitle: "(+2 Programs)",
     searchPlaceholder: "Search +2 colleges...",
   },
+  alevel: {
+    title: "Admission Ongoing",
+    subtitle: "(A Level Programs)",
+    searchPlaceholder: "Search A-Level colleges...",
+  },
+  diploma: {
+    title: "Admission Ongoing",
+    subtitle: "(Diploma/CTEVT Programs)",
+    searchPlaceholder: "Search CTEVT colleges...",
+  },
   bachelor: {
     title: "Admission Ongoing",
     subtitle: "(Bachelor Programs)",
@@ -230,7 +300,7 @@ const AdmissionsDiscoveryPage: React.FC<AdmissionsDiscoveryPageProps> = ({ onNav
 
   const getLevelFromState = (state: unknown): AdmissionLevel => {
     const level = (state as { level?: AdmissionLevel } | null)?.level;
-    if (level === "high-school" || level === "bachelor" || level === "master") {
+    if (level === "high-school" || level === "alevel" || level === "diploma" || level === "bachelor" || level === "master") {
       return level;
     }
     return "high-school";

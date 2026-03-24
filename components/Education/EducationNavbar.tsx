@@ -335,6 +335,13 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 onClick={() => onNavigate("admissionsDiscovery", { level: "high-school" })}
               />
               <DropdownCard
+                icon="fa-cubes"
+                color="text-orange-500"
+                title="A-Level"
+                desc="Discover internationally recognized Cambridge A-Level degrees."
+                onClick={() => onNavigate("admissionsDiscovery", { level: "alevel" })}
+              />
+              <DropdownCard
                 icon="fa-user-graduate"
                 color="text-purple-600"
                 title="Bachelor Degrees"
@@ -347,6 +354,13 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 title="Master Degrees"
                 desc="Advance your career with postgraduate degrees like MBA and M.Tech."
                 onClick={() => onNavigate("admissionsDiscovery", { level: "master" })}
+              />
+              <DropdownCard
+                icon="fa-wrench"
+                color="text-emerald-600"
+                title="Diploma / CTEVT"
+                desc="Explore skills-oriented technical and vocational education."
+                onClick={() => onNavigate("admissionsDiscovery", { level: "diploma" })}
               />
             </DesktopDropdown>
 
@@ -437,8 +451,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             <MobileItem label="Scholarships" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "scholarshipMain")} icon="fa-hand-holding-dollar" />
             <MobileItem label="Write Review" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "writeReview")} icon="fa-pen-to-square" />
             <MobileItem label="High School (+2)" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "admissionsDiscovery", { level: "high-school" })} icon="fa-school" />
+            <MobileItem label="A-Level" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "admissionsDiscovery", { level: "alevel" })} icon="fa-cubes" />
             <MobileItem label="Bachelors" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "admissionsDiscovery", { level: "bachelor" })} icon="fa-user-graduate" />
             <MobileItem label="Masters" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "admissionsDiscovery", { level: "master" })} icon="fa-book-open" />
+            <MobileItem label="Diploma/CTEVT" onClick={() => routeAndClose(onNavigate, setIsMobileOpen, "admissionsDiscovery", { level: "diploma" })} icon="fa-wrench" />
           </MobileSection>
 
           <MobileSection title="Tools">
