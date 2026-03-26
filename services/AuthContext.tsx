@@ -1,6 +1,12 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { apiService } from './api';
-import { useLoginMutation, useRegisterMutation } from './query-hooks';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
+import { apiService } from "./api";
+import { useLoginMutation, useRegisterMutation } from "./query-hooks";
 
 interface User {
   id: number;
@@ -17,8 +23,15 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, firstName: string, lastName: string, role?: string, educationLevel?: string) => Promise<{ requires_otp?: boolean, email?: string }>;
+  login: (email: string, password: string) => Promise<User>;
+  register: (
+    email: string,
+    password: string,
+    firstName: string,
+    lastName: string,
+    role?: string,
+    educationLevel?: string,
+  ) => Promise<{ requires_otp?: boolean; email?: string }>;
   verifyOTP: (email: string, otp: string) => Promise<void>;
   logout: () => void;
   setUser: (user: User | null) => void;
@@ -26,7 +39,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isBootstrapping, setIsBootstrapping] = useState(true);
@@ -54,8 +69,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       apiService.setUser(response.data.user);
       setToken(response.data.token);
       setUser(response.data.user);
+      return response.data.user;
     } else {
-      throw new Error('Invalid response from server');
+      throw new Error("Invalid response from server");
     }
   };
 
@@ -65,7 +81,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     firstName: string,
     lastName: string,
     role?: string,
-    educationLevel?: string
+    educationLevel?: string,
   ) => {
     const response = await registerMutation.mutateAsync({
       email,
@@ -87,7 +103,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setUser(response.data.user as any);
       return { requires_otp: false };
     } else {
-      throw new Error('Invalid response from server');
+      throw new Error("Invalid response from server");
     }
   };
 
@@ -99,7 +115,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setToken(response.data.token);
       setUser(response.data.user as any);
     } else {
-      throw new Error(response.message || 'OTP verification failed');
+      throw new Error(response.message || "OTP verification failed");
     }
   };
 
@@ -114,7 +130,10 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         user,
         token,
-        loading: isBootstrapping || loginMutation.isPending || registerMutation.isPending,
+        loading:
+          isBootstrapping ||
+          loginMutation.isPending ||
+          registerMutation.isPending,
         isAuthenticated: !!token && !!user,
         login,
         register,
@@ -131,7 +150,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 };
