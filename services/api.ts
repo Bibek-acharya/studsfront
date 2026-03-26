@@ -206,6 +206,10 @@ export interface ForumCommunity {
   name: string;
   emoji?: string;
   bg_color?: string;
+  member_count?: number;
+  is_member?: boolean;
+  post_count?: number;
+  description?: string;
 }
 
 export interface ForumPost {
@@ -914,12 +918,37 @@ class ApiService {
     return res.data;
   }
 
-  async getForumCommunities(): Promise<ForumCommunity[]> {
-    const res = await this.request<{ data: ForumCommunity[] }>({
-      method: "GET",
-      url: "/forum/communities",
-    });
+  async getForumCommunities(token?: string): Promise<ForumCommunity[]> {
+    const res = await this.request<{ data: ForumCommunity[] }>(
+      {
+        method: "GET",
+        url: "/forum/communities",
+      },
+      token,
+    );
     return res.data;
+  }
+
+  async joinForumCommunity(token: string, communityId: number): Promise<ForumCommunity> {
+    const res = await this.request<{ data: ForumCommunity }>(
+      {
+        method: "POST",
+        url: `/forum/communities/${communityId}/join`,
+      },
+      token,
+    );
+    return res.data;
+  }
+
+  async uploadForumMedia(token: string, files: File[]): Promise<string[]> {
+    const form = new FormData();
+    files.forEach((f) => form.append("files", f));
+    const res = await this.client.post<{ data: { urls: string[] } }>(
+      "/forum/upload",
+      form,
+      { headers: { Authorization: `Bearer ${token}`, "Content-Type": "multipart/form-data" } },
+    );
+    return res.data.data.urls;
   }
 
   async createForumPost(

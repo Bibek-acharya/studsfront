@@ -381,7 +381,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
   };
 
   return (
-    <div className="w-full text-slate-600 bg-slate-50 font-inter min-h-screen pt-20">
+    <div className="w-full text-slate-600 bg-slate-50 font-inter min-h-screen pt-10">
       {/* Hero Section */}
       <div className="w-full flex justify-center p-4 sm:p-8">
         <div className="relative w-full max-w-[1400px] aspect-[16/10] sm:aspect-[16/8] min-h-[500px] bg-slate-800 rounded-2xl shadow-2xl flex flex-col justify-center items-center text-center overflow-hidden group">
@@ -622,60 +622,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
         </div>
       </main>
 
-      {/* Promotional Ads */}
-      <section className="w-full max-w-[1400px] mx-auto px-6 md:px-12 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-blue-600 to-indigo-700 text-white shadow-2xl h-full min-h-[260px] flex flex-col justify-center p-10 group">
-            <div className="absolute inset-0 z-0">
-              <img
-                src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80"
-                alt=""
-                className="w-full h-full object-cover opacity-20 mix-blend-overlay group-hover:scale-105 transition-transform duration-1000"
-              />
-            </div>
-            <div className="relative z-10">
-              <span className="inline-block py-1.5 px-4 rounded-full bg-white/20 border border-white/30 text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-md">
-                UniPath+ Premium
-              </span>
-              <h3 className="text-3xl font-black mb-3 leading-tight uppercase tracking-tight">
-                Unlock Exclusive Grants
-              </h3>
-              <p className="text-blue-50 text-lg mb-8 max-w-md font-medium">
-                Get priority matching and see scholarships before anyone else.
-              </p>
-              <button className="bg-white text-blue-600 font-black py-4 px-10 rounded-2xl shadow-xl hover:bg-blue-50 transition-all text-sm uppercase tracking-widest active:scale-95">
-                Start Free Trial
-              </button>
-            </div>
-          </div>
-
-          <div className="relative rounded-2xl overflow-hidden bg-gradient-to-r from-violet-600 to-fuchsia-700 text-white shadow-2xl h-full min-h-[260px] flex flex-col justify-center p-10 group">
-            <div className="absolute inset-0 z-0">
-              <img
-                src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=800&q=80"
-                alt=""
-                className="w-full h-full object-cover opacity-20 mix-blend-overlay group-hover:scale-105 transition-transform duration-1000"
-              />
-            </div>
-            <div className="relative z-10">
-              <span className="inline-block py-1.5 px-4 rounded-full bg-white/20 border border-white/30 text-[10px] font-black uppercase tracking-[0.2em] mb-6 backdrop-blur-md">
-                Expert Service
-              </span>
-              <h3 className="text-3xl font-black mb-3 leading-tight uppercase tracking-tight">
-                Expert Essay Reviews
-              </h3>
-              <p className="text-violet-50 text-lg mb-8 max-w-md font-medium">
-                Have a former admissions officer review your scholarship essay
-                today.
-              </p>
-              <button className="bg-white text-violet-600 font-black py-4 px-10 rounded-2xl shadow-xl hover:bg-violet-50 transition-all text-sm uppercase tracking-widest active:scale-95">
-                Get Reviewed
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
+   
       <section className="w-full bg-white py-16 relative overflow-hidden border-y border-slate-100">
         <TestimonialsSection />
       </section>
@@ -683,10 +630,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
       {/* FAQ Section */}
       <section className="max-w-4xl w-full mx-auto px-6 py-10">
         <div className="text-center mb-8">
-          <span className="text-blue-600 font-black tracking-[0.3em] uppercase text-xs mb-3 block">
-            Help Center
-          </span>
-          <h2 className="text-xl md:text-2xl font-black text-slate-900 uppercase tracking-tight">
+          <h2 className="text-xl md:text-2xl font-black text-slate-900  tracking-tight">
             Frequently Asked Questions
           </h2>
         </div>
@@ -714,7 +658,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
               key={i}
               className="group bg-white rounded-2xl border border-slate-100 overflow-hidden transition-all duration-500 open:shadow-[0_40px_80px_rgba(0,0,0,0.06)] open:bg-white"
             >
-              <summary className="flex justify-between items-center font-black cursor-pointer list-none p-5 text-slate-800 text-base hover:bg-slate-50 transition-colors uppercase tracking-tight select-none">
+              <summary className="flex justify-between items-center font-black cursor-pointer list-none p-5 text-slate-800 text-base hover:bg-slate-50 transition-colors  tracking-tight select-none">
                 <span className="group-open:text-primary-600 transition-colors">
                   {faq.q}
                 </span>
