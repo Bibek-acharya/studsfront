@@ -17,6 +17,9 @@ const EducationPage = lazy(() => import("./components/Education/EducationPage"))
 const AdminCollegesPage = lazy(
   () => import("./components/Education/Admin/AdminCollegesPage"),
 );
+const SuperAdminDashboardPage = lazy(
+  () => import("./components/Education/Admin/SuperAdminDashboardPage"),
+);
 const FindCollegePage = lazy(
   () => import("./components/Education/FindCollege/FindCollegePage"),
 );
@@ -131,6 +134,9 @@ const ContactPage = lazy(() => import("./components/Contact/ContactPage"));
 const GoogleCallbackHandler = lazy(
   () => import("./components/Auth/GoogleCallbackHandler"),
 );
+const SuperAdminLoginPage = lazy(
+  () => import("./components/Auth/SuperAdminLoginPage"),
+);
 
 const App: React.FC = () => {
   const { user, logout } = useAuth();
@@ -148,7 +154,8 @@ const App: React.FC = () => {
     </div>
   );
 
-  const hideNavFooter = ["/login", "/signup", "/onboarding", "/studentDashboard", "/auth/google-callback", "/institutionZone", "/institutionDashboard", "/scholarshipProviderZone", "/scholarshipProviderDashboard"].some(path => location.pathname.startsWith(path));
+  const isAdminUser = user?.role === "admin" || user?.role === "super_admin";
+  const hideNavFooter = ["/login", "/signup", "/onboarding", "/studentDashboard", "/auth/google-callback", "/institutionZone", "/institutionDashboard", "/scholarshipProviderZone", "/scholarshipProviderDashboard", "/admin"].some(path => location.pathname.startsWith(path));
 
   return (
     <div className="min-h-screen font-sans selection:bg-blue-500 selection:text-white overflow-x-hidden bg-white">
@@ -174,6 +181,17 @@ const App: React.FC = () => {
             {/* Auth & Onboarding */}
             <Route path="/login" element={<AuthContainer type="login" onAuthSuccess={() => navigate("/")} />} />
             <Route path="/signup" element={<AuthContainer type="signup" onAuthSuccess={() => navigate("/")} />} />
+            <Route path="/admin" element={<SuperAdminLoginPage />} />
+            <Route
+              path="/admin/dashboard"
+              element={
+                isAdminUser ? (
+                  <SuperAdminDashboardPage />
+                ) : (
+                  <Navigate to="/admin" replace />
+                )
+              }
+            />
             <Route path="/onboarding" element={<OnboardingFlow onComplete={() => navigate("/")} />} />
             <Route path="/auth/google-callback" element={<GoogleCallbackHandler />} />
             <Route path="/studentDashboard" element={<StudentDashboard onLogout={handleLogout} />} />
@@ -242,7 +260,16 @@ const App: React.FC = () => {
             <Route path="/institutionDashboard" element={<InstitutionDashboard />} />
             <Route path="/scholarshipProviderZone" element={<ScholarshipProviderZone onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
             <Route path="/scholarshipProviderDashboard" element={<ScholarshipProviderDashboard />} />
-            <Route path="/adminColleges" element={<AdminCollegesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route
+              path="/adminColleges"
+              element={
+                isAdminUser ? (
+                  <AdminCollegesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />
+                ) : (
+                  <Navigate to="/admin" replace />
+                )
+              }
+            />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/contact" element={<ContactPage />} />
           </Routes>

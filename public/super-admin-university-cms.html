@@ -1,0 +1,1168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University CMS Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; background-color: #f8fafc; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Toggle Switch */
+        .toggle-checkbox:checked { right: 0; border-color: #4f46e5; }
+        .toggle-checkbox:checked + .toggle-label { background-color: #4f46e5; }
+        .toggle-checkbox { right: 0; z-index: 1; border-color: #e2e8f0; transition: all 0.3s; }
+        .toggle-label { width: 3rem; height: 1.5rem; background-color: #cbd5e1; border-radius: 9999px; transition: all 0.3s; }
+
+        /* Rich Text Editor */
+        .rich-editor[contenteditable="true"] { outline: none; min-height: 120px; }
+        .rich-editor[contenteditable="true"]:empty:before { content: attr(placeholder); color: #9ca3af; pointer-events: none; display: block; }
+        
+        /* Tab active state */
+        .tab-btn.active { border-bottom-color: #4f46e5; color: #4f46e5; font-weight: 600; }
+
+        .hidden-view { display: none !important; }
+        .image-preview { object-fit: cover; transition: transform 0.3s ease; }
+    </style>
+</head>
+<body class="flex h-screen overflow-hidden text-slate-800">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-slate-900 text-slate-300 flex flex-col transition-all duration-300 z-50">
+        <div class="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
+            <i data-lucide="graduation-cap" class="w-8 h-8 text-indigo-500 mr-3"></i>
+            <span class="text-xl font-bold text-white tracking-tight">UniCMS</span>
+        </div>
+        
+        <div class="flex-1 overflow-y-auto py-4 custom-scrollbar">
+            <!-- Global Nav -->
+            <ul class="space-y-1 px-3 mb-6">
+                <li>
+                    <button onclick="switchView('list')" class="w-full flex items-center px-3 py-2.5 rounded-lg hover:bg-slate-800 hover:text-white transition-colors">
+                        <i data-lucide="layout-dashboard" class="w-5 h-5 mr-3"></i> Dashboard
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchView('list')" class="w-full flex items-center px-3 py-2.5 rounded-lg bg-indigo-600/20 text-indigo-400 font-medium transition-colors">
+                        <i data-lucide="building-2" class="w-5 h-5 mr-3"></i> Universities
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Form Nav (Only visible when editing) -->
+            <div id="form-nav" class="hidden">
+                <div class="px-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Editor Sections</div>
+                <ul class="space-y-1 px-3 text-sm" id="section-nav">
+                    <!-- Nav items generated via JS -->
+                </ul>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <!-- Sticky Top Action Bar -->
+        <header class="h-16 bg-white/80 backdrop-blur-md border-b border-slate-200 flex items-center justify-between px-6 sticky top-0 z-40 shadow-sm">
+            <div class="flex items-center space-x-4">
+                <h1 id="topbar-title" class="text-xl font-semibold text-slate-800">Manage Universities</h1>
+                <span id="topbar-status" class="hidden px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-600">Draft</span>
+            </div>
+            
+            <!-- List View Actions -->
+            <div id="list-actions" class="flex items-center space-x-3">
+                <button onclick="openForm()" class="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors shadow-sm font-medium text-sm">
+                    <i data-lucide="plus" class="w-4 h-4 mr-2"></i> Add University
+                </button>
+            </div>
+
+            <!-- Form View Actions -->
+            <div id="form-actions" class="hidden flex items-center space-x-2">
+                <button onclick="resetForm()" class="px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm transition-colors" title="Reset Form">
+                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                </button>
+                <button onclick="previewUniversity()" class="px-3 py-2 text-slate-600 hover:bg-slate-100 rounded-lg text-sm transition-colors flex items-center">
+                    <i data-lucide="eye" class="w-4 h-4 mr-1.5"></i> Preview
+                </button>
+                <div class="h-5 w-px bg-slate-300 mx-1"></div>
+                <button onclick="saveUniversity('Draft')" class="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 font-medium rounded-lg text-sm transition-colors">
+                    Save Draft
+                </button>
+                <button onclick="saveUniversity('In Review')" class="px-4 py-2 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200 font-medium rounded-lg text-sm transition-colors">
+                    Submit Review
+                </button>
+                <button id="btn-publish" onclick="saveUniversity('Published')" class="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 shadow-sm font-medium rounded-lg text-sm transition-colors">
+                    Publish
+                </button>
+            </div>
+        </header>
+
+        <!-- Container for Views -->
+        <div class="flex-1 overflow-y-auto relative scroll-smooth bg-slate-50" id="main-scroll-area">
+            
+            <!-- LIST VIEW -->
+            <div id="view-list" class="p-6 max-w-7xl mx-auto">
+                <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50/50">
+                        <div class="relative">
+                            <i data-lucide="search" class="w-4 h-4 absolute left-3 top-3 text-slate-400"></i>
+                            <input type="text" placeholder="Search universities..." class="pl-9 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 w-64">
+                        </div>
+                        <div class="flex space-x-2">
+                            <select class="border border-slate-300 rounded-lg text-sm py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <option>All Status</option>
+                                <option>Published</option>
+                                <option>Draft</option>
+                                <option>In Review</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-sm text-slate-600">
+                            <thead class="text-xs text-slate-500 uppercase bg-slate-50 border-b border-slate-200">
+                                <tr>
+                                    <th class="px-6 py-4 font-medium">University Name</th>
+                                    <th class="px-6 py-4 font-medium">Location</th>
+                                    <th class="px-6 py-4 font-medium">Status</th>
+                                    <th class="px-6 py-4 font-medium">Updated Date</th>
+                                    <th class="px-6 py-4 font-medium text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="university-list-body" class="divide-y divide-slate-200">
+                                <!-- List populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FORM VIEW -->
+            <div id="view-form" class="hidden-view p-6 max-w-5xl mx-auto pb-32">
+                <form id="university-form" onsubmit="event.preventDefault();">
+                    
+                    <!-- Section 1: Cover & Basic Info -->
+                    <section id="sec-1" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between items-center">
+                            <span>1. Cover & Basic Info</span>
+                            <div class="flex items-center space-x-2 text-sm">
+                                <span class="text-slate-500">Verified</span>
+                                <div class="relative inline-block w-12 mr-2 align-middle select-none transition duration-200 ease-in">
+                                    <input type="checkbox" name="toggle" id="f-verified" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                                    <label for="f-verified" class="toggle-label block overflow-hidden h-6 rounded-full bg-gray-300 cursor-pointer"></label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="p-6 space-y-6">
+                            <!-- Cover Upload -->
+                            <div class="relative w-full h-48 bg-slate-100 rounded-lg border-2 border-dashed border-slate-300 flex flex-col items-center justify-center group overflow-hidden">
+                                <img id="f-cover-preview" class="absolute inset-0 w-full h-full image-preview hidden" src="" alt="Cover">
+                                <div class="z-10 text-center bg-white/80 p-4 rounded-lg backdrop-blur-sm shadow-sm group-hover:scale-105 transition-transform">
+                                    <i data-lucide="image" class="w-8 h-8 mx-auto text-slate-400 mb-2"></i>
+                                    <p class="text-sm font-medium text-slate-700">Upload Cover Photo</p>
+                                    <p class="text-xs text-slate-500 mt-1">1400px width recommended</p>
+                                    <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" onchange="handleImageUpload(this, 'f-cover-preview')">
+                                </div>
+                                <!-- Image Controls -->
+                                <div id="f-cover-controls" class="hidden absolute top-2 right-2 z-20 flex space-x-2">
+                                    <button type="button" onclick="rotateImage('f-cover-preview')" class="p-2 bg-white rounded shadow text-slate-600 hover:text-indigo-600" title="Rotate"><i data-lucide="rotate-cw" class="w-4 h-4"></i></button>
+                                    <button type="button" onclick="clearImage('f-cover-preview')" class="p-2 bg-white rounded shadow text-red-600 hover:text-red-700" title="Remove"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <!-- Logo Upload -->
+                                <div class="col-span-1">
+                                    <label class="block text-sm font-medium text-slate-700 mb-2">Rectangular Logo</label>
+                                    <div class="relative w-full h-32 bg-slate-50 rounded-lg border border-slate-200 flex flex-col items-center justify-center group overflow-hidden">
+                                        <img id="f-logo-preview" class="absolute inset-0 w-full h-full object-contain p-2 hidden bg-white" src="" alt="Logo">
+                                        <div class="z-10 text-center">
+                                            <i data-lucide="upload-cloud" class="w-6 h-6 mx-auto text-slate-400 mb-1"></i>
+                                            <span class="text-xs text-slate-500">Browse Logo</span>
+                                        </div>
+                                        <input type="file" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*" onchange="handleImageUpload(this, 'f-logo-preview')">
+                                    </div>
+                                </div>
+                                <!-- Basic Fields -->
+                                <div class="col-span-2 space-y-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">University Name *</label>
+                                        <input type="text" id="f-name" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border" required placeholder="e.g. Harvard University">
+                                    </div>
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 mb-1">Location</label>
+                                            <input type="text" id="f-location" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border" placeholder="City, Country">
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-slate-700 mb-1">Website Link</label>
+                                            <input type="url" id="f-website" class="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border" placeholder="https://...">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-slate-700 mb-1">Prospectus PDF</label>
+                                        <input type="file" id="f-pdf" accept=".pdf" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 border border-slate-200 rounded-lg p-1 bg-white">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section 2: About University -->
+                    <section id="sec-2" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800">2. About University</div>
+                        <div class="p-6 space-y-6">
+                            <div class="grid grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">YouTube Video Link 1</label>
+                                    <div class="flex relative"><i data-lucide="youtube" class="w-5 h-5 absolute left-3 top-2.5 text-red-500"></i>
+                                    <input type="url" id="f-yt1" class="w-full pl-10 rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border" placeholder="https://youtube.com/watch?...\"></div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">YouTube Video Link 2</label>
+                                    <div class="flex relative"><i data-lucide="youtube" class="w-5 h-5 absolute left-3 top-2.5 text-red-500"></i>
+                                    <input type="url" id="f-yt2" class="w-full pl-10 rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5 border" placeholder="https://youtube.com/watch?...\"></div>
+                                </div>
+                            </div>
+
+                            <!-- Rich Text: Description -->
+                            <div>
+                                <div class="flex justify-between items-end mb-1">
+                                    <label class="block text-sm font-medium text-slate-700">University Description</label>
+                                    <span id="f-desc-count" class="text-xs text-slate-500">0 words</span>
+                                </div>
+                                <div class="border border-slate-300 rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-indigo-500 focus-within:border-indigo-500">
+                                    <!-- Toolbar -->
+                                    <div class="bg-slate-50 border-b border-slate-200 px-3 py-2 flex space-x-2">
+                                        <button type="button" onclick="formatDoc('bold')" class="p-1 hover:bg-slate-200 rounded"><i data-lucide="bold" class="w-4 h-4 text-slate-700"></i></button>
+                                        <button type="button" onclick="formatDoc('italic')" class="p-1 hover:bg-slate-200 rounded"><i data-lucide="italic" class="w-4 h-4 text-slate-700"></i></button>
+                                        <button type="button" onclick="formatDoc('underline')" class="p-1 hover:bg-slate-200 rounded"><i data-lucide="underline" class="w-4 h-4 text-slate-700"></i></button>
+                                        <div class="w-px bg-slate-300 mx-1"></div>
+                                        <button type="button" onclick="formatDoc('insertUnorderedList')" class="p-1 hover:bg-slate-200 rounded"><i data-lucide="list" class="w-4 h-4 text-slate-700"></i></button>
+                                    </div>
+                                    <div id="f-desc" class="rich-editor p-4 text-sm text-slate-700 bg-white" contenteditable="true" placeholder="Write description here..." oninput="updateWordCount('f-desc', 'f-desc-count')"></div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Mission</label>
+                                    <div class="border border-slate-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500">
+                                        <div id="f-mission" class="rich-editor p-3 text-sm" contenteditable="true" placeholder="Mission statement..."></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Vision</label>
+                                    <div class="border border-slate-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500">
+                                        <div id="f-vision" class="rich-editor p-3 text-sm" contenteditable="true" placeholder="Vision statement..."></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-slate-700 mb-1">Core Values</label>
+                                    <div class="border border-slate-300 rounded-lg overflow-hidden focus-within:ring-1 focus-within:ring-indigo-500">
+                                        <div id="f-values" class="rich-editor p-3 text-sm" contenteditable="true" placeholder="Core values..."></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- Section 3: Overview -->
+                    <section id="sec-3" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between items-center">
+                            <span>3. University Overview</span>
+                            <button type="button" onclick="addRow('tbody-overview', 'overview')" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-md hover:bg-indigo-100 font-medium flex items-center">
+                                <i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> Add Row
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-slate-500 bg-slate-50 rounded-t-lg border-b">
+                                    <tr>
+                                        <th class="px-4 py-3 font-medium w-1/3">Label (e.g., Recognition)</th>
+                                        <th class="px-4 py-3 font-medium">Fact / Detail</th>
+                                        <th class="px-4 py-3 font-medium text-center w-16">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-overview" class="divide-y divide-slate-100">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 4: Leadership -->
+                    <section id="sec-4" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between items-center">
+                            <span>4. Leadership & Administration</span>
+                            <button type="button" onclick="addRow('tbody-leadership', 'leadership')" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-md hover:bg-indigo-100 font-medium flex items-center">
+                                <i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> Add Leader
+                            </button>
+                        </div>
+                        <div class="p-6">
+                            <table class="w-full text-sm text-left">
+                                <thead class="text-xs text-slate-500 bg-slate-50 border-b">
+                                    <tr>
+                                        <th class="px-4 py-3 font-medium">Position</th>
+                                        <th class="px-4 py-3 font-medium">Role Description</th>
+                                        <th class="px-4 py-3 font-medium">Current Holder</th>
+                                        <th class="px-4 py-3 font-medium text-center w-16">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-leadership" class="divide-y divide-slate-100">
+                                    <!-- Dynamic Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 5 & 6: Contact & Quick Facts -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                        <!-- Section 5: Contact Info -->
+                        <section id="sec-5" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden form-section">
+                            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800">5. Contact Information</div>
+                            <div class="p-6 space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="block text-xs text-slate-500 mb-1">Email</label><input type="email" id="f-c-email" class="w-full text-sm p-2 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500"></div>
+                                    <div><label class="block text-xs text-slate-500 mb-1">Phone</label><input type="text" id="f-c-phone" class="w-full text-sm p-2 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500"></div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="block text-xs text-slate-500 mb-1">Facebook</label><input type="url" id="f-c-fb" class="w-full text-sm p-2 border border-slate-300 rounded" placeholder="https://..."></div>
+                                    <div><label class="block text-xs text-slate-500 mb-1">Instagram</label><input type="url" id="f-c-ig" class="w-full text-sm p-2 border border-slate-300 rounded" placeholder="https://..."></div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="block text-xs text-slate-500 mb-1">LinkedIn</label><input type="url" id="f-c-li" class="w-full text-sm p-2 border border-slate-300 rounded" placeholder="https://..."></div>
+                                    <div><label class="block text-xs text-slate-500 mb-1">Twitter (X)</label><input type="url" id="f-c-tw" class="w-full text-sm p-2 border border-slate-300 rounded" placeholder="https://..."></div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Section 6: Quick Facts -->
+                        <section id="sec-6" class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden form-section">
+                            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800">6. Quick Facts</div>
+                            <div class="p-6 space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="block text-xs text-slate-500 mb-1">Established Year</label><input type="text" id="f-q-est" class="w-full text-sm p-2 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500"></div>
+                                    <div><label class="block text-xs text-slate-500 mb-1">University Type</label>
+                                        <select id="f-q-type" class="w-full text-sm p-2 border border-slate-300 rounded focus:ring-1 focus:ring-indigo-500 bg-white">
+                                            <option>Public</option><option>Private</option><option>Deemed</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div><label class="block text-xs text-slate-500 mb-1">Campus Size (Acres)</label><input type="text" id="f-q-size" class="w-full text-sm p-2 border border-slate-300 rounded"></div>
+                                    <div><label class="block text-xs text-slate-500 mb-1">Total Students</label><input type="text" id="f-q-students" class="w-full text-sm p-2 border border-slate-300 rounded"></div>
+                                </div>
+                                <div><label class="block text-xs text-slate-500 mb-1">Constituent Campuses Count</label><input type="number" id="f-q-campuses" class="w-full text-sm p-2 border border-slate-300 rounded"></div>
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- Section 7: Courses & Fees -->
+                    <section id="sec-7" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between items-center">
+                            <span>7. Courses & Fees</span>
+                        </div>
+                        <div class="border-b border-slate-200 flex">
+                            <button type="button" onclick="switchInnerTab('courses', 'bachelor')" class="courses-tab tab-btn active px-6 py-3 text-sm font-medium border-b-2 text-slate-500 border-transparent hover:text-slate-700">Bachelor</button>
+                            <button type="button" onclick="switchInnerTab('courses', 'master')" class="courses-tab tab-btn px-6 py-3 text-sm font-medium border-b-2 text-slate-500 border-transparent hover:text-slate-700">Master</button>
+                        </div>
+                        
+                        <!-- Bachelor Tab -->
+                        <div id="courses-bachelor" class="courses-content p-6">
+                            <div class="flex justify-end mb-3">
+                                <button type="button" onclick="addRow('tbody-course-b', 'course')" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-md hover:bg-indigo-100 flex items-center font-medium">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> Add Course
+                                </button>
+                            </div>
+                            <table class="w-full text-sm text-left border border-slate-200">
+                                <thead class="text-xs text-slate-500 bg-slate-50 border-b">
+                                    <tr>
+                                        <th class="px-3 py-2">Course Name</th><th class="px-3 py-2">Duration</th><th class="px-3 py-2">Fees/Yr</th><th class="px-3 py-2">Eligibility</th><th class="px-3 py-2 w-20">Seats</th><th class="px-3 py-2 w-12">Act</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-course-b" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+
+                        <!-- Master Tab -->
+                        <div id="courses-master" class="courses-content p-6 hidden">
+                             <div class="flex justify-end mb-3">
+                                <button type="button" onclick="addRow('tbody-course-m', 'course')" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-md hover:bg-indigo-100 flex items-center font-medium">
+                                    <i data-lucide="plus" class="w-3.5 h-3.5 mr-1"></i> Add Course
+                                </button>
+                            </div>
+                            <table class="w-full text-sm text-left border border-slate-200">
+                                <thead class="text-xs text-slate-500 bg-slate-50 border-b">
+                                    <tr>
+                                        <th class="px-3 py-2">Course Name</th><th class="px-3 py-2">Duration</th><th class="px-3 py-2">Fees/Yr</th><th class="px-3 py-2">Eligibility</th><th class="px-3 py-2 w-20">Seats</th><th class="px-3 py-2 w-12">Act</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-course-m" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 8: Institute / Faculties -->
+                    <section id="sec-8" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between items-center">
+                            <span>8. Affiliated Colleges / Faculties</span>
+                            <button type="button" onclick="addFacultyBlock()" class="text-xs bg-indigo-600 text-white px-3 py-1.5 rounded-md hover:bg-indigo-700 font-medium flex items-center">
+                                <i data-lucide="plus-circle" class="w-3.5 h-3.5 mr-1"></i> Add Faculty Block
+                            </button>
+                        </div>
+                        <div id="faculties-container" class="p-6 space-y-6 bg-slate-50/50">
+                            <!-- Dynamic Faculty Blocks go here -->
+                        </div>
+                    </section>
+
+                    <!-- Section 9: Offered Programs -->
+                    <section id="sec-9" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800">9. Offered Programs</div>
+                        <div class="p-6">
+                            <table class="w-full text-sm text-left border border-slate-200">
+                                <thead class="text-xs text-slate-500 bg-slate-50 border-b">
+                                    <tr>
+                                        <th class="px-4 py-3">Program Name</th>
+                                        <th class="px-4 py-3 w-32">Level</th>
+                                        <th class="px-4 py-3 w-32">Status</th>
+                                        <th class="px-4 py-3 w-16 text-center">
+                                            <button type="button" onclick="addRow('tbody-programs', 'program')" class="text-indigo-600 hover:text-indigo-800" title="Add Program"><i data-lucide="plus-square" class="w-5 h-5 mx-auto"></i></button>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-programs" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 10: Scholarship -->
+                    <section id="sec-10" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
+                            <span>10. Scholarships</span>
+                            <button type="button" onclick="addRow('tbody-scholars', 'scholarship')" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-md hover:bg-indigo-100 flex items-center font-medium">Add Row</button>
+                        </div>
+                        <div class="p-6">
+                            <table class="w-full text-sm text-left border border-slate-200">
+                                <thead class="text-xs text-slate-500 bg-slate-50 border-b">
+                                    <tr>
+                                        <th class="px-3 py-2">Level/Program</th><th class="px-3 py-2">Scholarship Name</th><th class="px-3 py-2">Benefit</th><th class="px-3 py-2">For Whom</th><th class="px-3 py-2 w-12 text-center">Act</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-scholars" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 11: Events -->
+                    <section id="sec-11" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
+                            <span>11. Events</span>
+                            <button type="button" onclick="addEventBlock()" class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700 flex items-center font-medium">Add Event</button>
+                        </div>
+                        <div id="events-container" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50">
+                            <!-- Dynamic Event Cards -->
+                        </div>
+                    </section>
+
+                    <!-- Section 12: News & Notice -->
+                    <section id="sec-12" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
+                            <span>12. News & Notice</span>
+                            <button type="button" onclick="addNewsBlock()" class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700 flex items-center font-medium">Add News</button>
+                        </div>
+                        <div id="news-container" class="p-6 space-y-4">
+                            <!-- Dynamic News Rows -->
+                        </div>
+                    </section>
+
+                    <!-- Section 13: Downloads -->
+                    <section id="sec-13" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
+                            <span>13. Downloads</span>
+                            <button type="button" onclick="addRow('tbody-downloads', 'download')" class="text-xs bg-indigo-50 text-indigo-700 px-3 py-1 rounded-md hover:bg-indigo-100 flex items-center font-medium">Add File</button>
+                        </div>
+                        <div class="p-6">
+                            <table class="w-full text-sm text-left border border-slate-200">
+                                <thead class="text-xs text-slate-500 bg-slate-50 border-b">
+                                    <tr>
+                                        <th class="px-3 py-2 w-1/2">File Name</th><th class="px-3 py-2">Attach PDF</th><th class="px-3 py-2 w-32">Updated Date</th><th class="px-3 py-2 w-12 text-center">Act</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbody-downloads" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                    <!-- Section 14: Gallery -->
+                    <section id="sec-14" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800">14. Gallery</div>
+                        <div class="p-6">
+                            <div class="w-full h-32 border-2 border-dashed border-slate-300 rounded-lg bg-slate-50 flex flex-col items-center justify-center relative hover:bg-slate-100 transition-colors cursor-pointer mb-4">
+                                <i data-lucide="images" class="w-8 h-8 text-slate-400 mb-2"></i>
+                                <span class="text-sm text-slate-600 font-medium">Click to upload multiple images</span>
+                                <input type="file" multiple accept="image/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="handleGalleryUpload(this)">
+                            </div>
+                            <!-- Grid Preview -->
+                            <div id="gallery-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+                                <!-- Thumbs generated via JS -->
+                            </div>
+                        </div>
+                    </section>
+                </form>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Vanilla JS Logic -->
+    <script>
+        // --- DATA STORE ---
+        let universities = [];
+        let currentEditingId = null;
+        const API_BASE_URL = `${window.location.origin}/api/v1`;
+
+        function getAuthToken() {
+            return localStorage.getItem("authToken");
+        }
+
+        async function requestApi(path, options = {}) {
+            const response = await fetch(`${API_BASE_URL}${path}`, options);
+            const payload = await response.json().catch(() => ({}));
+            if (!response.ok || payload.success === false) {
+                throw new Error(payload.message || `Request failed (${response.status})`);
+            }
+            return payload;
+        }
+
+        function mapApiUniversityToUi(university) {
+            return {
+                id: String(university.id),
+                status: "Published",
+                created_at: university.created_at ? university.created_at.split("T")[0] : "",
+                updated_at: university.updated_at ? university.updated_at.split("T")[0] : "",
+                basic_info: {
+                    name: university.name || "",
+                    verified: !!university.isPopular,
+                    location: university.location || "",
+                    website: university.website || "",
+                    cover: "",
+                    logo: university.logo || "",
+                },
+                about: {
+                    yt1: "",
+                    yt2: "",
+                    desc: university.description || "",
+                    mission: "",
+                    vision: "",
+                    values: "",
+                },
+                contact: { email: "", phone: "", fb: "", ig: "", li: "", tw: "" },
+                quick: {
+                    est: university.established || "",
+                    type: university.type || "Public",
+                    size: "",
+                    students: "",
+                    campuses: university.collegesCount || 0,
+                },
+                overview: [],
+                leadership: [],
+                courses: { bachelor: [], master: [] },
+                programs: [],
+                scholarships: [],
+            };
+        }
+
+        async function fetchUniversities() {
+            try {
+                const result = await requestApi("/universities");
+                const list = result?.data?.universities || [];
+                universities = list.map(mapApiUniversityToUi);
+                renderList();
+            } catch (err) {
+                alert(err.message || "Failed to load universities");
+            }
+        }
+
+        // Initialize Icons
+        lucide.createIcons();
+
+        // --- NAVIGATION & UI INIT ---
+        const sections = [
+            "Cover & Basic Info", "About University", "Overview", "Leadership", "Contact Info", 
+            "Quick Facts", "Courses & Fees", "Faculties", "Programs", "Scholarships", 
+            "Events", "News & Notice", "Downloads", "Gallery"
+        ];
+
+        function initSidebar() {
+            const nav = document.getElementById('section-nav');
+            nav.innerHTML = sections.map((s, i) => `
+                <li>
+                    <a href="#sec-${i+1}" class="flex items-center px-3 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors text-sm">
+                        <span class="w-5 font-mono text-xs opacity-50">${i+1}.</span> ${s}
+                    </a>
+                </li>
+            `).join('');
+        }
+        initSidebar();
+
+        function switchView(view) {
+            document.getElementById('view-list').classList.toggle('hidden-view', view !== 'list');
+            document.getElementById('view-form').classList.toggle('hidden-view', view !== 'form');
+            document.getElementById('list-actions').classList.toggle('hidden', view !== 'list');
+            document.getElementById('form-actions').classList.toggle('hidden', view !== 'form');
+            document.getElementById('form-nav').classList.toggle('hidden', view !== 'form');
+            
+            if(view === 'list') {
+                document.getElementById('topbar-title').innerText = "Manage Universities";
+                document.getElementById('topbar-status').classList.add('hidden');
+                fetchUniversities();
+            } else {
+                document.getElementById('topbar-title').innerText = currentEditingId ? "Edit University" : "Create New University";
+                document.getElementById('topbar-status').classList.remove('hidden');
+            }
+        }
+
+        function switchInnerTab(group, tabName) {
+            document.querySelectorAll(`.${group}-tab`).forEach(el => el.classList.remove('active', 'border-indigo-500', 'text-indigo-600'));
+            document.querySelectorAll(`.${group}-content`).forEach(el => el.classList.add('hidden'));
+            
+            event.currentTarget.classList.add('active', 'border-indigo-500', 'text-indigo-600');
+            event.currentTarget.classList.remove('border-transparent', 'text-slate-500');
+            document.getElementById(`${group}-${tabName}`).classList.remove('hidden');
+        }
+
+        // --- RICH TEXT & IMAGE UTILS ---
+        function formatDoc(cmd, value=null) { document.execCommand(cmd, false, value); }
+        
+        function updateWordCount(editorId, countId) {
+            const text = document.getElementById(editorId).innerText.trim();
+            const words = text ? text.split(/\s+/).length : 0;
+            document.getElementById(countId).innerText = `${words} word${words !== 1 ? 's' : ''}`;
+        }
+
+        function handleImageUpload(input, previewId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = document.getElementById(previewId);
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    if(previewId === 'f-cover-preview') {
+                        document.getElementById('f-cover-controls').classList.remove('hidden');
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function clearImage(previewId) {
+            const img = document.getElementById(previewId);
+            img.src = "";
+            img.classList.add('hidden');
+            img.style.transform = "rotate(0deg)";
+            if(previewId === 'f-cover-preview') {
+                document.getElementById('f-cover-controls').classList.add('hidden');
+                document.querySelector('input[type="file"]').value = "";
+            }
+        }
+
+        function rotateImage(previewId) {
+            const img = document.getElementById(previewId);
+            let currentRotation = parseInt(img.getAttribute('data-rot') || '0');
+            currentRotation = (currentRotation + 90) % 360;
+            img.style.transform = `rotate(${currentRotation}deg)`;
+            img.setAttribute('data-rot', currentRotation);
+        }
+
+        function handleGalleryUpload(input) {
+            const grid = document.getElementById('gallery-grid');
+            if (input.files) {
+                Array.from(input.files).forEach(file => {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        const div = document.createElement('div');
+                        div.className = "relative group aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200";
+                        div.innerHTML = `
+                            <img src="${e.target.result}" class="w-full h-full object-cover">
+                            <button type="button" onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="x" class="w-3 h-3"></i></button>
+                        `;
+                        grid.appendChild(div);
+                        lucide.createIcons();
+                    }
+                    reader.readAsDataURL(file);
+                });
+            }
+        }
+
+        // --- DYNAMIC ROWS GENERATOR ---
+        function addRow(tbodyId, type, data = null) {
+            const tbody = document.getElementById(tbodyId);
+            const tr = document.createElement('tr');
+            
+            // Generate standard inputs based on type
+            let html = '';
+            if (type === 'overview') {
+                html = `
+                    <td class="px-2 py-2"><input type="text" value="${data?.label||''}" class="w-full text-sm p-1.5 border rounded" placeholder="Label"></td>
+                    <td class="px-2 py-2"><input type="text" value="${data?.fact||''}" class="w-full text-sm p-1.5 border rounded" placeholder="Fact"></td>
+                    <td class="px-2 py-2 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i></button></td>
+                `;
+            } else if (type === 'leadership') {
+                html = `
+                    <td class="px-2 py-2"><input type="text" value="${data?.position||''}" class="w-full text-sm p-1.5 border rounded" placeholder="Position"></td>
+                    <td class="px-2 py-2"><input type="text" value="${data?.role||''}" class="w-full text-sm p-1.5 border rounded" placeholder="Role"></td>
+                    <td class="px-2 py-2"><input type="text" value="${data?.holder||''}" class="w-full text-sm p-1.5 border rounded" placeholder="Holder Name"></td>
+                    <td class="px-2 py-2 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i></button></td>
+                `;
+            } else if (type === 'course') {
+                html = `
+                    <td class="px-1 py-1"><input type="text" value="${data?.name||''}" class="w-full text-sm p-1.5 border rounded" placeholder="Course"></td>
+                    <td class="px-1 py-1"><input type="text" value="${data?.duration||''}" class="w-full text-sm p-1.5 border rounded" placeholder="Yrs"></td>
+                    <td class="px-1 py-1"><input type="text" value="${data?.fees||''}" class="w-full text-sm p-1.5 border rounded" placeholder="$"></td>
+                    <td class="px-1 py-1"><input type="text" value="${data?.eligibility||''}" class="w-full text-sm p-1.5 border rounded" placeholder="Req"></td>
+                    <td class="px-1 py-1"><input type="number" value="${data?.seats||''}" class="w-full text-sm p-1.5 border rounded" placeholder="100"></td>
+                    <td class="px-1 py-1 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i></button></td>
+                `;
+            } else if (type === 'program') {
+                 html = `
+                    <td class="px-2 py-2"><input type="text" value="${data?.name||''}" class="w-full text-sm p-1.5 border rounded" placeholder="Program"></td>
+                    <td class="px-2 py-2"><select class="w-full text-sm p-1.5 border rounded"><option ${data?.level==='Bachelor'?'selected':''}>Bachelor</option><option ${data?.level==='Master'?'selected':''}>Master</option><option ${data?.level==='Phd'?'selected':''}>Phd</option></select></td>
+                    <td class="px-2 py-2">
+                        <div class="relative inline-block w-10 mr-2 align-middle select-none transition duration-200 ease-in">
+                            <input type="checkbox" ${data?.status===false ? '':'checked'} class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer"/>
+                            <label class="toggle-label block overflow-hidden h-5 rounded-full bg-gray-300 cursor-pointer w-10"></label>
+                        </div>
+                    </td>
+                    <td class="px-2 py-2 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i></button></td>
+                `;
+            } else if (type === 'scholarship') {
+                html = `
+                    <td class="px-1 py-1"><input type="text" value="${data?.program||''}" class="w-full text-sm p-1.5 border rounded"></td>
+                    <td class="px-1 py-1"><input type="text" value="${data?.name||''}" class="w-full text-sm p-1.5 border rounded"></td>
+                    <td class="px-1 py-1"><input type="text" value="${data?.benefit||''}" class="w-full text-sm p-1.5 border rounded"></td>
+                    <td class="px-1 py-1"><input type="text" value="${data?.for||''}" class="w-full text-sm p-1.5 border rounded"></td>
+                    <td class="px-1 py-1 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i></button></td>
+                `;
+            } else if (type === 'download') {
+                 html = `
+                    <td class="px-2 py-2"><input type="text" value="${data?.name||''}" class="w-full text-sm p-1.5 border rounded" placeholder="File Name"></td>
+                    <td class="px-2 py-2"><input type="file" class="w-full text-xs file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-indigo-50 file:text-indigo-700"></td>
+                    <td class="px-2 py-2"><input type="date" value="${data?.date||''}" class="w-full text-sm p-1.5 border rounded"></td>
+                    <td class="px-2 py-2 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700"><i data-lucide="trash-2" class="w-4 h-4 mx-auto"></i></button></td>
+                `;
+            } else if (type === 'faculty-row') {
+                html = `
+                    <td class="px-1 py-1"><input type="text" value="${data?.sn||''}" class="w-12 text-sm p-1 border rounded text-center" placeholder="1"></td>
+                    <td class="px-1 py-1"><input type="text" value="${data?.college||''}" class="w-full text-sm p-1 border rounded" placeholder="College Name"></td>
+                    <td class="px-1 py-1"><input type="text" value="${data?.address||''}" class="w-full text-sm p-1 border rounded" placeholder="Address"></td>
+                    <td class="px-1 py-1"><input type="text" value="${data?.programs||''}" class="w-full text-sm p-1 border rounded" placeholder="Programs/Quota"></td>
+                    <td class="px-1 py-1 text-center"><button type="button" onclick="this.closest('tr').remove()" class="text-red-500 hover:text-red-700"><i data-lucide="x" class="w-4 h-4 mx-auto"></i></button></td>
+                `;
+            }
+
+            tr.innerHTML = html;
+            tbody.appendChild(tr);
+            lucide.createIcons();
+        }
+
+        // Section 8 dynamic blocks
+        let facultyCounter = 0;
+        function addFacultyBlock(data = null) {
+            facultyCounter++;
+            const fId = `fac-${facultyCounter}`;
+            const container = document.getElementById('faculties-container');
+            const div = document.createElement('div');
+            div.className = "bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative";
+            div.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-3 right-3 text-red-400 hover:text-red-600"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                <div class="mb-3">
+                    <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Faculty / Affiliation Heading</label>
+                    <input type="text" value="${data?.name||''}" class="w-full sm:w-1/2 text-sm p-2 border border-slate-300 rounded font-medium text-indigo-700" placeholder="e.g. Faculty of Engineering">
+                </div>
+                <table class="w-full text-xs text-left">
+                    <thead class="bg-slate-50 text-slate-500 border-b border-t">
+                        <tr><th class="p-2 w-16">SN</th><th class="p-2">College Name</th><th class="p-2">Address & District</th><th class="p-2">Approved Programs</th><th class="p-2 w-10">Act</th></tr>
+                    </thead>
+                    <tbody id="tbody-${fId}" class="divide-y divide-slate-100"></tbody>
+                </table>
+                <button type="button" onclick="addRow('tbody-${fId}', 'faculty-row')" class="mt-2 text-xs text-indigo-600 hover:underline flex items-center"><i data-lucide="plus" class="w-3 h-3 mr-1"></i> Add College</button>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+            
+            if(data && data.colleges) {
+                data.colleges.forEach(col => addRow(`tbody-${fId}`, 'faculty-row', col));
+            } else {
+                addRow(`tbody-${fId}`, 'faculty-row'); // Default 1 row
+            }
+        }
+
+        // Section 11 dynamic events
+        function addEventBlock(data = null) {
+            const container = document.getElementById('events-container');
+            const div = document.createElement('div');
+            div.className = "bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative";
+            div.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+                <div class="space-y-3 mt-2">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" value="${data?.type||''}" placeholder="Event Type" class="text-sm p-1.5 border rounded w-full">
+                        <input type="date" value="${data?.date||''}" class="text-sm p-1.5 border rounded w-full">
+                    </div>
+                    <input type="text" value="${data?.heading||''}" placeholder="Event Heading" class="text-sm font-medium p-1.5 border rounded w-full">
+                    <div class="grid grid-cols-2 gap-3">
+                        <input type="text" value="${data?.organizer||''}" placeholder="Organizer" class="text-sm p-1.5 border rounded w-full">
+                        <input type="text" value="${data?.venue||''}" placeholder="Venue" class="text-sm p-1.5 border rounded w-full">
+                    </div>
+                    <textarea placeholder="Short description..." class="text-sm p-2 border rounded w-full h-16 resize-none">${data?.desc||''}</textarea>
+                    <input type="url" value="${data?.link||''}" placeholder="Registration Link" class="text-sm p-1.5 border rounded w-full">
+                </div>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+        }
+
+        // Section 12 dynamic news
+        function addNewsBlock(data = null) {
+            const container = document.getElementById('news-container');
+            const div = document.createElement('div');
+            div.className = "bg-white p-3 rounded border border-slate-200 shadow-sm flex items-start space-x-4 relative";
+            div.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+                <div class="w-24 h-24 bg-slate-100 border-2 border-dashed border-slate-300 rounded flex items-center justify-center shrink-0">
+                    <i data-lucide="image" class="w-6 h-6 text-slate-300"></i>
+                </div>
+                <div class="flex-1 space-y-2">
+                    <div class="flex space-x-2 w-3/4">
+                        <select class="text-xs p-1 border rounded"><option ${data?.type==='Notice'?'selected':''}>Notice</option><option ${data?.type==='News'?'selected':''}>News</option></select>
+                        <input type="text" value="${data?.heading||''}" placeholder="Heading" class="text-sm font-medium p-1 border rounded w-full">
+                    </div>
+                    <textarea placeholder="News summary..." class="text-sm p-1.5 border rounded w-full h-12 resize-none">${data?.desc||''}</textarea>
+                </div>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+        }
+
+        // --- CRUD LOGIC ---
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Published': return 'bg-green-100 text-green-700';
+                case 'Draft': return 'bg-slate-100 text-slate-600';
+                case 'In Review': return 'bg-yellow-100 text-yellow-700';
+                case 'Rejected': return 'bg-red-100 text-red-700';
+                default: return 'bg-slate-100 text-slate-600';
+            }
+        }
+
+        function renderList() {
+            const tbody = document.getElementById('university-list-body');
+            tbody.innerHTML = '';
+            
+            if(universities.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="px-6 py-8 text-center text-slate-400">No universities found. Click "Add University" to start.</td></tr>`;
+                return;
+            }
+
+            universities.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-slate-50 transition-colors";
+                tr.innerHTML = `
+                    <td class="px-6 py-4 font-medium text-slate-800 flex items-center">
+                        <div class="w-8 h-8 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold mr-3 shrink-0">
+                            ${u.basic_info.name.charAt(0)}
+                        </div>
+                        ${u.basic_info.name}
+                    </td>
+                    <td class="px-6 py-4 text-slate-500">${u.basic_info.location || '-'}</td>
+                    <td class="px-6 py-4"><span class="px-2.5 py-1 text-xs font-medium rounded-full ${getStatusColor(u.status)}">${u.status}</span></td>
+                    <td class="px-6 py-4 text-slate-500">${u.updated_at}</td>
+                    <td class="px-6 py-4 text-right space-x-2">
+                        <button onclick="editUniversity('${u.id}')" class="text-indigo-600 hover:text-indigo-900" title="Edit"><i data-lucide="edit" class="w-4 h-4 inline"></i></button>
+                        <button onclick="deleteUniversity('${u.id}')" class="text-red-500 hover:text-red-700" title="Delete"><i data-lucide="trash" class="w-4 h-4 inline"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            lucide.createIcons();
+        }
+
+        function openForm() {
+            resetForm();
+            currentEditingId = null;
+            document.getElementById('btn-publish').innerText = 'Publish';
+            updateStatusBadge('Draft');
+            switchView('form');
+        }
+
+        function resetForm() {
+            document.getElementById('university-form').reset();
+            // Clear rich editors
+            ['f-desc', 'f-mission', 'f-vision', 'f-values'].forEach(id => document.getElementById(id).innerHTML = '');
+            document.getElementById('f-desc-count').innerText = '0 words';
+            // Clear tables & dynamic containers
+            ['tbody-overview', 'tbody-leadership', 'tbody-course-b', 'tbody-course-m', 'tbody-programs', 'tbody-scholars', 'tbody-downloads'].forEach(id => document.getElementById(id).innerHTML = '');
+            ['faculties-container', 'events-container', 'news-container', 'gallery-grid'].forEach(id => document.getElementById(id).innerHTML = '');
+            // Add default initial rows
+            addRow('tbody-overview', 'overview');
+            addRow('tbody-leadership', 'leadership');
+            addRow('tbody-course-b', 'course');
+            addRow('tbody-course-m', 'course');
+            addRow('tbody-programs', 'program');
+            addFacultyBlock();
+            
+            clearImage('f-cover-preview');
+            clearImage('f-logo-preview');
+            document.getElementById('main-scroll-area').scrollTop = 0;
+        }
+
+        function updateStatusBadge(status) {
+            const badge = document.getElementById('topbar-status');
+            badge.innerText = status;
+            badge.className = `px-2.5 py-1 text-xs font-semibold rounded-full ${getStatusColor(status)}`;
+        }
+
+        // Simplistic extraction for table bodies
+        function extractTableData(tbodyId, keys) {
+            const data = [];
+            const rows = document.getElementById(tbodyId).querySelectorAll('tr');
+            rows.forEach(row => {
+                const inputs = row.querySelectorAll('input, select');
+                const obj = {};
+                let hasData = false;
+                inputs.forEach((input, i) => {
+                    if(i < keys.length) {
+                        const val = input.type === 'checkbox' ? input.checked : input.value;
+                        obj[keys[i]] = val;
+                        if(val && val !== '') hasData = true;
+                    }
+                });
+                if(hasData) data.push(obj);
+            });
+            return data;
+        }
+
+        async function saveUniversity(targetStatus) {
+            const name = document.getElementById('f-name').value;
+            if(!name) { alert("University Name is required!"); return; }
+
+            const token = getAuthToken();
+            if (!token) {
+                alert("Login session expired. Please login again as super admin.");
+                return;
+            }
+
+            const today = new Date().toISOString().split('T')[0];
+            
+            // Build object
+            const uni = {
+                id: currentEditingId || Date.now().toString(),
+                status: targetStatus,
+                created_at: today, // Simple mock
+                updated_at: today,
+                basic_info: {
+                    name: name,
+                    verified: document.getElementById('f-verified').checked,
+                    location: document.getElementById('f-location').value,
+                    website: document.getElementById('f-website').value,
+                    cover: document.getElementById('f-cover-preview').src, // Storing base64 for demo
+                    logo: document.getElementById('f-logo-preview').src
+                },
+                about: {
+                    yt1: document.getElementById('f-yt1').value,
+                    yt2: document.getElementById('f-yt2').value,
+                    desc: document.getElementById('f-desc').innerHTML,
+                    mission: document.getElementById('f-mission').innerHTML,
+                    vision: document.getElementById('f-vision').innerHTML,
+                    values: document.getElementById('f-values').innerHTML
+                },
+                contact: {
+                    email: document.getElementById('f-c-email').value,
+                    phone: document.getElementById('f-c-phone').value,
+                    fb: document.getElementById('f-c-fb').value,
+                    ig: document.getElementById('f-c-ig').value,
+                    li: document.getElementById('f-c-li').value,
+                    tw: document.getElementById('f-c-tw').value,
+                },
+                quick: {
+                    est: document.getElementById('f-q-est').value,
+                    type: document.getElementById('f-q-type').value,
+                    size: document.getElementById('f-q-size').value,
+                    students: document.getElementById('f-q-students').value,
+                    campuses: document.getElementById('f-q-campuses').value,
+                },
+                overview: extractTableData('tbody-overview', ['label', 'fact']),
+                leadership: extractTableData('tbody-leadership', ['position', 'role', 'holder']),
+                courses: {
+                    bachelor: extractTableData('tbody-course-b', ['name', 'duration', 'fees', 'eligibility', 'seats']),
+                    master: extractTableData('tbody-course-m', ['name', 'duration', 'fees', 'eligibility', 'seats'])
+                },
+                programs: extractTableData('tbody-programs', ['name', 'level', 'status']),
+                scholarships: extractTableData('tbody-scholars', ['program', 'name', 'benefit', 'for'])
+            };
+
+            const payload = {
+                name: uni.basic_info.name,
+                logo: uni.basic_info.logo,
+                location: uni.basic_info.location,
+                website: uni.basic_info.website,
+                type: uni.quick.type || "Public",
+                established: uni.quick.est,
+                description: uni.about.desc.replace(/<[^>]*>/g, "").trim(),
+                rank: 0,
+                popular: !!uni.basic_info.verified,
+            };
+
+            try {
+                const isUpdate = !!currentEditingId;
+                if (currentEditingId) {
+                    await requestApi(`/admin/universities/${currentEditingId}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(payload),
+                    });
+                } else {
+                    await requestApi("/admin/universities", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify(payload),
+                    });
+                }
+
+                updateStatusBadge(targetStatus);
+                currentEditingId = null;
+                switchView('list');
+
+                const btn = document.createElement('div');
+                btn.className = "fixed bottom-4 right-4 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg z-50 animate-bounce";
+                btn.innerText = `University ${isUpdate ? 'Updated' : 'Saved'} successfully!`;
+                document.body.appendChild(btn);
+                setTimeout(() => btn.remove(), 3000);
+            } catch (err) {
+                alert(err.message || "Failed to save university");
+            }
+        }
+
+        function editUniversity(id) {
+            const uni = universities.find(u => u.id === id);
+            if(!uni) return;
+
+            resetForm();
+            currentEditingId = id;
+            
+            // Populate basic info
+            document.getElementById('f-name').value = uni.basic_info.name;
+            document.getElementById('f-verified').checked = uni.basic_info.verified;
+            document.getElementById('f-location').value = uni.basic_info.location;
+            document.getElementById('f-website').value = uni.basic_info.website;
+            
+            if(uni.basic_info.cover && uni.basic_info.cover.length > 100) {
+                document.getElementById('f-cover-preview').src = uni.basic_info.cover;
+                document.getElementById('f-cover-preview').classList.remove('hidden');
+            }
+            if(uni.basic_info.logo && uni.basic_info.logo.length > 100) {
+                document.getElementById('f-logo-preview').src = uni.basic_info.logo;
+                document.getElementById('f-logo-preview').classList.remove('hidden');
+            }
+
+            // Populate about
+            document.getElementById('f-yt1').value = uni.about.yt1;
+            document.getElementById('f-yt2').value = uni.about.yt2;
+            document.getElementById('f-desc').innerHTML = uni.about.desc;
+            document.getElementById('f-mission').innerHTML = uni.about.mission;
+            document.getElementById('f-vision').innerHTML = uni.about.vision;
+            document.getElementById('f-values').innerHTML = uni.about.values;
+            updateWordCount('f-desc', 'f-desc-count');
+
+            // Populate Contact & Quick
+            document.getElementById('f-c-email').value = uni.contact.email;
+            document.getElementById('f-c-phone').value = uni.contact.phone;
+            document.getElementById('f-c-fb').value = uni.contact.fb;
+            document.getElementById('f-c-ig').value = uni.contact.ig;
+            document.getElementById('f-c-li').value = uni.contact.li;
+            document.getElementById('f-c-tw').value = uni.contact.tw;
+            
+            document.getElementById('f-q-est').value = uni.quick.est;
+            document.getElementById('f-q-type').value = uni.quick.type;
+            document.getElementById('f-q-size').value = uni.quick.size;
+            document.getElementById('f-q-students').value = uni.quick.students;
+            document.getElementById('f-q-campuses').value = uni.quick.campuses;
+
+            // Populate tables
+            document.getElementById('tbody-overview').innerHTML = '';
+            uni.overview.forEach(row => addRow('tbody-overview', 'overview', row));
+            if(uni.overview.length===0) addRow('tbody-overview', 'overview');
+
+            document.getElementById('tbody-leadership').innerHTML = '';
+            uni.leadership.forEach(row => addRow('tbody-leadership', 'leadership', row));
+
+            document.getElementById('tbody-course-b').innerHTML = '';
+            uni.courses.bachelor.forEach(row => addRow('tbody-course-b', 'course', row));
+            
+            document.getElementById('tbody-course-m').innerHTML = '';
+            uni.courses.master.forEach(row => addRow('tbody-course-m', 'course', row));
+
+            document.getElementById('tbody-programs').innerHTML = '';
+            uni.programs.forEach(row => addRow('tbody-programs', 'program', row));
+
+            document.getElementById('tbody-scholars').innerHTML = '';
+            uni.scholarships.forEach(row => addRow('tbody-scholars', 'scholarship', row));
+
+            // Setup UI states
+            document.getElementById('btn-publish').innerText = 'Update Published';
+            updateStatusBadge(uni.status);
+            switchView('form');
+        }
+
+        async function deleteUniversity(id) {
+            if(!confirm('Are you sure you want to delete this university?')) {
+                return;
+            }
+
+            const token = getAuthToken();
+            if (!token) {
+                alert("Login session expired. Please login again as super admin.");
+                return;
+            }
+
+            try {
+                await requestApi(`/admin/universities/${id}`, {
+                    method: "DELETE",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+                await fetchUniversities();
+            } catch (err) {
+                alert(err.message || "Failed to delete university");
+            }
+        }
+
+        function previewUniversity() {
+            const name = document.getElementById('f-name').value || 'Untitled University';
+            alert(`Previewing: ${name}\n\nThis would open the public-facing university page in a new tab.`);
+        }
+
+        // Initialize App
+        window.onload = () => {
+            fetchUniversities();
+            switchView('list');
+        };
+
+    </script>
+</body>
+</html>

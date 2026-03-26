@@ -314,7 +314,7 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
     }
   };
 
-  if (user?.role !== "admin") {
+  if (user?.role !== "admin" && user?.role !== "super_admin") {
     return (
       <div className="min-h-screen bg-slate-50 pt-24 px-6">
         <div className="max-w-3xl mx-auto bg-white border border-slate-100 rounded-2xl p-8 shadow-sm">

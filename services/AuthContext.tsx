@@ -17,7 +17,7 @@ interface AuthContextType {
   loading: boolean;
   isAuthenticated: boolean;
   token: string | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<User>;
   register: (email: string, password: string, firstName: string, lastName: string, role?: string, educationLevel?: string) => Promise<{ requires_otp?: boolean, email?: string }>;
   verifyOTP: (email: string, otp: string) => Promise<void>;
   logout: () => void;
@@ -54,6 +54,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       apiService.setUser(response.data.user);
       setToken(response.data.token);
       setUser(response.data.user);
+      return response.data.user;
     } else {
       throw new Error('Invalid response from server');
     }
