@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiService, College, CreateCollegePayload, University } from "../../../services/api";
+import {
+  apiService,
+  College,
+  CreateCollegePayload,
+  University,
+} from "../../../services/api";
 import { useAuth } from "../../../services/AuthContext";
 
 interface AdminCollegesPageProps {
@@ -38,7 +43,9 @@ type ToastState = {
   message: string;
 };
 
-const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => {
+const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({
+  onNavigate,
+}) => {
   const queryClient = useQueryClient();
   const { user, token } = useAuth();
 
@@ -96,7 +103,8 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
   });
 
   const colleges = collegesQuery.data?.data?.colleges || [];
-  const universities = (universitiesQuery.data?.data?.universities || []) as University[];
+  const universities = (universitiesQuery.data?.data?.universities ||
+    []) as University[];
 
   const filteredColleges = useMemo(() => {
     if (!search.trim()) return colleges;
@@ -162,57 +170,71 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
       phone: form.phone,
     };
 
-    queryClient.setQueryData<AdminCollegesResponse>(["admin-colleges"], (old) => {
-      if (!old?.data) {
+    queryClient.setQueryData<AdminCollegesResponse>(
+      ["admin-colleges"],
+      (old) => {
+        if (!old?.data) {
+          return {
+            success: true,
+            message: "Optimistic",
+            data: {
+              colleges: [optimisticCollege],
+              pagination: { page: 1, pageSize: 100, total: 1, totalPages: 1 },
+            },
+          };
+        }
+
         return {
-          success: true,
-          message: "Optimistic",
+          ...old,
           data: {
-            colleges: [optimisticCollege],
-            pagination: { page: 1, pageSize: 100, total: 1, totalPages: 1 },
+            ...old.data,
+            colleges: [optimisticCollege, ...old.data.colleges],
+            pagination: {
+              ...old.data.pagination,
+              total: old.data.pagination.total + 1,
+            },
           },
         };
-      }
-
-      return {
-        ...old,
-        data: {
-          ...old.data,
-          colleges: [optimisticCollege, ...old.data.colleges],
-          pagination: {
-            ...old.data.pagination,
-            total: old.data.pagination.total + 1,
-          },
-        },
-      };
-    });
+      },
+    );
 
     setSaving(true);
     try {
       const response = await createCollegeMutation.mutateAsync(form);
       const created = response.data;
 
-      queryClient.setQueryData<AdminCollegesResponse>(["admin-colleges"], (old) => {
-        if (!old?.data || !created) return old;
+      queryClient.setQueryData<AdminCollegesResponse>(
+        ["admin-colleges"],
+        (old) => {
+          if (!old?.data || !created) return old;
 
-        return {
-          ...old,
-          data: {
-            ...old.data,
-            colleges: old.data.colleges.map((college) =>
-              college.id === optimisticCollege.id ? created : college,
-            ),
-          },
-        };
-      });
+          return {
+            ...old,
+            data: {
+              ...old.data,
+              colleges: old.data.colleges.map((college) =>
+                college.id === optimisticCollege.id ? created : college,
+              ),
+            },
+          };
+        },
+      );
 
       await queryClient.invalidateQueries({ queryKey: ["admin-colleges"] });
       await queryClient.invalidateQueries({ queryKey: ["universities"] });
       resetForm();
-      showToast("success", "College Created", `${form.name} has been added successfully.`);
+      showToast(
+        "success",
+        "College Created",
+        `${form.name} has been added successfully.`,
+      );
     } catch {
       queryClient.setQueryData(["admin-colleges"], previous);
-      showToast("error", "Create Failed", "Could not create college. Please try again.");
+      showToast(
+        "error",
+        "Create Failed",
+        "Could not create college. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -225,28 +247,32 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
       "admin-colleges",
     ]);
 
-    queryClient.setQueryData<AdminCollegesResponse>(["admin-colleges"], (old) => {
-      if (!old?.data) return old;
+    queryClient.setQueryData<AdminCollegesResponse>(
+      ["admin-colleges"],
+      (old) => {
+        if (!old?.data) return old;
 
-      return {
-        ...old,
-        data: {
-          ...old.data,
-          colleges: old.data.colleges.map((college) =>
-            college.id === editingCollegeId
-              ? {
-                ...college,
-                ...form,
-                type: form.type || college.type,
-                affiliation:
-                  universities.find((university) => university.id === form.university_id)
-                    ?.name || college.affiliation,
-              }
-              : college,
-          ),
-        },
-      };
-    });
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            colleges: old.data.colleges.map((college) =>
+              college.id === editingCollegeId
+                ? {
+                    ...college,
+                    ...form,
+                    type: form.type || college.type,
+                    affiliation:
+                      universities.find(
+                        (university) => university.id === form.university_id,
+                      )?.name || college.affiliation,
+                  }
+                : college,
+            ),
+          },
+        };
+      },
+    );
 
     setSaving(true);
     try {
@@ -273,7 +299,11 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
       showToast("success", "College Updated", "College details were updated.");
     } catch {
       queryClient.setQueryData(["admin-colleges"], previous);
-      showToast("error", "Update Failed", "Could not update college. Please try again.");
+      showToast(
+        "error",
+        "Update Failed",
+        "Could not update college. Please try again.",
+      );
     } finally {
       setSaving(false);
     }
@@ -286,21 +316,24 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
       "admin-colleges",
     ]);
 
-    queryClient.setQueryData<AdminCollegesResponse>(["admin-colleges"], (old) => {
-      if (!old?.data) return old;
+    queryClient.setQueryData<AdminCollegesResponse>(
+      ["admin-colleges"],
+      (old) => {
+        if (!old?.data) return old;
 
-      return {
-        ...old,
-        data: {
-          ...old.data,
-          colleges: old.data.colleges.filter((college) => college.id !== id),
-          pagination: {
-            ...old.data.pagination,
-            total: Math.max(0, old.data.pagination.total - 1),
+        return {
+          ...old,
+          data: {
+            ...old.data,
+            colleges: old.data.colleges.filter((college) => college.id !== id),
+            pagination: {
+              ...old.data.pagination,
+              total: Math.max(0, old.data.pagination.total - 1),
+            },
           },
-        },
-      };
-    });
+        };
+      },
+    );
 
     try {
       await deleteCollegeMutation.mutateAsync(id);
@@ -310,7 +343,11 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
       showToast("success", "College Deleted", "College has been removed.");
     } catch {
       queryClient.setQueryData(["admin-colleges"], previous);
-      showToast("error", "Delete Failed", "Could not delete college. Please try again.");
+      showToast(
+        "error",
+        "Delete Failed",
+        "Could not delete college. Please try again.",
+      );
     }
   };
 
@@ -318,7 +355,9 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
     return (
       <div className="min-h-screen bg-slate-50 pt-24 px-6">
         <div className="max-w-3xl mx-auto bg-white border border-slate-100 rounded-2xl p-8 shadow-sm">
-          <h1 className="text-2xl font-black text-slate-900 mb-2">Admin Access Required</h1>
+          <h1 className="text-2xl font-black text-slate-900 mb-2">
+            Admin Access Required
+          </h1>
           <p className="text-slate-500 font-medium mb-6">
             This page is restricted to admin accounts.
           </p>
@@ -338,16 +377,18 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
       {toast.show && (
         <div className="fixed top-24 right-6 z-[220] animate-fadeInDown">
           <div
-            className={`min-w-[320px] max-w-[420px] rounded-2xl shadow-2xl border px-4 py-3 flex items-start gap-3 ${toast.type === "success"
+            className={`min-w-[320px] max-w-[420px] rounded-2xl shadow-2xl border px-4 py-3 flex items-start gap-3 ${
+              toast.type === "success"
                 ? "bg-emerald-50 border-emerald-100"
                 : "bg-rose-50 border-rose-100"
-              }`}
+            }`}
           >
             <div
-              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${toast.type === "success"
+              className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                toast.type === "success"
                   ? "bg-emerald-500 text-white"
                   : "bg-rose-500 text-white"
-                }`}
+              }`}
             >
               <i
                 className={`fa-solid ${toast.type === "success" ? "fa-check" : "fa-xmark"}`}
@@ -355,7 +396,9 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
             </div>
             <div>
               <p className="text-sm font-black text-slate-900">{toast.title}</p>
-              <p className="text-xs font-semibold text-slate-500 mt-0.5">{toast.message}</p>
+              <p className="text-xs font-semibold text-slate-500 mt-0.5">
+                {toast.message}
+              </p>
             </div>
             <button
               onClick={() => setToast((prev) => ({ ...prev, show: false }))}
@@ -373,9 +416,13 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
             <div className="w-12 h-12 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center mb-4">
               <i className="fa-solid fa-triangle-exclamation text-xl"></i>
             </div>
-            <h3 className="text-lg font-black text-slate-900">Confirm Delete</h3>
+            <h3 className="text-lg font-black text-slate-900">
+              Confirm Delete
+            </h3>
             <p className="text-sm text-slate-500 font-semibold mt-2">
-              Delete <span className="text-slate-900">{deleteCandidate.name}</span>? This action cannot be undone.
+              Delete{" "}
+              <span className="text-slate-900">{deleteCandidate.name}</span>?
+              This action cannot be undone.
             </p>
 
             <div className="mt-6 flex items-center justify-end gap-3">
@@ -413,7 +460,10 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
             <select
               value={form.university_id}
               onChange={(event) =>
-                setForm((prev) => ({ ...prev, university_id: Number(event.target.value) }))
+                setForm((prev) => ({
+                  ...prev,
+                  university_id: Number(event.target.value),
+                }))
               }
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold text-slate-700"
             >
@@ -427,14 +477,18 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
 
             <input
               value={form.name}
-              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, name: event.target.value }))
+              }
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold"
               placeholder="College name"
             />
 
             <input
               value={form.location}
-              onChange={(event) => setForm((prev) => ({ ...prev, location: event.target.value }))}
+              onChange={(event) =>
+                setForm((prev) => ({ ...prev, location: event.target.value }))
+              }
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold"
               placeholder="Location"
             />
@@ -442,7 +496,9 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
             <div className="grid grid-cols-2 gap-3">
               <input
                 value={form.type || ""}
-                onChange={(event) => setForm((prev) => ({ ...prev, type: event.target.value }))}
+                onChange={(event) =>
+                  setForm((prev) => ({ ...prev, type: event.target.value }))
+                }
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold"
                 placeholder="Type"
               />
@@ -450,7 +506,10 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
                 type="number"
                 value={form.rating ?? 0}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, rating: Number(event.target.value) }))
+                  setForm((prev) => ({
+                    ...prev,
+                    rating: Number(event.target.value),
+                  }))
                 }
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold"
                 placeholder="Rating"
@@ -465,7 +524,10 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
                 type="number"
                 value={form.reviews ?? 0}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, reviews: Number(event.target.value) }))
+                  setForm((prev) => ({
+                    ...prev,
+                    reviews: Number(event.target.value),
+                  }))
                 }
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold"
                 placeholder="Reviews"
@@ -475,7 +537,10 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
                 type="number"
                 value={form.programs ?? 0}
                 onChange={(event) =>
-                  setForm((prev) => ({ ...prev, programs: Number(event.target.value) }))
+                  setForm((prev) => ({
+                    ...prev,
+                    programs: Number(event.target.value),
+                  }))
                 }
                 className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold"
                 placeholder="Programs"
@@ -486,7 +551,10 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
             <textarea
               value={form.description || ""}
               onChange={(event) =>
-                setForm((prev) => ({ ...prev, description: event.target.value }))
+                setForm((prev) => ({
+                  ...prev,
+                  description: event.target.value,
+                }))
               }
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm font-semibold min-h-24"
               placeholder="Description"
@@ -494,7 +562,9 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
 
             <div className="grid grid-cols-2 gap-3">
               <button
-                disabled={saving || !form.university_id || !form.name || !form.location}
+                disabled={
+                  saving || !form.university_id || !form.name || !form.location
+                }
                 onClick={editingCollegeId ? handleUpdate : handleCreate}
                 className="py-3 rounded-xl bg-primary-600 text-white font-black text-xs uppercase tracking-widest disabled:opacity-40"
               >
@@ -513,7 +583,9 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
 
         <section className="xl:col-span-8 bg-white border border-slate-100 rounded-2xl p-6 shadow-sm">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-            <h2 className="text-xl font-black text-slate-900">Manage Colleges</h2>
+            <h2 className="text-xl font-black text-slate-900">
+              Manage Colleges
+            </h2>
             <input
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -523,7 +595,9 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
           </div>
 
           {collegesQuery.isLoading ? (
-            <div className="py-10 text-center text-slate-500 font-semibold">Loading colleges...</div>
+            <div className="py-10 text-center text-slate-500 font-semibold">
+              Loading colleges...
+            </div>
           ) : collegesQuery.error ? (
             <div className="py-10 text-center text-rose-600 font-semibold">
               {(collegesQuery.error as Error).message}
@@ -536,12 +610,16 @@ const AdminCollegesPage: React.FC<AdminCollegesPageProps> = ({ onNavigate }) => 
                   className="border border-slate-100 rounded-xl p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
                 >
                   <div>
-                    <h3 className="text-slate-900 font-black text-base">{college.name}</h3>
+                    <h3 className="text-slate-900 font-black text-base">
+                      {college.name}
+                    </h3>
                     <p className="text-slate-500 text-sm font-semibold">
-                      {college.location} • {college.affiliation} • {college.type}
+                      {college.location} • {college.affiliation} •{" "}
+                      {college.type}
                     </p>
                     <p className="text-slate-400 text-xs font-bold uppercase tracking-widest mt-1">
-                      Rating {college.rating} • Reviews {college.reviews} • Programs {college.programs}
+                      Rating {college.rating} • Reviews {college.reviews} •
+                      Programs {college.programs}
                     </p>
                   </div>
 

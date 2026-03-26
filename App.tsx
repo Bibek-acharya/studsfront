@@ -1,6 +1,12 @@
 import EducationNavbar from "./components/Education/EducationNavbar";
 import React, { lazy, Suspense, useEffect } from "react";
-import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from "react-router-dom";
 import { useAuth } from "./services/AuthContext";
 import Footer from "./components/Footer";
 
@@ -13,7 +19,9 @@ const ScrollToTop = () => {
   return null;
 };
 
-const EducationPage = lazy(() => import("./components/Education/EducationPage"));
+const EducationPage = lazy(
+  () => import("./components/Education/EducationPage"),
+);
 const AdminCollegesPage = lazy(
   () => import("./components/Education/Admin/AdminCollegesPage"),
 );
@@ -23,12 +31,17 @@ const SuperAdminDashboardPage = lazy(
 const FindCollegePage = lazy(
   () => import("./components/Education/FindCollege/FindCollegePage"),
 );
-const SearchPage = lazy(() => import("./components/Education/SearchPage").then(module => ({ default: module.SearchPage })));
+const SearchPage = lazy(() =>
+  import("./components/Education/SearchPage").then((module) => ({
+    default: module.SearchPage,
+  })),
+);
 const CompareCollegesPage = lazy(
   () => import("./components/Education/CompareColleges/CompareCollegesPage"),
 );
 const CollegeComparisonResultPage = lazy(
-  () => import("./components/Education/CompareColleges/CollegeComparisonResultPage"),
+  () =>
+    import("./components/Education/CompareColleges/CollegeComparisonResultPage"),
 );
 const CourseFinderPage = lazy(
   () => import("./components/Education/CourseFinder/CourseFinderPage"),
@@ -80,7 +93,8 @@ const ScholarshipInquiryForm = lazy(
   () => import("./components/Education/Scholarships/ScholarshipInquiryForm"),
 );
 const ScholarshipApplicationPage = lazy(
-  () => import("./components/Education/Scholarships/ScholarshipApplicationPage"),
+  () =>
+    import("./components/Education/Scholarships/ScholarshipApplicationPage"),
 );
 const ScholarshipFinderPage = lazy(
   () => import("./components/Education/Scholarships/ScholarshipFinderPage"),
@@ -122,7 +136,8 @@ const ScholarshipProviderZone = lazy(
   () => import("./components/Partner/ScholarshipProviderZone"),
 );
 const ScholarshipProviderDashboard = lazy(
-  () => import("./components/Education/ScholarshipProvider/ScholarshipProviderDashboard"),
+  () =>
+    import("./components/Education/ScholarshipProvider/ScholarshipProviderDashboard"),
 );
 const AuthContainer = lazy(() => import("./components/Auth/AuthContainer"));
 const OnboardingFlow = lazy(
@@ -155,7 +170,18 @@ const App: React.FC = () => {
   );
 
   const isAdminUser = user?.role === "admin" || user?.role === "super_admin";
-  const hideNavFooter = ["/login", "/signup", "/onboarding", "/studentDashboard", "/auth/google-callback", "/institutionZone", "/institutionDashboard", "/scholarshipProviderZone", "/scholarshipProviderDashboard", "/admin"].some(path => location.pathname.startsWith(path));
+  const hideNavFooter = [
+    "/login",
+    "/signup",
+    "/onboarding",
+    "/studentDashboard",
+    "/auth/google-callback",
+    "/institutionZone",
+    "/institutionDashboard",
+    "/scholarshipProviderZone",
+    "/scholarshipProviderDashboard",
+    "/admin",
+  ].some((path) => location.pathname.startsWith(path));
 
   return (
     <div className="min-h-screen font-sans selection:bg-blue-500 selection:text-white overflow-x-hidden bg-white">
@@ -176,11 +202,36 @@ const App: React.FC = () => {
         <Suspense fallback={routeFallback}>
           <Routes>
             {/* Main Education Page */}
-            <Route path="/" element={<EducationPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route
+              path="/"
+              element={
+                <EducationPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
 
             {/* Auth & Onboarding */}
-            <Route path="/login" element={<AuthContainer type="login" onAuthSuccess={() => navigate("/")} />} />
-            <Route path="/signup" element={<AuthContainer type="signup" onAuthSuccess={() => navigate("/")} />} />
+            <Route
+              path="/login"
+              element={
+                <AuthContainer
+                  type="login"
+                  onAuthSuccess={() => navigate("/")}
+                />
+              }
+            />
+            <Route
+              path="/signup"
+              element={
+                <AuthContainer
+                  type="signup"
+                  onAuthSuccess={() => navigate("/")}
+                />
+              }
+            />
             <Route path="/admin" element={<SuperAdminLoginPage />} />
             <Route
               path="/admin/dashboard"
@@ -192,48 +243,286 @@ const App: React.FC = () => {
                 )
               }
             />
-            <Route path="/onboarding" element={<OnboardingFlow onComplete={() => navigate("/")} />} />
-            <Route path="/auth/google-callback" element={<GoogleCallbackHandler />} />
-            <Route path="/studentDashboard" element={<StudentDashboard onLogout={handleLogout} />} />
+            <Route
+              path="/onboarding"
+              element={<OnboardingFlow onComplete={() => navigate("/")} />}
+            />
+            <Route
+              path="/auth/google-callback"
+              element={<GoogleCallbackHandler />}
+            />
+            <Route
+              path="/studentDashboard"
+              element={<StudentDashboard onLogout={handleLogout} />}
+            />
 
             {/* Core Education Pages */}
-            <Route path="/educationPage" element={<EducationPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/findCollege" element={<FindCollegePage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route
+              path="/educationPage"
+              element={
+                <EducationPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/findCollege"
+              element={
+                <FindCollegePage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
             <Route path="/search" element={<SearchPage />} />
-            <Route path="/compareColleges" element={<CompareCollegesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/compareCollegesResult" element={<CollegeComparisonResultPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/collegeDetails" element={<CollegeDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/courseFinder" element={<CourseFinderPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/courseDetails" element={<CourseDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route
+              path="/compareColleges"
+              element={
+                <CompareCollegesPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/compareCollegesResult"
+              element={
+                <CollegeComparisonResultPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/collegeDetails"
+              element={
+                <CollegeDetailsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/courseFinder"
+              element={
+                <CourseFinderPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/courseDetails"
+              element={
+                <CourseDetailsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
 
             {/* Exams & Universities */}
-            <Route path="/examsPage" element={<ExamsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/examDetails" element={<ExamDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/universitiesPage" element={<UniversitiesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/universityDetails" element={<UniversityDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/rankingsPage" element={<RankingsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route
+              path="/examsPage"
+              element={
+                <ExamsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/examDetails"
+              element={
+                <ExamDetailsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/universitiesPage"
+              element={
+                <UniversitiesPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/universityDetails"
+              element={
+                <UniversityDetailsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/rankingsPage"
+              element={
+                <RankingsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
 
             {/* Scholarships */}
-            <Route path="/scholarshipMain" element={<ScholarshipMainPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/scholarshipFinder" element={<ScholarshipFinderPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/scholarshipFinderTool" element={<ScholarshipFinderToolPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/collegeRecommenderTool" element={<CollegeRecommenderToolPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/collegeQuiz" element={<CollegeQuizPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/scholarshipDetails" element={<ScholarshipDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/scholarshipHubDetails" element={<ScholarshipHubDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/scholarshipCategory" element={<ScholarshipCategoryPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/scholarshipInquiry" element={<ScholarshipInquiryForm onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/scholarshipApplication" element={<ScholarshipApplicationPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route
+              path="/scholarshipMain"
+              element={
+                <ScholarshipMainPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/scholarshipFinder"
+              element={
+                <ScholarshipFinderPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/scholarshipFinderTool"
+              element={
+                <ScholarshipFinderToolPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/collegeRecommenderTool"
+              element={
+                <CollegeRecommenderToolPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/collegeQuiz"
+              element={
+                <CollegeQuizPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/scholarshipDetails"
+              element={
+                <ScholarshipDetailsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/scholarshipHubDetails"
+              element={
+                <ScholarshipHubDetailsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/scholarshipCategory"
+              element={
+                <ScholarshipCategoryPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/scholarshipInquiry"
+              element={
+                <ScholarshipInquiryForm
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/scholarshipApplication"
+              element={
+                <ScholarshipApplicationPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
 
             {/* Others */}
-            <Route path="/admissionsDiscovery" element={<AdmissionsDiscoveryPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/entranceDiscovery" element={<EntranceDiscoveryPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/campusForum" element={<CampusForumPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
+            <Route
+              path="/admissionsDiscovery"
+              element={
+                <AdmissionsDiscoveryPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/entranceDiscovery"
+              element={
+                <EntranceDiscoveryPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/campusForum"
+              element={
+                <CampusForumPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
             <Route
               path="/bookCounselling"
               element={
                 user ? (
-                  <BookCounsellingPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />
+                  <BookCounsellingPage
+                    onNavigate={(view, data) =>
+                      navigate(`/${view}`, { state: data })
+                    }
+                  />
                 ) : (
                   <Navigate to="/login" replace />
                 )
@@ -243,28 +532,123 @@ const App: React.FC = () => {
               path="/writeReview"
               element={
                 user ? (
-                  <WriteReviewPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />
+                  <WriteReviewPage
+                    onNavigate={(view, data) =>
+                      navigate(`/${view}`, { state: data })
+                    }
+                  />
                 ) : (
                   <Navigate to="/login" replace />
                 )
               }
             />
-            <Route path="/studyResources" element={<ResourcesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/newsPage" element={<NewsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/newsDetails" element={<NewsDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/blogPage" element={<BlogPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/blogDetails" element={<BlogDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/eventsPage" element={<EventsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/eventDetails" element={<EventDetailsPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/institutionZone" element={<InstitutionZone onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/institutionDashboard" element={<InstitutionDashboard />} />
-            <Route path="/scholarshipProviderZone" element={<ScholarshipProviderZone onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />} />
-            <Route path="/scholarshipProviderDashboard" element={<ScholarshipProviderDashboard />} />
+            <Route
+              path="/studyResources"
+              element={
+                <ResourcesPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/newsPage"
+              element={
+                <NewsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/newsDetails"
+              element={
+                <NewsDetailsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/blogPage"
+              element={
+                <BlogPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/blogDetails"
+              element={
+                <BlogDetailsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/eventsPage"
+              element={
+                <EventsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/eventDetails"
+              element={
+                <EventDetailsPage
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/institutionZone"
+              element={
+                <InstitutionZone
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/institutionDashboard"
+              element={<InstitutionDashboard />}
+            />
+            <Route
+              path="/scholarshipProviderZone"
+              element={
+                <ScholarshipProviderZone
+                  onNavigate={(view, data) =>
+                    navigate(`/${view}`, { state: data })
+                  }
+                />
+              }
+            />
+            <Route
+              path="/scholarshipProviderDashboard"
+              element={<ScholarshipProviderDashboard />}
+            />
             <Route
               path="/adminColleges"
               element={
                 isAdminUser ? (
-                  <AdminCollegesPage onNavigate={(view, data) => navigate(`/${view}`, { state: data })} />
+                  <AdminCollegesPage
+                    onNavigate={(view, data) =>
+                      navigate(`/${view}`, { state: data })
+                    }
+                  />
                 ) : (
                   <Navigate to="/admin" replace />
                 )
@@ -274,7 +658,6 @@ const App: React.FC = () => {
             <Route path="/contact" element={<ContactPage />} />
           </Routes>
         </Suspense>
-
       </div>
 
       {!hideNavFooter && <Footer onNavigate={(view) => navigate(`/${view}`)} />}

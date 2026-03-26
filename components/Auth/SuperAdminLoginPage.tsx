@@ -24,7 +24,8 @@ const SuperAdminLoginPage: React.FC = () => {
 
     try {
       const loggedInUser = await login(email, password);
-      const isAdmin = loggedInUser.role === "admin" || loggedInUser.role === "super_admin";
+      const isAdmin =
+        loggedInUser.role === "admin" || loggedInUser.role === "super_admin";
 
       if (!isAdmin) {
         logout();
@@ -49,9 +50,13 @@ const SuperAdminLoginPage: React.FC = () => {
       <div className="relative min-h-screen flex items-center justify-center p-6">
         <div className="w-full max-w-md rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl shadow-black/40">
           <div className="mb-7">
-            <p className="text-xs uppercase tracking-[0.22em] text-cyan-300 font-semibold">StudSphere Control</p>
+            <p className="text-xs uppercase tracking-[0.22em] text-cyan-300 font-semibold">
+              StudSphere Control
+            </p>
             <h1 className="text-3xl font-black mt-2">Super Admin Login</h1>
-            <p className="text-sm text-slate-300 mt-2">Sign in from localhost using your admin credentials.</p>
+            <p className="text-sm text-slate-300 mt-2">
+              Sign in from localhost using your admin credentials.
+            </p>
           </div>
 
           {error && (
@@ -62,7 +67,9 @@ const SuperAdminLoginPage: React.FC = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Email</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                Email
+              </label>
               <input
                 type="email"
                 required
@@ -75,7 +82,9 @@ const SuperAdminLoginPage: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">Password</label>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-slate-300 mb-2">
+                Password
+              </label>
               <input
                 type="password"
                 required
