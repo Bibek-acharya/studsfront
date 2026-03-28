@@ -766,7 +766,10 @@
 
         async function fetchUniversities() {
             try {
-                const result = await requestApi("/universities");
+                const token = getAuthToken();
+                const result = await requestApi("/admin/universities", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const list = result?.data?.universities || [];
                 universities = list.map(mapApiUniversityToUi);
                 renderList();

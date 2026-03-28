@@ -914,6 +914,49 @@ class ApiService {
     );
   }
 
+  // Admin university endpoints
+  async createUniversity(
+    token: string,
+    university: any,
+  ): Promise<{ success: boolean; data?: University; message: string }> {
+    return this.request<{ success: boolean; data?: University; message: string }>(
+      {
+        method: "POST",
+        url: "/admin/universities",
+        data: university,
+      },
+      token,
+    );
+  }
+
+  async updateUniversity(
+    token: string,
+    id: number,
+    updates: any,
+  ): Promise<{ success: boolean; data?: University; message: string }> {
+    return this.request<{ success: boolean; data?: University; message: string }>(
+      {
+        method: "PUT",
+        url: `/admin/universities/${id}`,
+        data: updates,
+      },
+      token,
+    );
+  }
+
+  async deleteUniversity(
+    token: string,
+    id: number,
+  ): Promise<{ success: boolean; message: string }> {
+    return this.request<{ success: boolean; message: string }>(
+      {
+        method: "DELETE",
+        url: `/admin/universities/${id}`,
+      },
+      token,
+    );
+  }
+
   // --- Forum Endpoints ---
   async getForumPosts(
     category?: string,
