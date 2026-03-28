@@ -306,9 +306,64 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
   const website = university?.website || "WWW.Studsphere.Com";
   const websiteHref = website.startsWith("http") ? website : `https://${website}`;
 
-  const courseRows = coursesFilter === "all" ? courses : courses.filter((row) => row.level === coursesFilter);
-  const programRows = programFilter === "all" ? offeredPrograms : offeredPrograms.filter((row) => row.level === programFilter);
-  const scholarshipRows = scholarshipFilter === "all" ? scholarships : scholarships.filter((row) => row.level === scholarshipFilter);
+  const parsedCourses = useMemo(() => {
+    if (!university?.courses) return courses;
+    try {
+      const { bachelor = [], master = [] } = typeof university.courses === 'string' ? JSON.parse(university.courses) : university.courses;
+      const b = bachelor.map((c: any) => ({
+        title: c.name,
+        subtitle: "",
+        duration: c.duration,
+        format: "Full Time",
+        fee: c.fees,
+        eligibility: c.eligibility,
+        seats: c.seats ? `${c.seats} Seats` : "-",
+        level: "Bachelor" as LevelFilter,
+      }));
+      const m = master.map((c: any) => ({
+        title: c.name,
+        subtitle: "",
+        duration: c.duration,
+        format: "Full Time",
+        fee: c.fees,
+        eligibility: c.eligibility,
+        seats: c.seats ? `${c.seats} Seats` : "-",
+        level: "Master" as LevelFilter,
+      }));
+      return b.length || m.length ? [...b, ...m] : courses;
+    } catch { return courses; }
+  }, [university?.courses]);
+
+  const parsedPrograms = useMemo(() => {
+    if (!university?.programs) return offeredPrograms;
+    try {
+      const progs = typeof university.programs === 'string' ? JSON.parse(university.programs) : university.programs;
+      return Array.isArray(progs) && progs.length ? progs.map((p: any) => ({
+        name: p.name,
+        level: p.level as LevelFilter,
+        status: String(p.status) === "false" || p.status === "Closed" ? "Closed" : "Ongoing"
+      })) : offeredPrograms;
+    } catch { return offeredPrograms; }
+  }, [university?.programs]);
+
+  const parsedScholarships = useMemo(() => {
+    if (!university?.scholarships) return scholarships;
+    try {
+      const schols = typeof university.scholarships === 'string' ? JSON.parse(university.scholarships) : university.scholarships;
+      return Array.isArray(schols) && schols.length ? schols.map((s: any) => ({
+        program: s.program,
+        title: s.name,
+        benefit: s.benefit,
+        audience: s.for,
+        level: "all" as LevelFilter,
+      })) : scholarships;
+    } catch { return scholarships; }
+  }, [university?.scholarships]);
+
+  const courseRows = coursesFilter === "all" ? parsedCourses : parsedCourses.filter((row: any) => row.level === coursesFilter);
+  const programRows = programFilter === "all" ? parsedPrograms : parsedPrograms.filter((row: any) => row.level === programFilter);
+  const scholarshipRows = scholarshipFilter === "all" ? parsedScholarships : parsedScholarships.filter((row: any) => row.level === scholarshipFilter || row.level === "all");
+
 
   const affiliatedTableRows = useMemo(() => {
     const sampleAddresses = [
@@ -339,21 +394,128 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
     });
   }, [affiliatedColleges, university?.location]);
 
-  if (!resolvedId) {
-    return <StatusState text="University not selected." tone="default" />;
-  }
-
-  if (isLoading) {
-    return <StatusState text="Loading university details..." tone="default" />;
-  }
-
-  if (isError || !university) {
-    return <StatusState text="Failed to load university details." tone="error" />;
-  }
 
   const toggleDropdown = (key: string) => {
     setOpenDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
   };
+
+  const parsedAbout = useMemo(() => {
+    try {
+      return typeof university?.about === 'string' ? JSON.parse(university.about) : university?.about || {};
+    } catch { return {}; }
+  }, [university?.about]);
+
+  const parsedQuick = useMemo(() => {
+    try {
+      return typeof university?.quick === 'string' ? JSON.parse(university.quick) : university?.quick || {};
+    } catch { return {}; }
+  }, [university?.quick]);
+
+  const parsedOverview = useMemo(() => {
+    try {
+      return typeof university?.overview === 'string' ? JSON.parse(university.overview) : university?.overview || [];
+    } catch { return []; }
+  }, [university?.overview]);
+
+  const parsedLeadership = useMemo(() => {
+    try {
+      return typeof university?.leadership === 'string' ? JSON.parse(university.leadership) : university?.leadership || [];
+    } catch { return []; }
+  }, [university?.leadership]);
+
+  const parsedContact = useMemo(() => {
+    try {
+      return typeof university?.contact === 'string' ? JSON.parse(university.contact) : university?.contact || {};
+    } catch { return {}; }
+  }, [university?.contact]);
+
+  const parsedEvents = useMemo(() => {
+    try {
+      const eVs = typeof university?.events === 'string' ? JSON.parse(university.events) : university?.events || [];
+      return Array.isArray(eVs) && eVs.length ? eVs.map((e: any) => ({
+        day: e.date?.split('-')[2] || "01",
+        month: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"][parseInt(e.date?.split('-')[1] || "0") - 1] || "JAN",
+        color: "bg-blue-50 text-blue-600",
+        monthColor: "text-blue-600",
+        title: e.heading,
+        time: "All Day",
+        body: e.desc || `Type: ${e.type} | Venue: ${e.venue}`
+      })) : eventCards;
+    } catch { return eventCards; }
+  }, [university?.events]);
+
+  const parsedNews = useMemo(() => {
+    try {
+      const nWs = typeof university?.news === 'string' ? JSON.parse(university.news) : university?.news || [];
+      return Array.isArray(nWs) && nWs.length ? nWs.map((n: any) => ({
+        tag: n.type || "News",
+        tagClass: n.type === "Notice" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600",
+        image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
+        title: n.heading,
+        body: n.desc,
+        time: "Recently"
+      })) : newsCards;
+    } catch { return newsCards; }
+  }, [university?.news]);
+
+  const parsedDownloads = useMemo(() => {
+    try {
+      const dL = typeof university?.downloads === 'string' ? JSON.parse(university.downloads) : university?.downloads || [];
+      return Array.isArray(dL) && dL.length ? dL.map((d: any) => ({
+        title: d.name,
+        meta: `Updated ${d.date}`,
+        action: "Download",
+        icon: "fa-file-pdf",
+        color: "bg-red-50 text-red-500",
+        linkColor: "text-red-500 hover:text-red-700"
+      })) : downloads;
+    } catch { return downloads; }
+  }, [university?.downloads]);
+
+  const parsedGallery = useMemo(() => {
+    try {
+      const gL = typeof university?.gallery === 'string' ? JSON.parse(university.gallery) : university?.gallery || [];
+      return Array.isArray(gL) && gL.length ? gL : galleryImages;
+    } catch { return galleryImages; }
+  }, [university?.gallery]);
+
+  const instituteSections = useMemo(() => {
+    try {
+      if (!university?.faculties) return [];
+      const facs = typeof university.faculties === 'string' ? JSON.parse(university.faculties) : university.faculties;
+      return Array.isArray(facs) ? facs.map((f: any) => ({
+        key: f.name.toLowerCase().replace(/\s+/g, '-'),
+        title: f.name,
+        colleges: Array.isArray(f.colleges) ? f.colleges : []
+      })) : [];
+    } catch { return []; }
+  }, [university?.faculties]);
+
+  const parsedAdmissions = useMemo(() => {
+    try {
+      if (!university?.admissions) return [];
+      const data = typeof university.admissions === "string" ? JSON.parse(university.admissions) : university.admissions;
+      return Array.isArray(data) ? data : [];
+    } catch { return []; }
+  }, [university?.admissions]);
+
+  const parsedReviews = useMemo(() => {
+    try {
+      if (!university?.reviews) return [];
+      const data = typeof university.reviews === "string" ? JSON.parse(university.reviews) : university.reviews;
+      return Array.isArray(data) ? data : [];
+    } catch { return []; }
+  }, [university?.reviews]);
+
+  if (!resolvedId) {
+    return <StatusState text="University not selected." tone="default" />;
+  }
+  if (isLoading) {
+    return <StatusState text="Loading university details..." tone="default" />;
+  }
+  if (isError || !university) {
+    return <StatusState text="Failed to load university details." tone="error" />;
+  }
 
   return (
     <div className="w-full bg-white">
@@ -361,7 +523,7 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
         className="h-[220px] w-full bg-cover bg-center md:h-[360px]"
         style={{
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop')",
+            `url('${university?.cover || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop"}')`,
         }}
       />
 
@@ -419,7 +581,21 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                 <i className="fa-solid fa-building"></i>
                 View Affiliated Colleges
               </button>
-              <button className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-[15px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
+              <button 
+                className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-[15px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
+                onClick={() => {
+                  try {
+                    const downloads = typeof university?.downloads === 'string' ? JSON.parse(university.downloads) : university.downloads;
+                    if (downloads && downloads[0]?.file) {
+                      window.open(downloads[0].file, '_blank');
+                    } else {
+                      alert("Prospectus not available yet.");
+                    }
+                  } catch (e) {
+                      alert("Prospectus not available yet.");
+                  }
+                }}
+              >
                 <i className="fa-solid fa-download"></i>
                 Prospectus
               </button>
@@ -453,29 +629,39 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
             {activeTab === "about" && (
               <div className="space-y-10">
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
-                  <MediaCard title="VC's Message" icon="fa-comment-dots" image="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop" />
-                  <MediaCard title="Campus Tour" icon="fa-video" image="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop" />
+                  {parsedAbout.yt1 ? (
+                    <div className="overflow-hidden rounded-xl h-64 shadow-sm bg-gray-100"><iframe className="w-full h-full" src={parsedAbout.yt1.replace("watch?v=", "embed/")} frameBorder="0" allowFullScreen></iframe></div>
+                  ) : <MediaCard title="VC's Message" icon="fa-comment-dots" image="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop" />}
+                  {parsedAbout.yt2 ? (
+                    <div className="overflow-hidden rounded-xl h-64 shadow-sm bg-gray-100"><iframe className="w-full h-full" src={parsedAbout.yt2.replace("watch?v=", "embed/")} frameBorder="0" allowFullScreen></iframe></div>
+                  ) : <MediaCard title="Campus Tour" icon="fa-video" image="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop" />}
                 </div>
 
                 <div className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px]">
-                  <p className="text-lg font-medium text-gray-800">
-                    Welcome to {university.name} - the pioneer of higher education in Nepal.
-                  </p>
-                  <p>
-                    Established in {university.established || "1959"}, <strong className="font-bold text-gray-900">{university.name}</strong> is one of Nepal's oldest and largest universities. With a central campus in {university.location} and numerous constituent and affiliated colleges across the country, it has been a cornerstone of academic excellence for decades.
-                  </p>
-                  <p>
-                    The university comprises multiple institutes, faculties, central departments, and over <strong className="text-gray-900">{university.collegesCount || affiliatedColleges.length}+ affiliated colleges</strong>. It offers a broad range of programs from intermediate to PhD levels in humanities, management, science, technology, medicine, engineering, forestry, and agriculture.
-                  </p>
-                  <p>
-                    Our mission is to produce socially responsible, skilled, and research-oriented graduates who can contribute to national development through quality education and international collaboration.
-                  </p>
+                  {parsedAbout.desc ? (
+                    <div dangerouslySetInnerHTML={{ __html: parsedAbout.desc }} />
+                  ) : (
+                    <>
+                      <p className="text-lg font-medium text-gray-800">
+                        Welcome to {university.name} - the pioneer of higher education in Nepal.
+                      </p>
+                      <p>
+                        Established in {parsedQuick.est || university.established || "1959"}, <strong className="font-bold text-gray-900">{university.name}</strong> is one of Nepal's oldest and largest universities. With a central campus in {university.location} and numerous constituent and affiliated colleges across the country, it has been a cornerstone of academic excellence for decades.
+                      </p>
+                      <p>
+                        The university comprises multiple institutes, faculties, central departments, and over <strong className="text-gray-900">{university.collegesCount || affiliatedColleges.length}+ affiliated colleges</strong>. It offers a broad range of programs from intermediate to PhD levels.
+                      </p>
+                      <p>
+                        Our mission is to produce socially responsible, skilled, and research-oriented graduates who can contribute to national development through quality education and international collaboration.
+                      </p>
+                    </>
+                  )}
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                  <InfoPanel title="Our Vision" body="To be a leading center of higher learning globally recognized for excellence in research, teaching, and contribution to society's progress." panelClass="bg-[#f4f7fb]" iconClass="bg-blue-100/80 text-blue-600" icon="fa-eye" />
-                  <InfoPanel title="Our Mission" body="To provide affordable, quality higher education that empowers individuals and cultivates intellectual growth across diverse communities." panelClass="bg-[#f0fdf4]" iconClass="bg-green-100/80 text-green-600" icon="fa-bullseye" />
-                  <InfoPanel title="Core Values" body="Excellence, Inclusivity, Integrity, Innovation, and Social Responsibility." panelClass="bg-[#fef2f2]" iconClass="bg-red-50 text-red-500" icon="fa-gem" />
+                  <InfoPanel title="Our Vision" body={parsedAbout.vision || "To be a leading center of higher learning globally recognized for excellence in research, teaching, and contribution to society's progress."} panelClass="bg-[#f4f7fb]" iconClass="bg-blue-100/80 text-blue-600" icon="fa-eye" />
+                  <InfoPanel title="Our Mission" body={parsedAbout.mission || "To provide affordable, quality higher education that empowers individuals and cultivates intellectual growth across diverse communities."} panelClass="bg-[#f0fdf4]" iconClass="bg-green-100/80 text-green-600" icon="fa-bullseye" />
+                  <InfoPanel title="Core Values" body={parsedAbout.values || "Excellence, Inclusivity, Integrity, Innovation, and Social Responsibility."} panelClass="bg-[#fef2f2]" iconClass="bg-red-50 text-red-500" icon="fa-gem" />
                 </div>
 
                 <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
@@ -485,12 +671,18 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                     </h3>
                   </div>
                   <div className="divide-y divide-gray-100">
-                    <OverviewRow label="Established" value={String(university.established || "1959")} />
-                    <OverviewRow label="Location" value={`${university.location} (Central Campus)`} />
-                    <OverviewRow label="Type" value={university.type || "Public / Non-profit / Autonomous"} />
-                    <OverviewRow label="Affiliated Colleges" value={String(university.collegesCount || affiliatedColleges.length)} />
-                    <OverviewRow label="Programs" value={String(university.programsCount || 150)} />
-                    <OverviewRow label="International Collaborations" value="200+ universities worldwide" />
+                    {parsedOverview.length > 0 ? parsedOverview.map((item: any, i: number) => (
+                      <OverviewRow key={i} label={item.label} value={item.fact} />
+                    )) : (
+                      <>
+                        <OverviewRow label="Established" value={String(parsedQuick.est || university.established || "1959")} />
+                        <OverviewRow label="Location" value={`${university.location} (Central Campus)`} />
+                        <OverviewRow label="Type" value={parsedQuick.type || university.type || "Public / Non-profit / Autonomous"} />
+                        <OverviewRow label="Affiliated Colleges" value={String(parsedQuick.campuses || university.collegesCount || affiliatedColleges.length)} />
+                        <OverviewRow label="Programs" value={String(university.programsCount || 150)} />
+                        <OverviewRow label="Total Students" value={parsedQuick.students || "Unknown"} />
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -510,18 +702,36 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        <AdminRow position="Chancellor" role="Ceremonial head (Prime Minister)" holder="Rt. Hon'ble Prime Minister" />
-                        <AdminRow position="Vice Chancellor" role="Chief Executive" holder="Prof. Dr. Dharma Kant Baskota" />
-                        <AdminRow position="Rector" role="Academic affairs" holder="Prof. Dr. Khadga K.C." />
-                        <AdminRow position="Registrar" role="Administration & finance" holder="Prof. Dr. Kedar Prasad Rijal" />
+                        {parsedLeadership.length > 0 ? parsedLeadership.map((item: any, i: number) => (
+                           <AdminRow key={i} position={item.position} role={item.role} holder={item.holder} />
+                        )) : (
+                          <>
+                            <AdminRow position="Chancellor" role="Ceremonial head (Prime Minister)" holder="Rt. Hon'ble Prime Minister" />
+                            <AdminRow position="Vice Chancellor" role="Chief Executive" holder="Prof. Dr. Dharma Kant Baskota" />
+                            <AdminRow position="Rector" role="Academic affairs" holder="Prof. Dr. Khadga K.C." />
+                            <AdminRow position="Registrar" role="Administration & finance" holder="Prof. Dr. Kedar Prasad Rijal" />
+                          </>
+                        )}
                       </tbody>
                     </table>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <FeatureCallout title="Semester System" body="Implemented at master's level, expanding to undergraduate for timely completion." cardClass="bg-blue-50 border-blue-100" iconClass="bg-blue-100 text-blue-600" icon="fa-layer-group" />
-                  <FeatureCallout title="Global Ties" body="Partnerships with 200+ universities for research and exchange." cardClass="bg-emerald-50 border-emerald-100" iconClass="bg-emerald-100 text-emerald-600" icon="fa-globe" />
+                  <FeatureCallout 
+                    title={parsedAbout.feature1Title || "Semester System"} 
+                    body={parsedAbout.feature1Body || "Implemented at master's level, expanding to undergraduate for timely completion."} 
+                    cardClass="bg-blue-50 border-blue-100" 
+                    iconClass="bg-blue-100 text-blue-600" 
+                    icon="fa-layer-group" 
+                  />
+                  <FeatureCallout 
+                    title={parsedAbout.feature2Title || "Global Ties"} 
+                    body={parsedAbout.feature2Body || "Partnerships with 200+ universities for research and exchange."} 
+                    cardClass="bg-emerald-50 border-emerald-100" 
+                    iconClass="bg-emerald-100 text-emerald-600" 
+                    icon="fa-globe" 
+                  />
                 </div>
 
                 <div className="flex items-start gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
@@ -529,9 +739,9 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                     <i className="fa-solid fa-award"></i>
                   </div>
                   <div>
-                    <h4 className="text-[15px] font-bold text-gray-900">Commitment to Excellence</h4>
+                    <h4 className="text-[15px] font-bold text-gray-900">{parsedAbout.bannerTitle || "Commitment to Excellence"}</h4>
                     <p className="mt-1 text-[14px] text-gray-600">
-                      Aims to be a global center for quality education, fostering peace and learning.
+                      {parsedAbout.bannerBody || "Aims to be a global center for quality education, fostering peace and learning."}
                     </p>
                   </div>
                 </div>
@@ -590,52 +800,64 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                     </div>
                   </div>
                   <div className="grid grid-cols-1 gap-5">
-                    <DropdownCard
-                      title="Affiliated Colleges (Faculty of Humanities & Social Sciences)"
-                      icon="fa-building-columns"
-                      isOpen={!!openDropdowns["institutes-master-drop"]}
-                      onToggle={() => toggleDropdown("institutes-master-drop")}
-                    >
-                      <table className="w-full border-collapse text-[13px]">
-                        <thead>
-                          <tr>
-                            <ProgTh>SN</ProgTh>
-                            <ProgTh>College</ProgTh>
-                            <ProgTh>Address</ProgTh>
-                            <ProgTh>District</ProgTh>
-                            <ProgTh>Approved Programs/Quotas</ProgTh>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {affiliatedTableRows.map((row) => (
-                            <tr key={row.sn}>
-                              <ProgTd>{row.sn}</ProgTd>
-                              <ProgTd>{row.college}</ProgTd>
-                              <ProgTd>{row.address}</ProgTd>
-                              <ProgTd>{row.district}</ProgTd>
-                              <ProgTd>{row.programs}</ProgTd>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </DropdownCard>
-
-                    {instituteSections.map((section) => (
+                    {instituteSections.map((section: any, idx: number) => (
                       <DropdownCard
-                        key={section.key}
+                        key={section.key || idx}
                         title={section.title}
-                        icon={section.icon}
-                        isOpen={!!openDropdowns[section.key]}
-                        onToggle={() => toggleDropdown(section.key)}
-                        compact
+                        icon={section.icon || "fa-building-columns"}
+                        isOpen={idx === 0 || !!openDropdowns[section.key]}
+                        onToggle={() => toggleDropdown(section.key || `fac-idx-${idx}`)}
+                        compact={!section.colleges}
                       >
-                        <div className="space-y-1 pl-2 text-sm text-gray-600">
-                          {section.items.map((item) => (
-                            <p key={item}>• {item}</p>
-                          ))}
-                        </div>
+                        {section.colleges ? (
+                          <div className="overflow-x-auto">
+                            <table className="w-full border-collapse text-[13px]">
+                              <thead>
+                                <tr>
+                                  <ProgTh>SN</ProgTh>
+                                  <ProgTh>College</ProgTh>
+                                  <ProgTh>Address</ProgTh>
+                                  <ProgTh>Programs/Quotas</ProgTh>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {section.colleges.map((row: any, i: number) => (
+                                  <tr key={i}>
+                                    <ProgTd>{row.sn}</ProgTd>
+                                    <ProgTd>{row.college}</ProgTd>
+                                    <ProgTd>{row.address}</ProgTd>
+                                    <ProgTd>{row.programs}</ProgTd>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+                        ) : (
+                          <div className="space-y-1 pl-2 text-sm text-gray-600">
+                            {section.items?.map((item: any) => (
+                              <p key={item}>• {item}</p>
+                            ))}
+                          </div>
+                        )}
                       </DropdownCard>
                     ))}
+                    {instituteSections.length === 0 && (
+                       <DropdownCard
+                        title="Affiliated Colleges (Sample)"
+                        icon="fa-building-columns"
+                        isOpen={!!openDropdowns["institutes-master-drop"]}
+                        onToggle={() => toggleDropdown("institutes-master-drop")}
+                      >
+                         <table className="w-full border-collapse text-[13px]">
+                          <thead><tr><ProgTh>SN</ProgTh><ProgTh>College</ProgTh><ProgTh>Address</ProgTh><ProgTh>District</ProgTh><ProgTh>Approved Programs/Quotas</ProgTh></tr></thead>
+                          <tbody>
+                            {affiliatedTableRows.map((row) => (
+                              <tr key={row.sn}><ProgTd>{row.sn}</ProgTd><ProgTd>{row.college}</ProgTd><ProgTd>{row.address}</ProgTd><ProgTd>{row.district}</ProgTd><ProgTd>{row.programs}</ProgTd></tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </DropdownCard>
+                    )}
                   </div>
                 </div>
 
@@ -714,8 +936,24 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
 
             {activeTab === "admissions" && (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                <AdmissionCard title="Bachelor In Information Technology" status="Ongoing" statusClass="bg-[#ecfdf5] text-[#10b981]" image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop" faculty="Faculty of Science" admissionOpen="20th Dec, 2025" deadline="20th Dec, 2025" darkButton />
-                <AdmissionCard title="Master of Business Administration" status="Closed" statusClass="bg-[#fef2f2] text-[#ef4444]" image="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=2070&auto=format&fit=crop" faculty="Faculty of Mgt" admissionOpen="1st Aug, 2025" deadline="30th Sep, 2025" />
+                {parsedAdmissions.length > 0 ? parsedAdmissions.map((adm: any, i: number) => (
+                  <AdmissionCard 
+                    key={i}
+                    title={adm.title} 
+                    status={adm.status} 
+                    statusClass={adm.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"} 
+                    image={adm.image || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop"} 
+                    faculty={adm.faculty} 
+                    admissionOpen={adm.admissionOpen} 
+                    deadline={adm.deadline} 
+                    darkButton={adm.status === "Ongoing"} 
+                  />
+                )) : (
+                  <>
+                    <AdmissionCard title="Bachelor In Information Technology" status="Ongoing" statusClass="bg-[#ecfdf5] text-[#10b981]" image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop" faculty="Faculty of Science" admissionOpen="20th Dec, 2025" deadline="20th Dec, 2025" darkButton />
+                    <AdmissionCard title="Master of Business Administration" status="Closed" statusClass="bg-[#fef2f2] text-[#ef4444]" image="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=2070&auto=format&fit=crop" faculty="Faculty of Mgt" admissionOpen="1st Aug, 2025" deadline="30th Sep, 2025" />
+                  </>
+                )}
               </div>
             )}
 
@@ -783,8 +1021,8 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
 
             {activeTab === "events" && (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {eventCards.map((event) => (
-                  <div key={event.title} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-[2px] hover:shadow-md">
+                {parsedEvents.map((event: any, idx: number) => (
+                  <div key={idx} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-[2px] hover:shadow-md">
                     <div className="flex items-start gap-4">
                       <div className={`min-w-[70px] rounded-xl p-3 text-center ${event.color}`}>
                         <span className="block text-2xl font-black">{event.day}</span>
@@ -803,8 +1041,8 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
 
             {activeTab === "news" && (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {newsCards.map((card) => (
-                  <div key={card.title} className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
+                {parsedNews.map((card: any, idx: number) => (
+                  <div key={idx} className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
                     <div className="flex flex-1 flex-col p-5">
                       <div className="mb-4"><span className={`inline-block rounded-full px-3.5 py-1 text-[12px] font-bold ${card.tagClass}`}>{card.tag}</span></div>
                       <div className="mb-4 h-[140px] w-full overflow-hidden rounded-xl shrink-0">
@@ -829,8 +1067,8 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                     <i className="fa-solid fa-download text-blue-600"></i> Brochures & Forms
                   </h3>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {downloads.map((item) => (
-                      <div key={item.title} className="flex items-start gap-3 rounded-xl border border-gray-100 bg-[#f8fafc] p-5 transition-all hover:-translate-y-[3px] hover:border-blue-200 hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)]">
+                    {parsedDownloads.map((item: any, idx: number) => (
+                      <div key={idx} className="flex items-start gap-3 rounded-xl border border-gray-100 bg-[#f8fafc] p-5 transition-all hover:-translate-y-[3px] hover:border-blue-200 hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)]">
                         <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${item.color}`}>
                           <i className={`fa-solid ${item.icon}`}></i>
                         </div>
@@ -857,8 +1095,8 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
 
             {activeTab === "gallery" && (
               <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                {galleryImages.map((image) => (
-                  <div key={image} className="aspect-[16/10] overflow-hidden rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
+                {parsedGallery.map((image: any, idx: number) => (
+                  <div key={idx} className="aspect-[16/10] overflow-hidden rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
                     <img src={image} alt="Gallery" className="h-full w-full object-cover transition-transform duration-300 hover:scale-105" />
                   </div>
                 ))}
@@ -887,8 +1125,23 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                   </div>
                 </div>
 
-                <ReviewCard initials="AK" initialsClass="bg-blue-100 text-blue-600" name="Aarav Kumar" program="B.Tech Computer Science" rating={5} body="The university has an amazing infrastructure with top-notch labs for Data Science. The faculties are extremely helpful and the placement cell is very active. I got placed in a top MNC right after my final semester." />
-                <ReviewCard initials="SP" initialsClass="bg-green-100 text-green-600" name="Sita Paudel" program="MA Sociology" rating={4} body="Great environment for research in social sciences. The central library has an extensive collection. Hostel facilities are decent." className="mt-4" />
+                {parsedReviews.length > 0 ? parsedReviews.map((rev: any, i: number) => (
+                  <ReviewCard 
+                    key={i}
+                    initials={rev.name ? rev.name.charAt(0) : "U"} 
+                    initialsClass={i % 2 === 0 ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"} 
+                    name={rev.name} 
+                    program={rev.program} 
+                    rating={rev.rating || 5} 
+                    body={rev.body} 
+                    className={i > 0 ? "mt-4" : ""}
+                  />
+                )) : (
+                  <>
+                    <ReviewCard initials="AK" initialsClass="bg-blue-100 text-blue-600" name="Aarav Kumar" program="B.Tech Computer Science" rating={5} body="The university has an amazing infrastructure with top-notch labs for Data Science. The faculties are extremely helpful and the placement cell is very active. I got placed in a top MNC right after my final semester." />
+                    <ReviewCard initials="SP" initialsClass="bg-green-100 text-green-600" name="Sita Paudel" program="MA Sociology" rating={4} body="Great environment for research in social sciences. The central library has an extensive collection. Hostel facilities are decent." className="mt-4" />
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -899,11 +1152,11 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                 <i className="fa-solid fa-circle-info text-blue-500"></i> Quick Facts
               </h3>
               <div className="space-y-4">
-                <FactRow label="Established" value={String(university.established || "1959")} />
-                <FactRow label="University Type" value={university.type || "Public"} />
-                <FactRow label="Campus Size" value="154+ Hectares" />
-                <FactRow label="Total Students" value="400,000+" />
-                <FactRow label="Constituent Campuses" value={String(university.collegesCount || 64)} noBorder />
+                <FactRow label="Established" value={String(parsedQuick.est || university.established || "1959")} />
+                <FactRow label="University Type" value={parsedQuick.type || university.type || "Public"} />
+                <FactRow label="Campus Size" value={parsedQuick.size || "154+ Hectares"} />
+                <FactRow label="Total Students" value={parsedQuick.students || "400,000+"} />
+                <FactRow label="Constituent Campuses" value={String(parsedQuick.campuses || university.collegesCount || 64)} noBorder />
               </div>
             </div>
 
@@ -913,8 +1166,8 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
               </h3>
               <div className="space-y-4">
                 <ContactRow icon="fa-location-dot" text={`${university.location}, Nepal`} />
-                <ContactRow icon="fa-envelope" text="info@tribhuvan.edu.np" />
-                <ContactRow icon="fa-phone" text="+977-1-4330437" />
+                <ContactRow icon="fa-envelope" text={parsedAbout.email || parsedContact?.email || "info@tribhuvan.edu.np"} />
+                <ContactRow icon="fa-phone" text={parsedAbout.phone || parsedContact?.phone || "+977-1-4330437"} />
                 <ContactRow icon="fa-globe" text={website} />
               </div>
               <button className="mt-6 w-full rounded-xl bg-blue-600 py-3 text-[13.5px] font-bold text-white shadow-sm transition-colors hover:bg-blue-700">Get Directions</button>
