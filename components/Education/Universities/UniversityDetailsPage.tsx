@@ -450,7 +450,7 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
       return Array.isArray(nWs) && nWs.length ? nWs.map((n: any) => ({
         tag: n.type || "News",
         tagClass: n.type === "Notice" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600",
-        image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
+        image: n.image || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
         title: n.heading,
         body: n.desc,
         time: "Recently"
@@ -936,23 +936,51 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
 
             {activeTab === "admissions" && (
               <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {parsedAdmissions.length > 0 ? parsedAdmissions.map((adm: any, i: number) => (
-                  <AdmissionCard 
-                    key={i}
-                    title={adm.title} 
-                    status={adm.status} 
-                    statusClass={adm.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"} 
-                    image={adm.image || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop"} 
-                    faculty={adm.faculty} 
-                    admissionOpen={adm.admissionOpen} 
-                    deadline={adm.deadline} 
-                    darkButton={adm.status === "Ongoing"} 
-                  />
-                )) : (
-                  <>
-                    <AdmissionCard title="Bachelor In Information Technology" status="Ongoing" statusClass="bg-[#ecfdf5] text-[#10b981]" image="https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop" faculty="Faculty of Science" admissionOpen="20th Dec, 2025" deadline="20th Dec, 2025" darkButton />
-                    <AdmissionCard title="Master of Business Administration" status="Closed" statusClass="bg-[#fef2f2] text-[#ef4444]" image="https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=2070&auto=format&fit=crop" faculty="Faculty of Mgt" admissionOpen="1st Aug, 2025" deadline="30th Sep, 2025" />
-                  </>
+                {parsedAdmissions.length > 0 ? parsedAdmissions.map((adm: any, i: number) => {
+                  const isOngoing = ["Ongoing", "Open", "Coming Soon"].includes(adm.status);
+                  return (
+                    <AdmissionCard 
+                      key={i}
+                      title={adm.title} 
+                      status={adm.status} 
+                      statusClass={isOngoing ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"} 
+                      image={adm.image || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop"} 
+                      faculty={adm.faculty} 
+                      admissionOpen={adm.admissionOpen} 
+                      deadline={adm.deadline} 
+                      darkButton={isOngoing} 
+                    />
+                  );
+                }) : (
+                  <div className="col-span-1 md:col-span-2 py-12 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                    <i className="fa-solid fa-graduation-cap text-4xl text-gray-300 mb-4 block"></i>
+                    <p className="text-gray-500 font-medium">No active admissions posted yet for this university.</p>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {activeTab === "review" && (
+              <div className="space-y-6">
+                 {parsedReviews.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {parsedReviews.map((rev: any, i: number) => (
+                      <ReviewCard
+                        key={i}
+                        name={rev.name}
+                        program={rev.program}
+                        rating={rev.rating}
+                        body={rev.body}
+                        initials={rev.name?.split(' ').map((n:any)=>n[0]).join('').toUpperCase() || 'S'}
+                        initialsClass="bg-blue-100 text-blue-600"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
+                    <i className="fa-solid fa-star text-4xl text-gray-300 mb-4 block"></i>
+                    <p className="text-gray-500 font-medium">No reviews yet for this university.</p>
+                  </div>
                 )}
               </div>
             )}

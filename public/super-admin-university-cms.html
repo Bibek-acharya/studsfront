@@ -31,6 +31,32 @@
 
         .hidden-view { display: none !important; }
         .image-preview { object-fit: cover; transition: transform 0.3s ease; }
+
+        /* Form Tabs */
+        .form-tab.active {
+            border-bottom: 2px solid #4f46e5;
+            color: #1e1b4b;
+            font-weight: 700;
+        }
+        .form-tab {
+            transition: all 0.2s;
+            cursor: pointer;
+            padding: 1rem 0;
+            color: #64748b;
+            font-weight: 600;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            border-bottom: 2px solid transparent;
+            background: none;
+            border-top: none;
+            border-left: none;
+            border-right: none;
+        }
+        .form-tab:hover {
+            color: #1e1b4b;
+        }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
 <body class="flex h-screen overflow-hidden text-slate-800">
@@ -57,12 +83,15 @@
                 </li>
             </ul>
 
-            <!-- Form Nav (Only visible when editing) -->
+            <!-- Form Nav -->
             <div id="form-nav" class="hidden">
-                <div class="px-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Editor Sections</div>
-                <ul class="space-y-1 px-3 text-sm" id="section-nav">
-                    <!-- Nav items generated via JS -->
-                </ul>
+                <div class="px-6 mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">Form Navigation</div>
+                <div class="px-3">
+                    <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-3 text-xs text-indigo-700">
+                        <p class="font-bold mb-1"><i data-lucide="info" class="w-3 h-3 inline mr-1"></i> Tabbed Editor</p>
+                        Sections are now organized into tabs for better focus.
+                    </div>
+                </div>
             </div>
         </div>
     </aside>
@@ -145,8 +174,27 @@
             </div>
 
             <!-- FORM VIEW -->
-            <div id="view-form" class="hidden-view p-6 max-w-5xl mx-auto pb-32">
+            <div id="view-form" class="hidden-view p-6 max-w-7xl mx-auto pb-32">
+                
+                <!-- Sticky Form Tabs (Like University Details) -->
+                <div class="sticky top-16 z-30 bg-slate-50 border-b border-slate-200 -mx-6 px-6 mb-8 flex space-x-8 overflow-x-auto no-scrollbar shadow-sm">
+                    <button type="button" onclick="switchFormTab('about')" class="form-tab active" id="tab-about">About</button>
+                    <button type="button" onclick="switchFormTab('courses')" class="form-tab" id="tab-courses">Courses & Fees</button>
+                    <button type="button" onclick="switchFormTab('institutes')" class="form-tab" id="tab-institutes">Institutes</button>
+                    <button type="button" onclick="switchFormTab('admissions')" class="form-tab" id="tab-admissions">Admissions</button>
+                    <button type="button" onclick="switchFormTab('programs')" class="form-tab" id="tab-programs">Offered Programs</button>
+                    <button type="button" onclick="switchFormTab('scholarships')" class="form-tab" id="tab-scholarships">Scholarships</button>
+                    <button type="button" onclick="switchFormTab('events')" class="form-tab" id="tab-events">Events</button>
+                    <button type="button" onclick="switchFormTab('news')" class="form-tab" id="tab-news">News</button>
+                    <button type="button" onclick="switchFormTab('downloads')" class="form-tab" id="tab-downloads">Downloads</button>
+                    <button type="button" onclick="switchFormTab('gallery')" class="form-tab" id="tab-gallery">Gallery</button>
+                    <button type="button" onclick="switchFormTab('reviews')" class="form-tab" id="tab-reviews">Reviews</button>
+                </div>
+
                 <form id="university-form" onsubmit="event.preventDefault();">
+                    
+                    <!-- TAB: ABOUT -->
+                    <div id="form-content-about" class="form-content-block">
                     
                     <!-- Section 1: Cover & Basic Info -->
                     <section id="sec-1" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
@@ -385,6 +433,10 @@
                             </div>
                         </section>
                     </div>
+                </div>
+
+                <!-- TAB: COURSES -->
+                <div id="form-content-courses" class="form-content-block hidden">
 
                     <!-- Section 7: Courses & Fees -->
                     <section id="sec-7" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
@@ -430,6 +482,10 @@
                             </table>
                         </div>
                     </section>
+                    </div>
+
+                    <!-- TAB: INSTITUTES -->
+                    <div id="form-content-institutes" class="form-content-block hidden">
 
                     <!-- Section 8: Institute / Faculties -->
                     <section id="sec-8" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
@@ -443,6 +499,10 @@
                             <!-- Dynamic Faculty Blocks go here -->
                         </div>
                     </section>
+                    </div>
+
+                    <!-- TAB: PROGRAMS -->
+                    <div id="form-content-programs" class="form-content-block hidden">
 
                     <!-- Section 9: Offered Programs -->
                     <section id="sec-9" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
@@ -463,6 +523,10 @@
                             </table>
                         </div>
                     </section>
+                    </div>
+
+                    <!-- TAB: SCHOLARSHIPS -->
+                    <div id="form-content-scholarships" class="form-content-block hidden">
 
                     <!-- Section 10: Scholarship -->
                     <section id="sec-10" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
@@ -481,6 +545,10 @@
                             </table>
                         </div>
                     </section>
+                    </div>
+
+                    <!-- TAB: EVENTS -->
+                    <div id="form-content-events" class="form-content-block hidden">
 
                     <!-- Section 11: Events -->
                     <section id="sec-11" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
@@ -492,6 +560,10 @@
                             <!-- Dynamic Event Cards -->
                         </div>
                     </section>
+                    </div>
+
+                    <!-- TAB: NEWS -->
+                    <div id="form-content-news" class="form-content-block hidden">
 
                     <!-- Section 12: News & Notice -->
                     <section id="sec-12" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
@@ -503,6 +575,10 @@
                             <!-- Dynamic News Rows -->
                         </div>
                     </section>
+                    </div>
+
+                    <!-- TAB: DOWNLOADS -->
+                    <div id="form-content-downloads" class="form-content-block hidden">
 
                     <!-- Section 13: Downloads -->
                     <section id="sec-13" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
@@ -521,6 +597,10 @@
                             </table>
                         </div>
                     </section>
+                    </div>
+
+                    <!-- TAB: GALLERY -->
+                    <div id="form-content-gallery" class="form-content-block hidden">
 
                     <!-- Section 14: Gallery -->
                     <section id="sec-14" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
@@ -534,32 +614,38 @@
                             <!-- Grid Preview -->
                             <div id="gallery-grid" class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
                                 <!-- Thumbs generated via JS -->
-                            </div>
                         </div>
                     </section>
-+
-+                    <!-- Section 15: Admissions -->
-+                    <section id="sec-15" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
-+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
-+                            <span>15. Admissions</span>
-+                            <button type="button" onclick="addAdmissionBlock()" class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700 flex items-center font-medium">Add Admission Card</button>
-+                        </div>
-+                        <div id="admissions-container" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50">
-+                            <!-- Dynamic Admission Cards -->
-+                        </div>
-+                    </section>
-+
-+                    <!-- Section 16: Reviews -->
-+                    <section id="sec-16" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
-+                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
-+                            <span>16. Student Reviews</span>
-+                            <button type="button" onclick="addReviewBlock()" class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700 flex items-center font-medium">Add Review</button>
-+                        </div>
-+                        <div id="reviews-container" class="p-6 space-y-4">
-+                            <!-- Dynamic Review Rows -->
-+                        </div>
-+                    </section>
-                 </form>
+                    </div>
+
+                    <!-- TAB: ADMISSIONS -->
+                    <div id="form-content-admissions" class="form-content-block hidden">
+                        <!-- Section 15: Admissions -->
+                        <section id="sec-15" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
+                                <span>15. Admissions</span>
+                                <button type="button" onclick="addAdmissionBlock()" class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700 flex items-center font-medium">Add Admission Card</button>
+                            </div>
+                            <div id="admissions-container" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50">
+                                <!-- Dynamic Admission Cards -->
+                            </div>
+                        </section>
+                    </div>
+
+                    <!-- TAB: REVIEWS -->
+                    <div id="form-content-reviews" class="form-content-block hidden">
+                        <!-- Section 16: Reviews -->
+                        <section id="sec-16" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
+                            <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
+                                <span>16. Student Reviews</span>
+                                <button type="button" onclick="addReviewBlock()" class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700 flex items-center font-medium">Add Review</button>
+                            </div>
+                            <div id="reviews-container" class="p-6 space-y-4">
+                                <!-- Dynamic Review Rows -->
+                            </div>
+                        </section>
+                    </div>
+                </form>
             </div>
             
         </div>
@@ -613,6 +699,14 @@
         }
 
         function mapApiUniversityToUi(university) {
+            const parseJson = (val, defaultVal = []) => {
+                if (!val) return defaultVal;
+                if (typeof val === 'string') {
+                    try { return JSON.parse(val); } catch(e) { return defaultVal; }
+                }
+                return val;
+            };
+
             return {
                 id: String(university.id),
                 status: "Published",
@@ -623,43 +717,59 @@
                     verified: !!university.isPopular,
                     location: university.location || "",
                     website: university.website || "",
-                    cover: "",
+                    cover: university.cover || "",
                     logo: university.logo || "",
                 },
                 about: {
-                    yt1: "",
-                    yt2: "",
-                    desc: university.description || "",
-                    mission: "",
-                    vision: "",
-                    values: "",
+                    yt1: university.about?.yt1 || "",
+                    yt2: university.about?.yt2 || "",
+                    desc: university.about?.desc || university.description || "",
+                    mission: university.about?.mission || "",
+                    vision: university.about?.vision || "",
+                    values: university.about?.values || "",
+                    feature1Title: university.about?.feature1Title || "",
+                    feature1Body: university.about?.feature1Body || "",
+                    feature2Title: university.about?.feature2Title || "",
+                    feature2Body: university.about?.feature2Body || "",
+                    bannerTitle: university.about?.bannerTitle || "",
+                    bannerBody: university.about?.bannerBody || "",
                 },
-                contact: { email: "", phone: "", fb: "", ig: "", li: "", tw: "" },
+                contact: {
+                    email: university.contact?.email || "",
+                    phone: university.contact?.phone || "",
+                    fb: university.contact?.fb || "",
+                    ig: university.contact?.ig || "",
+                    li: university.contact?.li || "",
+                    tw: university.contact?.tw || ""
+                },
                 quick: {
-                    est: university.established || "",
-                    type: university.type || "Public",
-                    size: "",
-                    students: "",
-                    campuses: university.collegesCount || 0,
+                    est: university.quick?.est || university.established || "",
+                    type: university.quick?.type || university.type || "Public",
+                    size: university.quick?.size || "",
+                    students: university.quick?.students || "",
+                    campuses: university.quick?.campuses || 0,
                 },
-                overview: [],
-                leadership: [],
-                courses: { bachelor: [], master: [] },
-                programs: [],
-                scholarships: [],
-                events: university.events ? (typeof university.events === 'string' ? JSON.parse(university.events) : university.events) : [],
-                news: university.news ? (typeof university.news === 'string' ? JSON.parse(university.news) : university.news) : [],
-                faculties: university.faculties ? (typeof university.faculties === 'string' ? JSON.parse(university.faculties) : university.faculties) : [],
-                downloads: university.downloads ? (typeof university.downloads === 'string' ? JSON.parse(university.downloads) : university.downloads) : [],
-                gallery: university.gallery ? (typeof university.gallery === 'string' ? JSON.parse(university.gallery) : university.gallery) : [],
-                admissions: university.admissions ? (typeof university.admissions === 'string' ? JSON.parse(university.admissions) : university.admissions) : [],
-                reviews: university.reviews ? (typeof university.reviews === 'string' ? JSON.parse(university.reviews) : university.reviews) : [],
+                overview: parseJson(university.overview),
+                leadership: parseJson(university.leadership),
+                courses: university.courses ? parseJson(university.courses, { bachelor: [], master: [] }) : { bachelor: [], master: [] },
+                programs: parseJson(university.programs),
+                scholarships: parseJson(university.scholarships),
+                events: parseJson(university.events),
+                news: parseJson(university.news),
+                faculties: parseJson(university.faculties),
+                downloads: parseJson(university.downloads),
+                gallery: parseJson(university.gallery),
+                admissions: parseJson(university.admissions),
+                reviews: parseJson(university.reviews),
             };
         }
 
         async function fetchUniversities() {
             try {
-                const result = await requestApi("/universities");
+                const token = getAuthToken();
+                const result = await requestApi("/admin/universities", {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
                 const list = result?.data?.universities || [];
                 universities = list.map(mapApiUniversityToUi);
                 renderList();
@@ -671,24 +781,25 @@
         // Initialize Icons
         lucide.createIcons();
 
-        // --- NAVIGATION & UI INIT ---
-        const sections = [
-            "Cover & Basic Info", "About University", "Overview", "Leadership", "Contact Info", 
-            "Quick Facts", "Courses & Fees", "Faculties", "Programs", "Scholarships", 
-            "Events", "News & Notice", "Downloads", "Gallery"
-        ];
-
         function initSidebar() {
-            const nav = document.getElementById('section-nav');
-            nav.innerHTML = sections.map((s, i) => `
-                <li>
-                    <a href="#sec-${i+1}" class="flex items-center px-3 py-1.5 text-slate-400 hover:text-white hover:bg-slate-800 rounded transition-colors text-sm">
-                        <span class="w-5 font-mono text-xs opacity-50">${i+1}.</span> ${s}
-                    </a>
-                </li>
-            `).join('');
+            // Updated to be simpler since horizontal tabs are now the main navigation
         }
         initSidebar();
+
+        function switchFormTab(tabKey) {
+            // Hide all tab content
+            document.querySelectorAll('.form-content-block').forEach(el => el.classList.add('hidden'));
+            // Remove active state from all tabs
+            document.querySelectorAll('.form-tab').forEach(el => el.classList.remove('active'));
+            
+            // Show selected tab content
+            document.getElementById(`form-content-${tabKey}`).classList.remove('hidden');
+            // Set selected tab as active
+            document.getElementById(`tab-${tabKey}`).classList.add('active');
+            
+            // Scroll to top of form area
+            document.getElementById('main-scroll-area').scrollTop = 0;
+        }
 
         function switchView(view) {
             document.getElementById('view-list').classList.toggle('hidden-view', view !== 'list');
@@ -704,6 +815,8 @@
             } else {
                 document.getElementById('topbar-title').innerText = currentEditingId ? "Edit University" : "Create New University";
                 document.getElementById('topbar-status').classList.remove('hidden');
+                // Always start with the 'about' tab when opening the form
+                switchFormTab('about');
             }
         }
 
@@ -769,6 +882,22 @@
             `;
             grid.appendChild(div);
             lucide.createIcons();
+        }
+
+        function handleBlockImage(input) {
+            const file = input.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const parent = input.parentElement;
+                    const img = parent.querySelector('img');
+                    const icon = parent.querySelector('.upload-icon');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    if (icon) icon.classList.add('hidden');
+                }
+                reader.readAsDataURL(file);
+            }
         }
 
         function handleGalleryUpload(input) {
@@ -918,9 +1047,14 @@
             const div = document.createElement('div');
             div.className = "bg-white p-3 rounded border border-slate-200 shadow-sm flex items-start space-x-4 relative";
             div.innerHTML = `
-                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button>
-                <div class="w-24 h-24 bg-slate-100 border-2 border-dashed border-slate-300 rounded flex items-center justify-center shrink-0">
-                    <i data-lucide="image" class="w-6 h-6 text-slate-300"></i>
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500 z-10"><i data-lucide="x" class="w-4 h-4"></i></button>
+                <div class="w-24 h-24 bg-slate-100 border-2 border-dashed border-slate-300 rounded flex items-center justify-center shrink-0 relative overflow-hidden group">
+                    <img src="${data?.image||''}" class="w-full h-full object-cover ${data?.image?'':'hidden'}" alt="Preview">
+                    <div class="upload-icon flex flex-col items-center ${data?.image?'hidden':''}">
+                        <i data-lucide="camera" class="w-6 h-6 text-slate-300"></i>
+                        <span class="text-[10px] text-slate-400 mt-1">Add Image</span>
+                    </div>
+                    <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleBlockImage(this)">
                 </div>
                 <div class="flex-1 space-y-2">
                     <div class="flex space-x-2 w-3/4">
@@ -943,6 +1077,66 @@
                 case 'Rejected': return 'bg-red-100 text-red-700';
                 default: return 'bg-slate-100 text-slate-600';
             }
+        }
+
+        function addAdmissionBlock(data = null) {
+            const container = document.getElementById('admissions-container');
+            const div = document.createElement('div');
+            div.className = "bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative space-y-3";
+            div.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500 z-10"><i data-lucide="x" class="w-4 h-4"></i></button>
+                <div class="h-32 bg-slate-100 border-2 border-dashed border-slate-300 rounded flex items-center justify-center relative overflow-hidden group">
+                    <img src="${data?.image||''}" class="w-full h-full object-cover ${data?.image?'':'hidden'}" alt="Preview">
+                    <div class="upload-icon flex flex-col items-center ${data?.image?'hidden':''}">
+                        <i data-lucide="camera" class="w-6 h-6 text-slate-300"></i>
+                        <span class="text-[10px] text-slate-400 mt-1">Add Banner</span>
+                    </div>
+                    <input type="file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" onchange="handleBlockImage(this)">
+                </div>
+                <div class="space-y-2">
+                    <input type="text" value="${data?.title||''}" placeholder="Program Title (e.g. B.Tech)" class="text-sm font-medium p-1.5 border rounded w-full">
+                    <div class="grid grid-cols-2 gap-2">
+                        <select class="text-xs p-1.5 border rounded">
+                            <option ${data?.status==='Open'?'selected':''}>Open</option>
+                            <option ${data?.status==='Closed'?'selected':''}>Closed</option>
+                            <option ${data?.status==='Coming Soon'?'selected':''}>Coming Soon</option>
+                        </select>
+                        <input type="text" value="${data?.faculty||''}" placeholder="Faculty" class="text-xs p-1.5 border rounded">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" value="${data?.admissionOpen||''}" placeholder="Admission Open" class="text-xs p-1.5 border rounded">
+                        <input type="text" value="${data?.deadline||''}" placeholder="Deadline" class="text-xs p-1.5 border rounded">
+                    </div>
+                </div>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
+        }
+
+        function addReviewBlock(data = null) {
+            const container = document.getElementById('reviews-container');
+            const div = document.createElement('div');
+            div.className = "bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative space-y-3";
+            div.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-2 right-2 text-slate-400 hover:text-red-500"><i data-lucide="x" class="w-4 h-4"></i></button>
+                <div class="grid grid-cols-2 gap-3">
+                    <input type="text" value="${data?.name||''}" placeholder="Student Name" class="text-sm font-medium p-1.5 border rounded w-full">
+                    <input type="text" value="${data?.program||''}" placeholder="Program (e.g. MBBS)" class="text-sm p-1.5 border rounded w-full">
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="text-xs text-slate-500">Rating:</span>
+                    <select class="text-xs p-1 border rounded w-16">
+                        <option value="5" ${data?.rating===5?'selected':''}>5 ★</option>
+                        <option value="4" ${data?.rating===4?'selected':''}>4 ★</option>
+                        <option value="3" ${data?.rating===3?'selected':''}>3 ★</option>
+                        <option value="2" ${data?.rating===2?'selected':''}>2 ★</option>
+                        <option value="1" ${data?.rating===1?'selected':''}>1 ★</option>
+                    </select>
+                </div>
+                <textarea placeholder="Student testimonial..." class="text-sm p-2 border rounded w-full h-20 resize-none">${data?.body||''}</textarea>
+            `;
+            container.appendChild(div);
+            lucide.createIcons();
         }
 
         function renderList() {
@@ -1001,6 +1195,8 @@
             addRow('tbody-course-m', 'course');
             addRow('tbody-programs', 'program');
             addFacultyBlock();
+            addAdmissionBlock();
+            addReviewBlock();
             
             clearImage('f-cover-preview');
             clearImage('f-logo-preview');
@@ -1055,12 +1251,14 @@
         function extractNews() {
             const data = [];
             document.querySelectorAll('#news-container > div').forEach(div => {
-                const inputs = div.querySelectorAll('input, textarea, select');
+                const inputs = div.querySelectorAll('input[type="text"], textarea, select');
+                const img = div.querySelector('img');
                 if (inputs.length >= 3) {
                     data.push({
                         type: inputs[0].value,
                         heading: inputs[1].value,
-                        desc: inputs[2].value
+                        desc: inputs[2].value,
+                        image: img ? img.src : ""
                     });
                 }
             });
@@ -1107,15 +1305,16 @@
         function extractAdmissions() {
             const data = [];
             document.querySelectorAll('#admissions-container > div').forEach(div => {
-                const inputs = div.querySelectorAll('input, select, textarea');
-                if (inputs.length >= 5) {
+                const img = div.querySelector('img');
+                const inputs = div.querySelectorAll('input[type="text"], select');
+                if (inputs.length >= 4) {
                     data.push({
                         title: inputs[0].value,
                         status: inputs[1].value,
                         faculty: inputs[2].value,
                         admissionOpen: inputs[3].value,
                         deadline: inputs[4].value,
-                        image: inputs[5].value
+                        image: img ? img.src : ""
                     });
                 }
             });
