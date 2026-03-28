@@ -113,6 +113,17 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
     handleFileUpload(file, (result) => updateField(path, result), minWidth);
   };
 
+  const handleMultipleImagesUpload = (files: FileList) => {
+    Array.from(files).forEach(file => {
+      handleFileUpload(file, (result) => {
+        setFormData(prev => ({
+          ...prev,
+          gallery: [...(prev.gallery || []), result]
+        }));
+      });
+    });
+  };
+
   // Initial Form State matching the prototype structure
   const [formData, setFormData] = useState<Partial<University>>({
     name: "",
@@ -1123,12 +1134,28 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
                     <h3 className="text-xl font-bold text-slate-800">Media Gallery</h3>
                     <p className="text-sm text-slate-500">Collect images of the campus, facilities and graduation.</p>
                  </div>
-                 <button 
-                  onClick={() => addArrayRow("gallery", "")}
-                  className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-indigo-700 flex items-center"
-                 >
-                    <Plus className="w-4 h-4 mr-1" /> Add Image URL
-                 </button>
+                 <div className="flex items-center space-x-3">
+                    <input 
+                      type="file" 
+                      multiple 
+                      accept="image/*" 
+                      className="hidden" 
+                      id="batch-upload" 
+                      onChange={(e) => e.target.files && handleMultipleImagesUpload(e.target.files)}
+                    />
+                    <label 
+                      htmlFor="batch-upload"
+                      className="bg-indigo-50 text-indigo-700 px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-indigo-100 flex items-center cursor-pointer transition-colors"
+                    >
+                      <Image className="w-4 h-4 mr-1" /> Batch Upload
+                    </label>
+                    <button 
+                      onClick={() => addArrayRow("gallery", "")}
+                      className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-indigo-700 flex items-center transition-colors"
+                    >
+                      <Plus className="w-4 h-4 mr-1" /> Add Empty Slot
+                    </button>
+                 </div>
               </div>
 
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">

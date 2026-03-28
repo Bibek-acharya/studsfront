@@ -1,13 +1,13 @@
 import React, { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { LayoutDashboard, Building2, Plus, ArrowLeft } from "lucide-react";
+import { LayoutDashboard, Building2, Plus, ArrowLeft, LogOut } from "lucide-react";
 import { apiService, University } from "../../../services/api";
 import { useAuth } from "../../../services/AuthContext";
 import UniversityList from "./UniversityList";
 import UniversityForm from "./UniversityForm";
 
 const SuperAdminDashboardPage: React.FC = () => {
-  const { user, token } = useAuth();
+  const { user, token, logout } = useAuth();
   const queryClient = useQueryClient();
   
   const [currentView, setCurrentView] = useState<"list" | "form">("list");
@@ -117,6 +117,15 @@ const SuperAdminDashboardPage: React.FC = () => {
               </button>
             </li>
           </ul>
+        </div>
+
+        <div className="p-4 border-t border-slate-800">
+          <button 
+            onClick={logout}
+            className="w-full flex items-center px-3 py-2.5 rounded-lg text-slate-400 hover:bg-rose-500/10 hover:text-rose-500 transition-all font-medium"
+          >
+            <LogOut className="w-5 h-5 mr-3" /> Logout
+          </button>
         </div>
       </aside>
 
