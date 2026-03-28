@@ -519,7 +519,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
         </aside>
 
         <section className="flex-1 w-full min-w-0 flex flex-col">
-          <div className="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 pb-5">
+          <div className="mb-1 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 pb-5">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
                 Showing {paginatedCourses.length > 0 ? (currentPage - 1) * COURSES_PER_PAGE + 1 : 0}-{Math.min(currentPage * COURSES_PER_PAGE, filteredCourses.length)} of {filteredCourses.length.toLocaleString()} Courses
@@ -541,7 +541,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             </div>
           </div>
 
-          <div className="mb-5 min-h-[32px]">
+          <div className="mb-2 min-h-[32px]">
             {(activeFilterPills.length > 0 || maxFee < maxFeeBound) && (
               <div className="flex-wrap items-center gap-2 flex">
                 <span className="text-xs font-semibold text-gray-400 uppercase tracking-wider mr-1">
@@ -609,9 +609,10 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                     <article
                       className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col group"
                     >
-                    <div className="h-32 relative overflow-hidden bg-gray-200 shrink-0 border-b border-gray-100">
-                      <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
-
+                      <div className=" relative">
+                        <div className='p-2'>
+                          <img src={course.image} alt={course.title} className="w-full h-32 object-cover rounded-md" />
+                        </div>
                       <div className="absolute top-2 right-2 bg-white/95 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1.5 border border-gray-200">
                         <span className={`w-1.5 h-1.5 rounded-full ${statusDots[course.status]}`}></span>
                         <span className="text-[10px] font-bold text-gray-800 uppercase tracking-wide">
