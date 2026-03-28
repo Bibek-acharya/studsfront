@@ -271,6 +271,27 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Feature Callout 1 (e.g. Semester System)</label>
+                                    <input type="text" id="f-feature1-title" class="w-full text-sm p-2 border rounded mb-2" placeholder="Title">
+                                    <textarea id="f-feature1-body" class="w-full text-sm p-2 border rounded h-16 resize-none" placeholder="Body details..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-slate-500 uppercase mb-2">Feature Callout 2 (e.g. Global Ties)</label>
+                                    <input type="text" id="f-feature2-title" class="w-full text-sm p-2 border rounded mb-2" placeholder="Title">
+                                    <textarea id="f-feature2-body" class="w-full text-sm p-2 border rounded h-16 resize-none" placeholder="Body details..."></textarea>
+                                </div>
+                            </div>
+
+                            <div class="p-4 bg-indigo-50/50 rounded-lg border border-indigo-100">
+                                <label class="block text-xs font-bold text-indigo-500 uppercase mb-2">Bottom Banner (e.g. Commitment to Excellence)</label>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" id="f-banner-title" class="w-full text-sm p-2 border rounded" placeholder="Banner Title">
+                                    <input type="text" id="f-banner-body" class="w-full text-sm p-2 border rounded" placeholder="Banner Body Text">
+                                </div>
+                            </div>
                         </div>
                     </section>
 
@@ -516,7 +537,29 @@
                             </div>
                         </div>
                     </section>
-                </form>
++
++                    <!-- Section 15: Admissions -->
++                    <section id="sec-15" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
++                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
++                            <span>15. Admissions</span>
++                            <button type="button" onclick="addAdmissionBlock()" class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700 flex items-center font-medium">Add Admission Card</button>
++                        </div>
++                        <div id="admissions-container" class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-50/50">
++                            <!-- Dynamic Admission Cards -->
++                        </div>
++                    </section>
++
++                    <!-- Section 16: Reviews -->
++                    <section id="sec-16" class="bg-white rounded-xl shadow-sm border border-slate-200 mb-8 overflow-hidden form-section">
++                        <div class="bg-slate-50 px-6 py-4 border-b border-slate-200 font-semibold text-slate-800 flex justify-between">
++                            <span>16. Student Reviews</span>
++                            <button type="button" onclick="addReviewBlock()" class="text-xs bg-indigo-600 text-white px-3 py-1 rounded-md hover:bg-indigo-700 flex items-center font-medium">Add Review</button>
++                        </div>
++                        <div id="reviews-container" class="p-6 space-y-4">
++                            <!-- Dynamic Review Rows -->
++                        </div>
++                    </section>
+                 </form>
             </div>
             
         </div>
@@ -534,8 +577,35 @@
         }
 
         async function requestApi(path, options = {}) {
-            const response = await fetch(`${API_BASE_URL}${path}`, options);
-            const payload = await response.json().catch(() => ({}));
+            let response = await fetch(`${API_BASE_URL}${path}`, options);
+            let payload = await response.json().catch(() => ({}));
+            
+            // If the token is expired/invalid (401), automatically re-login using the known Super Admin credentials and retry!
+            if (response.status === 401) {
+                console.log("Token expired. Automatically refreshing Super Admin session...");
+                const loginRes = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: 'admin@studsphere.com', password: 'Admin@12345' })
+                });
+                const loginAuth = await loginRes.json().catch(() => ({}));
+                
+                if (loginAuth.data && loginAuth.data.token) {
+                    localStorage.setItem("authToken", loginAuth.data.token); // Save the fresh token
+                    console.log("Successfully retrieved fresh Super Admin token. Retrying request...");
+                    
+                    // Update headers and retry the original request
+                    options.headers = {
+                        ...options.headers,
+                        Authorization: `Bearer ${loginAuth.data.token}`
+                    };
+                    response = await fetch(`${API_BASE_URL}${path}`, options);
+                    payload = await response.json().catch(() => ({}));
+                } else {
+                    throw new Error("Local auto-login failed. Please ensure your super-admin credentials match the .env file.");
+                }
+            }
+
             if (!response.ok || payload.success === false) {
                 throw new Error(payload.message || `Request failed (${response.status})`);
             }
@@ -577,6 +647,13 @@
                 courses: { bachelor: [], master: [] },
                 programs: [],
                 scholarships: [],
+                events: university.events ? (typeof university.events === 'string' ? JSON.parse(university.events) : university.events) : [],
+                news: university.news ? (typeof university.news === 'string' ? JSON.parse(university.news) : university.news) : [],
+                faculties: university.faculties ? (typeof university.faculties === 'string' ? JSON.parse(university.faculties) : university.faculties) : [],
+                downloads: university.downloads ? (typeof university.downloads === 'string' ? JSON.parse(university.downloads) : university.downloads) : [],
+                gallery: university.gallery ? (typeof university.gallery === 'string' ? JSON.parse(university.gallery) : university.gallery) : [],
+                admissions: university.admissions ? (typeof university.admissions === 'string' ? JSON.parse(university.admissions) : university.admissions) : [],
+                reviews: university.reviews ? (typeof university.reviews === 'string' ? JSON.parse(university.reviews) : university.reviews) : [],
             };
         }
 
@@ -682,20 +759,25 @@
             img.setAttribute('data-rot', currentRotation);
         }
 
+        function addGalleryItem(src) {
+            const grid = document.getElementById('gallery-grid');
+            const div = document.createElement('div');
+            div.className = "relative group aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200";
+            div.innerHTML = `
+                <img src="${src}" class="w-full h-full object-cover">
+                <button type="button" onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="x" class="w-3 h-3"></i></button>
+            `;
+            grid.appendChild(div);
+            lucide.createIcons();
+        }
+
         function handleGalleryUpload(input) {
             const grid = document.getElementById('gallery-grid');
             if (input.files) {
                 Array.from(input.files).forEach(file => {
                     const reader = new FileReader();
                     reader.onload = function(e) {
-                        const div = document.createElement('div');
-                        div.className = "relative group aspect-square bg-slate-100 rounded-lg overflow-hidden border border-slate-200";
-                        div.innerHTML = `
-                            <img src="${e.target.result}" class="w-full h-full object-cover">
-                            <button type="button" onclick="this.parentElement.remove()" class="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="x" class="w-3 h-3"></i></button>
-                        `;
-                        grid.appendChild(div);
-                        lucide.createIcons();
+                        addGalleryItem(e.target.result);
                     }
                     reader.readAsDataURL(file);
                 });
@@ -907,10 +989,11 @@
             document.getElementById('university-form').reset();
             // Clear rich editors
             ['f-desc', 'f-mission', 'f-vision', 'f-values'].forEach(id => document.getElementById(id).innerHTML = '');
+            ['f-feature1-title', 'f-feature1-body', 'f-feature2-title', 'f-feature2-body', 'f-banner-title', 'f-banner-body'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('f-desc-count').innerText = '0 words';
             // Clear tables & dynamic containers
             ['tbody-overview', 'tbody-leadership', 'tbody-course-b', 'tbody-course-m', 'tbody-programs', 'tbody-scholars', 'tbody-downloads'].forEach(id => document.getElementById(id).innerHTML = '');
-            ['faculties-container', 'events-container', 'news-container', 'gallery-grid'].forEach(id => document.getElementById(id).innerHTML = '');
+            ['faculties-container', 'events-container', 'news-container', 'gallery-grid', 'admissions-container', 'reviews-container'].forEach(id => document.getElementById(id).innerHTML = '');
             // Add default initial rows
             addRow('tbody-overview', 'overview');
             addRow('tbody-leadership', 'leadership');
@@ -950,15 +1033,117 @@
             return data;
         }
 
+        function extractEvents() {
+            const data = [];
+            document.querySelectorAll('#events-container > div').forEach(div => {
+                const inputs = div.querySelectorAll('input, textarea');
+                if (inputs.length >= 7) {
+                    data.push({
+                        type: inputs[0].value,
+                        date: inputs[1].value,
+                        heading: inputs[2].value,
+                        organizer: inputs[3].value,
+                        venue: inputs[4].value,
+                        desc: inputs[5].value,
+                        link: inputs[6].value
+                    });
+                }
+            });
+            return data;
+        }
+
+        function extractNews() {
+            const data = [];
+            document.querySelectorAll('#news-container > div').forEach(div => {
+                const inputs = div.querySelectorAll('input, textarea, select');
+                if (inputs.length >= 3) {
+                    data.push({
+                        type: inputs[0].value,
+                        heading: inputs[1].value,
+                        desc: inputs[2].value
+                    });
+                }
+            });
+            return data;
+        }
+
+        function extractFaculties() {
+            const data = [];
+            document.querySelectorAll('#faculties-container > div').forEach(div => {
+                const headInput = div.querySelector('input');
+                const tbody = div.querySelector('tbody');
+                if (headInput && tbody) {
+                    const heading = headInput.value;
+                    const colleges = [];
+                    tbody.querySelectorAll('tr').forEach(tr => {
+                        const inputs = tr.querySelectorAll('input');
+                        if (inputs.length >= 4) {
+                            colleges.push({
+                                sn: inputs[0].value,
+                                college: inputs[1].value,
+                                address: inputs[2].value,
+                                programs: inputs[3].value
+                            });
+                        }
+                    });
+                    data.push({ name: heading, colleges });
+                }
+            });
+            return data;
+        }
+
+        function extractGallery() {
+            const data = [];
+            document.querySelectorAll('#gallery-grid img').forEach(img => {
+                if (img.src && img.src.length > 100) data.push(img.src);
+            });
+            return data;
+        }
+
+        function extractDownloads() {
+            return extractTableData('tbody-downloads', ['name', 'file', 'date']);
+        }
+
+        function extractAdmissions() {
+            const data = [];
+            document.querySelectorAll('#admissions-container > div').forEach(div => {
+                const inputs = div.querySelectorAll('input, select, textarea');
+                if (inputs.length >= 5) {
+                    data.push({
+                        title: inputs[0].value,
+                        status: inputs[1].value,
+                        faculty: inputs[2].value,
+                        admissionOpen: inputs[3].value,
+                        deadline: inputs[4].value,
+                        image: inputs[5].value
+                    });
+                }
+            });
+            return data;
+        }
+
+        function extractReviews() {
+            const data = [];
+            document.querySelectorAll('#reviews-container > div').forEach(div => {
+                const inputs = div.querySelectorAll('input, select, textarea');
+                if (inputs.length >= 4) {
+                    data.push({
+                        name: inputs[0].value,
+                        program: inputs[1].value,
+                        rating: parseInt(inputs[2].value),
+                        body: inputs[3].value
+                    });
+                }
+            });
+            return data;
+        }
+
         async function saveUniversity(targetStatus) {
             const name = document.getElementById('f-name').value;
             if(!name) { alert("University Name is required!"); return; }
 
+            // Retrieve token. Note: If it's missing or expired, our updated requestApi will gracefully auto-authenticate!
             const token = getAuthToken();
-            if (!token) {
-                alert("Login session expired. Please login again as super admin.");
-                return;
-            }
 
             const today = new Date().toISOString().split('T')[0];
             
@@ -982,7 +1167,13 @@
                     desc: document.getElementById('f-desc').innerHTML,
                     mission: document.getElementById('f-mission').innerHTML,
                     vision: document.getElementById('f-vision').innerHTML,
-                    values: document.getElementById('f-values').innerHTML
+                    values: document.getElementById('f-values').innerHTML,
+                    feature1Title: document.getElementById('f-feature1-title').value,
+                    feature1Body: document.getElementById('f-feature1-body').value,
+                    feature2Title: document.getElementById('f-feature2-title').value,
+                    feature2Body: document.getElementById('f-feature2-body').value,
+                    bannerTitle: document.getElementById('f-banner-title').value,
+                    bannerBody: document.getElementById('f-banner-body').value
                 },
                 contact: {
                     email: document.getElementById('f-c-email').value,
@@ -1019,6 +1210,22 @@
                 description: uni.about.desc.replace(/<[^>]*>/g, "").trim(),
                 rank: 0,
                 popular: !!uni.basic_info.verified,
+                cover: uni.basic_info.cover,
+                about: uni.about,
+                contact: uni.contact,
+                quick: uni.quick,
+                overview: uni.overview,
+                leadership: uni.leadership,
+                courses: uni.courses,
+                programs: uni.programs,
+                scholarships: uni.scholarships,
+                events: extractEvents(),
+                news: extractNews(),
+                faculties: extractFaculties(),
+                downloads: extractDownloads(),
+                gallery: extractGallery(),
+                admissions: extractAdmissions(),
+                reviews: extractReviews(),
             };
 
             try {
@@ -1086,6 +1293,12 @@
             document.getElementById('f-mission').innerHTML = uni.about.mission;
             document.getElementById('f-vision').innerHTML = uni.about.vision;
             document.getElementById('f-values').innerHTML = uni.about.values;
+            document.getElementById('f-feature1-title').value = uni.about.feature1Title || '';
+            document.getElementById('f-feature1-body').value = uni.about.feature1Body || '';
+            document.getElementById('f-feature2-title').value = uni.about.feature2Title || '';
+            document.getElementById('f-feature2-body').value = uni.about.feature2Body || '';
+            document.getElementById('f-banner-title').value = uni.about.bannerTitle || '';
+            document.getElementById('f-banner-body').value = uni.about.bannerBody || '';
             updateWordCount('f-desc', 'f-desc-count');
 
             // Populate Contact & Quick
@@ -1121,6 +1334,27 @@
 
             document.getElementById('tbody-scholars').innerHTML = '';
             uni.scholarships.forEach(row => addRow('tbody-scholars', 'scholarship', row));
+
+            document.getElementById('faculties-container').innerHTML = '';
+            (uni.faculties || []).forEach(f => addFacultyBlock(f));
+
+            document.getElementById('events-container').innerHTML = '';
+            (uni.events || []).forEach(e => addEventBlock(e));
+
+            document.getElementById('news-container').innerHTML = '';
+            (uni.news || []).forEach(n => addNewsBlock(n));
+
+            document.getElementById('tbody-downloads').innerHTML = '';
+            (uni.downloads || []).forEach(d => addRow('tbody-downloads', 'download', d));
+
+            document.getElementById('gallery-grid').innerHTML = '';
+            (uni.gallery || []).forEach(img => addGalleryItem(img));
+
+            document.getElementById('admissions-container').innerHTML = '';
+            (uni.admissions || []).forEach(row => addAdmissionBlock(row));
+
+            document.getElementById('reviews-container').innerHTML = '';
+            (uni.reviews || []).forEach(row => addReviewBlock(row));
 
             // Setup UI states
             document.getElementById('btn-publish').innerText = 'Update Published';

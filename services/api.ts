@@ -270,6 +270,22 @@ export interface University {
   description?: string;
   established?: string;
   website?: string;
+  cover?: string;
+  about?: any;
+  contact?: any;
+  quick?: any;
+  overview?: any;
+  leadership?: any;
+  courses?: any;
+  programs?: any;
+  scholarships?: any;
+  events?: any;
+  news?: any;
+  downloads?: any;
+  gallery?: any;
+  faculties?: any;
+  admissions?: any;
+  reviews?: any;
 }
 
 export interface UniversityCollege {
