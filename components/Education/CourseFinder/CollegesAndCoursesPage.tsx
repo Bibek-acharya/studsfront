@@ -73,16 +73,40 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
 
   const backendCourses = (coursesResponse?.data?.courses || []) as EducationCourse[];
 
-  const initialSelectedCourseId = selectedCourse.id || backendCourses[0]?.id || "";
+  const getInitialCourseId = () => {
+    if (selectedCourse?.id) {
+      const foundById = backendCourses.find(c => String(c.id) === String(selectedCourse.id));
+      if (foundById) return String(foundById.id);
+      
+      const foundByTitle = backendCourses.find(c => 
+        c.title?.toLowerCase() === selectedCourse.title?.toLowerCase() ||
+        c.title?.toLowerCase().includes(selectedCourse.title?.toLowerCase().split('(')[0].trim())
+      );
+      if (foundByTitle) return String(foundByTitle.id);
+    }
+    return backendCourses[0]?.id ? String(backendCourses[0].id) : "";
+  };
+
+  const initialSelectedCourseId = selectedCourse?.id ? getInitialCourseId() : (backendCourses[0]?.id ? String(backendCourses[0].id) : "");
   const [activeCourseId, setActiveCourseId] = useState(initialSelectedCourseId);
 
   useEffect(() => {
     if (!activeCourseId && backendCourses.length > 0) {
-      setActiveCourseId(backendCourses[0].id);
+      setActiveCourseId(backendCourses[0].id ? String(backendCourses[0].id) : "");
     }
   }, [activeCourseId, backendCourses]);
 
+  useEffect(() => {
+    if (selectedCourse?.id && backendCourses.length > 0) {
+      const newId = getInitialCourseId();
+      if (newId && newId !== activeCourseId) {
+        setActiveCourseId(newId);
+      }
+    }
+  }, [selectedCourse, backendCourses]);
+
   const activeCourse = useMemo(() => {
+    if (!activeCourseId) return null;
     return (
       backendCourses.find((course) => String(course.id) === String(activeCourseId)) ||
       null
@@ -93,12 +117,11 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
     return backendCourses.map((course) => ({
       id: String(course.id),
       name: course.title,
-      count: `${Number(course.colleges || 0)}+`,
-      // status: "Admission ongoing",
+      count: `${Number((course as any).collegesCount || course.colleges || 0)}+`,
       active: String(course.id) === String(activeCourseId),
       affiliation: course.affiliation || "",
     }));
-  }, [backendCourses, activeCourseId, selectedCourse.title, selectedCourse.collegesCount]);
+  }, [backendCourses, activeCourseId, selectedCourse?.title, selectedCourse?.collegesCount]);
 
   const { data: collegesResponse, isLoading: collegesLoading } = useQuery({
     queryKey: [
@@ -111,6 +134,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
       nationalWide,
       selectedCollegeType,
       activeCourse?.affiliation,
+      selectedCourse?.id,
     ],
     queryFn: () =>
       apiService.getColleges({
@@ -125,6 +149,7 @@ const CollegesAndCoursesPage: React.FC<CollegesAndCoursesPageProps> = ({
           nationalWide || province === "All Provinces" ? undefined : province,
         type: selectedCollegeType || undefined,
         affiliation: activeCourse?.affiliation || undefined,
+        courseId: selectedCourse?.id || undefined,
       }),
   });
 
