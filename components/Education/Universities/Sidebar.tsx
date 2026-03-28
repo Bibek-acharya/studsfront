@@ -5,6 +5,8 @@ interface SidebarProps {
   onFilterChange: (affiliation: string) => void;
   onRemoveFilter: (affiliation: string) => void;
   onReset: () => void;
+  nepalUniversityCount: number;
+  foreignAffiliatedCount: number;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({
@@ -12,6 +14,8 @@ const Sidebar: React.FC<SidebarProps> = ({
   onFilterChange,
   onRemoveFilter,
   onReset,
+  nepalUniversityCount,
+  foreignAffiliatedCount,
 }) => {
   return (
     <aside className="w-full lg:w-[280px] flex-shrink-0 bg-white p-5 rounded-2xl border border-gray-100 shadow-[0_2px_15px_-3px_rgba(0,0,0,0.02)]">
@@ -59,14 +63,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 
           <FilterCheckbox
             label="Nepal University"
-            count="+10,00"
+            count={nepalUniversityCount}
             checked={affiliationFilters.includes("Nepal University")}
             onChange={() => onFilterChange("Nepal University")}
           />
 
           <FilterCheckbox
             label="Foreign Affiliated"
-            count="320"
+            count={foreignAffiliatedCount}
             checked={affiliationFilters.includes("Foreign Affiliated")}
             onChange={() => onFilterChange("Foreign Affiliated")}
           />
@@ -78,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
 const FilterCheckbox: React.FC<{
   label: string;
-  count: string;
+  count: number;
   checked: boolean;
   onChange: () => void;
 }> = ({ label, count, checked, onChange }) => (

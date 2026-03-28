@@ -37,11 +37,12 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
   const [view, setView] = useState<"discovery" | "colleges">("discovery");
   const [selectedUniId, setSelectedUniId] = useState<number>(1);
   const [filters, setFilters] = useState<FilterState>({
-    affiliation: ["Nepal University"],
+    affiliation: [],
     searchQuery: "",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const [collegePage, setCollegePage] = useState(1);
+  const [collegeToClaim, setCollegeToClaim] = useState<College | null>(null);
   const itemsPerPage = 9;
   const collegesPerPage = 21;
 
@@ -72,7 +73,7 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
   };
 
   const resetFilters = () => {
-    setFilters({ affiliation: ["Nepal University"], searchQuery: "" });
+    setFilters({ affiliation: [], searchQuery: "" });
     setCurrentPage(1);
   };
 
@@ -240,7 +241,8 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
               <CollegeListItem
                 key={college.id}
                 college={college}
-                onClick={() => onNavigate("collegeDetails", { id: college.id })}
+                onNavigate={onNavigate}
+                onClaim={() => setCollegeToClaim(college)}
               />
             ))}
           </div>
@@ -288,7 +290,8 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
               <CollegeListItem
                 key={`bottom-${college.id}`}
                 college={college}
-                onClick={() => onNavigate("collegeDetails", { id: college.id })}
+                onNavigate={onNavigate}
+                onClaim={() => setCollegeToClaim(college)}
               />
             ))}
           </div>
@@ -343,6 +346,8 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
               <i className="fa-solid fa-chevron-right"></i>
             </button>
           </div>
+
+          <ClaimCollegeModal college={collegeToClaim} onClose={() => setCollegeToClaim(null)} />
         </main>
       </div>
     );
@@ -356,6 +361,8 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
           onFilterChange={handleAffiliationToggle}
           onRemoveFilter={handleAffiliationToggle}
           onReset={resetFilters}
+          nepalUniversityCount={universities.length}
+          foreignAffiliatedCount={0}
         />
 
         <main className="flex-1 w-full">
@@ -387,6 +394,109 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
             />
           </div>
         </main>
+      </div>
+    </div>
+  );
+};
+
+const ClaimCollegeModal: React.FC<{
+  college: College | null;
+  onClose: () => void;
+}> = ({ college, onClose }) => {
+  const [institutionName, setInstitutionName] = useState(college?.name || "");
+  const [registrationNumber, setRegistrationNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [contactPerson, setContactPerson] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+
+  useEffect(() => {
+    if (college) {
+      setInstitutionName(college.name);
+      setRegistrationNumber("");
+      setEmail("");
+      setContactPerson("");
+      setContactNumber("");
+    }
+  }, [college]);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    alert("Claim request submitted successfully! Our team will verify and grant you access.");
+    onClose();
+  };
+
+  const isOpen = college !== null;
+
+  return (
+    <div className={`fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'}`} onClick={onClose}>
+      <div className={`mx-4 flex max-h-[90vh] w-full max-w-md flex-col rounded-[20px] bg-white shadow-2xl transition-transform duration-300 ${isOpen ? 'scale-100' : 'scale-95'}`} onClick={e => e.stopPropagation()}>
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
+          <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+            <i className="fa-solid fa-building-shield text-[20px] text-[#2563eb]"></i>
+            Claim Institution
+          </h3>
+          <button type="button" onClick={onClose} className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700">
+            <i className="fa-solid fa-xmark text-[20px]"></i>
+          </button>
+        </div>
+        <div className="overflow-y-auto px-6 py-5">
+          <div className="mb-5 flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-3.5">
+            <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-blue-600"></i>
+            <p className="line-height-extra text-[13px] text-blue-800">
+              Provide official details to claim <span className="font-bold text-blue-700">{college?.name}</span>. Upon verification, you will receive full control over this profile.
+            </p>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <input
+              type="text"
+              placeholder="College name"
+              required
+              value={institutionName}
+              onChange={(event) => setInstitutionName(event.target.value)}
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+            />
+            <input
+              type="text"
+              placeholder="Institution registration number"
+              required
+              value={registrationNumber}
+              onChange={(event) => setRegistrationNumber(event.target.value)}
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+            />
+            <input
+              type="email"
+              placeholder="Work email"
+              required
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+            />
+            <input
+              type="text"
+              placeholder="Contact Person Full Name"
+              required
+              value={contactPerson}
+              onChange={(event) => setContactPerson(event.target.value)}
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+            />
+            <input
+              type="tel"
+              placeholder="Contact Number"
+              required
+              value={contactNumber}
+              onChange={(event) => setContactNumber(event.target.value)}
+              className="w-full px-4 py-3 bg-[#EEF2F6] border border-[#D5DCE8] rounded-xl focus:bg-white focus:border-[#2D68FE] outline-none text-[14px] shadow-sm"
+            />
+            <div className="mt-8 flex flex-col justify-end gap-3 sm:flex-row pt-4">
+              <button type="button" onClick={onClose} className="w-full rounded-xl border border-gray-200 bg-white px-5 py-2.5 text-[14px] font-bold text-gray-600 transition-colors hover:bg-gray-50 sm:w-auto">
+                Cancel
+              </button>
+              <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgb(37,99,235,0.2)] transition-all hover:-translate-y-0.5 hover:bg-blue-700 sm:w-auto">
+                Submit Claim Request
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );

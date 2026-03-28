@@ -69,9 +69,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
 
   return (
     <header
-      className={`fixed left-0 top-0 z-[110] w-full bg-white shadow-sm transition-transform duration-300 ${
-        isVisible ? "translate-y-0" : "-translate-y-full"
-      }`}
+      className={`fixed left-0 top-0 z-[110] w-full bg-white shadow-sm transition-transform duration-300 ${isVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
     >
       <div className="w-full px-4 sm:px-6 lg:px-8 py-3">
         <div className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-4">
@@ -80,10 +79,10 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
             className="flex items-center gap-2.5 cursor-pointer shrink-0"
             onClick={() => setActiveMenu(null)}
           >
-            <img 
-              src="https://lh3.googleusercontent.com/gg-dl/AOI_d_8JQM_NjnLsLepwl71POGjhXPI49DR1EmqPWYQ2vqriU9mSLeqn6VsajlAtx2wLPEV1XCdgdW3cb3N-E4FxfUTnRxei2OwjuM9GtSMaj4H4j_xDCiGespMLtDlh7L_6vEJVIhYtI1OKZItvNIqve2qN7kY3s5Y1NEQYbNHqrBy1AaH7iA=s1024-rj" 
-              alt="Studsphere Logo" 
-              className="w-[30px] h-[30px] sm:w-[38px] sm:h-[38px] object-contain" 
+            <img
+              src="https://lh3.googleusercontent.com/gg-dl/AOI_d_8JQM_NjnLsLepwl71POGjhXPI49DR1EmqPWYQ2vqriU9mSLeqn6VsajlAtx2wLPEV1XCdgdW3cb3N-E4FxfUTnRxei2OwjuM9GtSMaj4H4j_xDCiGespMLtDlh7L_6vEJVIhYtI1OKZItvNIqve2qN7kY3s5Y1NEQYbNHqrBy1AaH7iA=s1024-rj"
+              alt="Studsphere Logo"
+              className="w-[30px] h-[30px] sm:w-[38px] sm:h-[38px] object-contain"
             />
             <span className="text-[20px] sm:text-[26px] font-[700] text-[#0e5cf4] tracking-tight leading-none mt-0.5">
               Studsphere
@@ -320,7 +319,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               Campus Feed
               <div className="relative ml-1.5 mt-0.5 block">
                 <span className="relative overflow-hidden bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 text-white text-[10px] font-bold px-1.5 py-[3px] rounded block tracking-wider leading-none shadow-sm uppercase z-10">
-                  New 
+                  New
                   <span className="shimmer-effect"></span>
                 </span>
               </div>
@@ -416,7 +415,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
                 className="flex items-center gap-1.5 text-[13px] sm:text-[14px] font-semibold text-[#0f172a] hover:text-[#4461f2] transition-colors whitespace-nowrap"
               >
                 Institution Zone
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6" /></svg>
               </button>
             </div>
           )}
@@ -424,9 +423,8 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
       </div>
 
       <div
-        className={`fixed inset-y-0 right-0 z-[200] flex w-[300px] transform flex-col border-l border-slate-50 bg-white shadow-[-10px_0_40px_rgba(0,0,0,0.1)] transition-transform duration-500 ease-in-out md:hidden ${
-          isMobileOpen ? "translate-x-0" : "translate-x-full"
-        }`}
+        className={`fixed inset-y-0 right-0 z-[200] flex w-[300px] transform flex-col border-l border-slate-50 bg-white shadow-[-10px_0_40px_rgba(0,0,0,0.1)] transition-transform duration-500 ease-in-out md:hidden ${isMobileOpen ? "translate-x-0" : "translate-x-full"
+          }`}
       >
         <div className="flex items-center justify-between border-b border-gray-50 p-6">
           <div className="flex items-center gap-2">
@@ -519,18 +517,16 @@ const DesktopDropdown: React.FC<{
   <div className="group relative h-full shrink-0">
     <div className="nav-link flex h-full cursor-pointer items-center gap-1">
       <span>{label}</span>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-[#4461f2] transition-colors"><path d="m6 9 6 6 6-6"/></svg>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400 group-hover:text-[#4461f2] transition-colors"><path d="m6 9 6 6 6-6" /></svg>
     </div>
     <div
-      className={`invisible absolute top-[46px] z-50 mt-1 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 ${
-        alignRight ? "right-0" : "left-0"
-      }`}
+      className={`invisible absolute top-[46px] z-50 mt-1 translate-y-2 opacity-0 transition-all duration-200 group-hover:visible group-hover:translate-y-0 group-hover:opacity-100 ${alignRight ? "right-0" : "left-0"
+        }`}
     >
       <div className="relative w-[400px] whitespace-normal rounded-xl border border-gray-100 bg-white p-3 shadow-[0_10px_40px_-10px_rgba(0,0,0,0.1)]">
         <div
-          className={`absolute -top-1.5 h-3 w-3 rotate-45 border-l border-t border-gray-100 bg-white ${
-            alignRight ? "right-6" : "left-6"
-          }`}
+          className={`absolute -top-1.5 h-3 w-3 rotate-45 border-l border-t border-gray-100 bg-white ${alignRight ? "right-6" : "left-6"
+            }`}
         ></div>
         <div className="relative z-10 flex flex-col gap-1 whitespace-normal">{children}</div>
       </div>
@@ -547,7 +543,7 @@ const DropdownCard: React.FC<{
 }> = ({ icon, color, title, desc, onClick }) => (
   <button
     onClick={onClick}
-      className="group/card flex w-full min-w-0 items-start rounded-xl border border-transparent p-3 text-left whitespace-normal transition-colors hover:border-blue-100 hover:bg-blue-50/50"
+    className="group/card flex w-full min-w-0 items-start rounded-xl border border-transparent p-3 text-left whitespace-normal transition-colors hover:border-blue-100 hover:bg-blue-50/50"
   >
     <div
       className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg border border-gray-100 bg-gray-50 transition-colors group-hover/card:bg-white ${color}`}
@@ -569,9 +565,8 @@ const NotificationItem: React.FC<{
   unread?: boolean;
 }> = ({ icon, color, text, time, unread }) => (
   <button
-    className={`flex w-full items-start gap-3 border-b border-gray-50 px-4 py-3 text-left transition-colors hover:bg-gray-50 ${
-      unread ? "bg-blue-50/30" : ""
-    }`}
+    className={`flex w-full items-start gap-3 border-b border-gray-50 px-4 py-3 text-left transition-colors hover:bg-gray-50 ${unread ? "bg-blue-50/30" : ""
+      }`}
   >
     <div className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full ${color}`}>
       <i className={`fa-solid ${icon} text-sm`}></i>

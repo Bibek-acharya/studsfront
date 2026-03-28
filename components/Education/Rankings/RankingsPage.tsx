@@ -2,11 +2,10 @@ import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { COLLEGES, MAX_SELECTION } from "./Constants";
 import { SortOption, College } from "./types";
-import ComparisonModal from "./ComparisonModal";
 import { apiService } from "../../../services/api";
 
 interface RankingsPageProps {
-  onNavigate: (view: any) => void;
+  onNavigate: (view: any, data?: any) => void;
 }
 
 const RankingsPage: React.FC<RankingsPageProps> = ({ onNavigate }) => {
@@ -16,7 +15,6 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ onNavigate }) => {
   const [selectedCourse, setSelectedCourse] = useState("All Courses");
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const [sortBy, setSortBy] = useState<SortOption>("RANK_DESC");
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
 
   const PAGE_SIZE = 8;
@@ -320,7 +318,7 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ onNavigate }) => {
                   <i className="fa-solid fa-filter text-sm text-blue-600"></i>
                   <span className="font-extrabold tracking-tight text-slate-900">Compare</span>
                 </div>
-                <p className="mb-8 text-xs font-medium text-slate-400">Select up to 3 colleges to compare</p>
+                <p className="mb-8 text-xs font-medium text-slate-400">Select 2 colleges to compare</p>
 
                 {selectedColleges.length === 0 ? (
                   <div className="group mb-8 flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-100 p-10 transition-all hover:border-blue-200 hover:bg-blue-50/30">
@@ -346,8 +344,13 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ onNavigate }) => {
                 )}
 
                 <button
-                  onClick={() => setIsModalOpen(true)}
-                  disabled={selectedIds.length < 2}
+                  onClick={() =>
+                    onNavigate("compareCollegesResult", {
+                      college1: selectedColleges[0],
+                      college2: selectedColleges[1],
+                    })
+                  }
+                  disabled={selectedIds.length !== 2}
                   className="w-full rounded-lg bg-blue-600 py-3.5 font-bold text-white transition-all active:scale-[0.98] hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Start Comparison
@@ -358,11 +361,6 @@ const RankingsPage: React.FC<RankingsPageProps> = ({ onNavigate }) => {
         </div>
       </div>
 
-      <ComparisonModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        selectedColleges={selectedColleges}
-      />
     </div>
   );
 };

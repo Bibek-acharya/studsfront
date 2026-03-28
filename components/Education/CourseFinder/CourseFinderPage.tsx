@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { apiService, EducationCourse } from "../../../services/api";
+import { CourseCarouselAd } from "./ads/CourseCarouselAd";
+import { KistProgramsAd } from "./ads/KistProgramsAd";
+import { SudsphereBannerAd } from "./ads/SudsphereBannerAd";
+import { useAuth } from "../../../services/AuthContext";
+import RatingAd from "../FindCollege/ads/RatingAd";
 
 interface CourseFinderPageProps {
   onNavigate: (view: any, data?: any) => void;
@@ -195,7 +200,11 @@ const mapCourseToCard = (course: EducationCourse, index: number): CourseCard => 
   };
 };
 
+const COURSES_PER_PAGE = 18;
+
 const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
+  const { isAuthenticated } = useAuth();
+  
   const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
   const [selectedStreams, setSelectedStreams] = useState<string[]>([]);
   const [selectedAffiliations, setSelectedAffiliations] = useState<string[]>([]);
@@ -205,6 +214,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   const [globalSearch, setGlobalSearch] = useState("");
   const [streamSearch, setStreamSearch] = useState("");
   const [affiliationSearch, setAffiliationSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const [openSections, setOpenSections] = useState({
     level: true,
@@ -307,6 +317,16 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
     maxFee,
   ]);
 
+  const totalPages = Math.ceil(filteredCourses.length / COURSES_PER_PAGE);
+  const paginatedCourses = useMemo(() => {
+    const start = (currentPage - 1) * COURSES_PER_PAGE;
+    return filteredCourses.slice(start, start + COURSES_PER_PAGE);
+  }, [filteredCourses, currentPage]);
+
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [selectedLevels, selectedStreams, selectedAffiliations, selectedStatuses, selectedFeeRanges, maxFee, globalSearch]);
+
   const formatLakhLabel = (value: number) => {
     if (value >= maxFeeBound) return `${(maxFeeBound / 100000).toFixed(1)}+ Lakhs`;
     return `${(value / 100000).toFixed(1)} Lakhs`;
@@ -330,6 +350,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
     setStreamSearch("");
     setAffiliationSearch("");
     setMaxFee(maxFeeBound);
+    setCurrentPage(1);
   };
 
   const activeFilterPills = [
@@ -501,7 +522,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
           <div className="mb-5 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-gray-200 pb-5">
             <div>
               <h1 className="text-2xl font-bold text-gray-900 tracking-tight">
-                Showing {filteredCourses.length.toLocaleString()} Colleges
+                Showing {paginatedCourses.length > 0 ? (currentPage - 1) * COURSES_PER_PAGE + 1 : 0}-{Math.min(currentPage * COURSES_PER_PAGE, filteredCourses.length)} of {filteredCourses.length.toLocaleString()} Courses
               </h1>
               <p className="mt-1 text-sm text-gray-500 font-medium">
                 Explore and compare the best colleges tailored for you.
@@ -553,7 +574,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             )}
           </div>
 
-          {filteredCourses.length === 0 ? (
+          {paginatedCourses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 text-center bg-white rounded-lg border border-gray-200 border-dashed">
               <i className="fa-solid fa-magnifying-glass text-4xl text-gray-300 mb-3"></i>
               <h3 className="text-lg font-bold text-gray-900 mb-1">No colleges found</h3>
@@ -569,13 +590,25 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-              {filteredCourses.map((course) => {
+              {paginatedCourses.map((course, index) => {
                 const theme = themes[course.colorTheme];
+                
+                const showAd = (index + 1) % 6 === 0;
+                const globalIndex = (currentPage - 1) * COURSES_PER_PAGE + index;
+                const adIndex = Math.floor(globalIndex / 6) % 3;
+                let AdComponent = null;
+                
+                if (showAd) {
+                  if (adIndex === 0) AdComponent = <CourseCarouselAd />;
+                  else if (adIndex === 1) AdComponent = <KistProgramsAd />;
+                  else AdComponent = isAuthenticated ? <RatingAd /> : <SudsphereBannerAd />;
+                }
+
                 return (
-                  <article
-                    key={course.id}
-                    className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col group"
-                  >
+                  <React.Fragment key={course.id}>
+                    <article
+                      className="bg-white rounded-lg border border-gray-200 overflow-hidden flex flex-col group"
+                    >
                     <div className="h-32 relative overflow-hidden bg-gray-200 shrink-0 border-b border-gray-100">
                       <img src={course.image} alt={course.title} className="w-full h-full object-cover" />
 
@@ -646,19 +679,74 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
                           Details
                         </button>
                         <button
-                          onClick={() => onNavigate("courseDetails", { id: course.id })}
-                          className={`flex-1 h-10 ${theme.btn} rounded-md text-white font-bold text-xs ${theme.btnHover} focus:ring-2 ${theme.ring} outline-none transition-colors`}
+                          onClick={() => onNavigate("universitiesPage", { courseId: course.id, courseTitle: course.title, collegesCount: course.stream })}
+                          className="flex-1 h-10 bg-blue-600 hover:bg-blue-700 rounded-md text-white font-bold text-xs focus:ring-2 focus:ring-blue-200 outline-none transition-colors flex items-center justify-center gap-1.5"
                         >
-                          Apply
-                        </button>
-                        <button className="w-10 h-10 shrink-0 flex items-center justify-center border border-gray-300 rounded-md text-gray-400 hover:text-red-500 hover:bg-red-50 hover:border-red-200 transition-colors outline-none focus:ring-2 focus:ring-red-100">
-                          <i className="fa-regular fa-heart text-base"></i>
+                          <span>View Colleges</span>
+                          <i className="fa-solid fa-chevron-right text-[10px]"></i>
                         </button>
                       </div>
                     </div>
                   </article>
+                  
+                  {showAd && (
+                    <div className="col-span-1 md:col-span-2 xl:col-span-3 my-4">
+                      {AdComponent}
+                    </div>
+                  )}
+                </React.Fragment>
                 );
               })}
+            </div>
+          )}
+
+          {totalPages > 1 && (
+            <div className="mt-8 flex justify-center items-center gap-2">
+              <button
+                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                disabled={currentPage === 1}
+                className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 font-bold text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <i className="fa-solid fa-chevron-left"></i>
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter((page) => {
+                  if (totalPages <= 5) return true;
+                  if (page === 1 || page === totalPages) return true;
+                  if (Math.abs(page - currentPage) <= 1) return true;
+                  return false;
+                })
+                .map((page, index, arr) => {
+                  const showEllipsis = index > 0 && page - arr[index - 1] > 1;
+                  return (
+                    <React.Fragment key={page}>
+                      {showEllipsis && (
+                        <span className="w-10 h-10 flex items-center justify-center text-gray-400 font-bold text-sm">
+                          ...
+                        </span>
+                      )}
+                      <button
+                        onClick={() => setCurrentPage(page)}
+                        className={`w-10 h-10 flex items-center justify-center rounded-md font-bold text-sm transition-colors ${
+                          currentPage === page
+                            ? "bg-blue-600 text-white"
+                            : "border border-gray-300 text-gray-600 hover:bg-gray-50"
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    </React.Fragment>
+                  );
+                })}
+
+              <button
+                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                disabled={currentPage === totalPages}
+                className="w-10 h-10 flex items-center justify-center rounded-md border border-gray-300 text-gray-600 font-bold text-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <i className="fa-solid fa-chevron-right"></i>
+              </button>
             </div>
           )}
         </section>

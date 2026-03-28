@@ -74,11 +74,100 @@ const AdmissionFilterSidebar: React.FC<AdmissionFilterSidebarProps> = ({ activeL
     directAdmission: false
   });
 
+  const [isDetecting, setIsDetecting] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     onFilterChange(filters);
   }, [filters]);
+
+  const detectLocation = async () => {
+    if (!navigator.geolocation) {
+      alert("Browser does not support geolocation.");
+      return;
+    }
+    
+    setIsDetecting(true);
+    
+    const fetchWithFallback = async (lat: number, lon: number) => {
+      try {
+        // Try Nominatim First
+        const res = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`);
+        const data = await res.json();
+        if (data && data.address) return data.address;
+        
+        // Fallback to BigDataCloud
+        const res2 = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`);
+        const data2 = await res2.json();
+        return {
+          state: data2.principalSubdivision,
+          county: data2.locality,
+          city: data2.city || data2.locality
+        };
+      } catch (err) {
+        console.warn("Location service failed, trying next...", err);
+        return null;
+      }
+    };
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const { latitude, longitude } = pos.coords;
+          const addr = await fetchWithFallback(latitude, longitude);
+
+          if (!addr) throw new Error("Could not detect address");
+
+          let province = "";
+          const state = String(addr.state || addr.principalSubdivision || "").toLowerCase();
+          const city_name = String(addr.city || addr.town || addr.village || addr.locality || "").toLowerCase();
+          
+          if (state.includes("bagmati") || city_name.includes("kathmandu")) province = "Bagmati";
+          else if (state.includes("koshi") || state.includes("province 1") || city_name.includes("biratnagar")) province = "Koshi";
+          else if (state.includes("madhesh") || state.includes("province 2") || city_name.includes("birgunj")) province = "Madhesh";
+          else if (state.includes("gandaki") || city_name.includes("pokhara")) province = "Gandaki";
+          else if (state.includes("lumbini") || state.includes("province 5") || city_name.includes("butwal")) province = "Lumbini";
+          else if (state.includes("karnali") || city_name.includes("surkhet")) province = "Karnali";
+          else if (state.includes("sudurpashchim") || city_name.includes("dhangadhi")) province = "Sudurpashchim";
+
+          if (province && rawLocationData[province]) {
+            const detectedDistrict = (addr.county || addr.city_district || addr.locality || "").toLowerCase();
+            const detectedCity = (addr.city || addr.town || addr.village || addr.suburb || "").toLowerCase();
+            
+            const districts = Object.keys(rawLocationData[province]);
+            const district = districts.find(d => 
+              detectedDistrict.includes(d.toLowerCase()) || 
+              detectedCity.includes(d.toLowerCase())
+            ) || districts[0];
+
+            const cities = rawLocationData[province][district];
+            const city = cities.find(c => 
+              detectedCity.includes(c.toLowerCase()) || 
+              c.toLowerCase().includes(detectedCity.toLowerCase())
+            ) || cities[0];
+
+            setFilters(prev => ({ ...prev, province, district, city }));
+          } else {
+            // Default Kathmandu
+            setFilters(prev => ({ ...prev, province: "Bagmati", district: "Kathmandu", city: "Kathmandu Metropolitan" }));
+          }
+        } catch (e) {
+          console.error("Discovery Location Error:", e);
+          // Standard fallback
+          setFilters(prev => ({ ...prev, province: "Bagmati", district: "Kathmandu", city: "Kathmandu Metropolitan" }));
+        } finally {
+          setIsDetecting(false);
+        }
+      },
+      (err) => {
+        console.error("Geolocation Error:", err);
+        setIsDetecting(false);
+        // Fallback to Kathmandu if user denies
+        setFilters(prev => ({ ...prev, province: "Bagmati", district: "Kathmandu", city: "Kathmandu Metropolitan" }));
+      },
+      { enableHighAccuracy: false, timeout: 10000, maximumAge: 30000 }
+    );
+  };
 
   const toggleSection = (id: string) => {
     setOpenSections(prev => ({ ...prev, [id]: !prev[id] }));
@@ -111,7 +200,7 @@ const AdmissionFilterSidebar: React.FC<AdmissionFilterSidebarProps> = ({ activeL
   };
 
   return (
-    <aside className="w-full bg-white rounded-xl border border-gray-200 shadow-sm p-5 sticky top-24 font-['Inter',sans-serif]">
+    <aside className="w-full bg-white rounded-xl border border-gray-200 shadow-sm p-5 sticky font-['Inter',sans-serif]">
       {/* Header */}
       <div className="flex justify-between items-center mb-4 pb-4 border-b border-gray-100">
         <div className="flex items-center gap-2">
@@ -128,14 +217,19 @@ const AdmissionFilterSidebar: React.FC<AdmissionFilterSidebarProps> = ({ activeL
 
       {/* Detect Location Button */}
       <button 
-        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-colors font-semibold text-sm mb-2 border border-blue-100 shadow-sm"
-        onClick={() => {
-           // Mock location detection
-           setFilters(prev => ({ ...prev, province: "Bagmati", district: "Kathmandu", city: "Kathmandu Metropolitan" }));
-        }}
+        disabled={isDetecting}
+        className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-colors font-semibold text-sm mb-2 border border-blue-100 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed group"
+        onClick={detectLocation}
       >
-        <i className="fa-solid fa-location-crosshairs text-[14px]"></i>
-        Detect Location
+        <i className={`fa-solid ${isDetecting ? 'fa-spinner fa-spin' : filters.province ? 'fa-location-dot' : 'fa-location-crosshairs'} text-[14px]`}></i>
+        <div className="flex flex-col items-center">
+           <span className="leading-tight">
+             {isDetecting ? 'Detecting...' : filters.city ? `${filters.city}, ${filters.district}` : filters.province ? `${filters.district || filters.province}` : 'Detect Location'}
+           </span>
+           {filters.province && !isDetecting && (
+             <span className="text-[10px] opacity-70 font-medium">Recent Detection</span>
+           )}
+        </div>
       </button>
 
       {/* Filter Sections */}

@@ -4,7 +4,9 @@ import { College, apiService } from "../../../services/api";
 import { CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "./FindCollegePage";
 import { BadgeCheckIcon, LockIcon } from "lucide-react";
 
-interface CollegeGridProps {
+import LocationAd from "./ads/LocationAd";
+import ByTypeAd from "./ads/ByTypeAd";
+import RatingAd from "./ads/RatingAd";interface CollegeGridProps {
   filters: CollegeFilters;
   setFilters: React.Dispatch<React.SetStateAction<CollegeFilters>>;
   onNavigate: (view: any, data?: any) => void;
@@ -77,12 +79,12 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
     queryFn: () => {
       const params: any = {
         page: currentPage,
-        pageSize: 12,
+        pageSize: 18,
         sort: "rating",
         order: "DESC",
       };
 
-      if (filters.quick.includes("Verified") || isQuickInquiryMode) params.verified = true;
+      if (filters.quick.includes("Verified")) params.verified = true;
       if (
         filters.popularity.includes("Most Enrolled") ||
         filters.popularity.includes("Recommended")
@@ -127,7 +129,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
     setSelectedForInquiry((prev) => {
       if (prev.includes(collegeId)) return prev.filter((id) => id !== collegeId);
       if (prev.length >= 5) {
-        console.warn("You can select up to 5 colleges for Quick Inquiry.");
+        alert("You can select up to 5 colleges for Quick Apply.");
         return prev;
       }
       return [...prev, collegeId];
@@ -137,7 +139,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
   const handleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.checked) {
       setIsQuickInquiryMode(true);
-      const toSelect = colleges.filter(c => c.verified).slice(0, 5).map(c => c.id);
+      const toSelect = colleges.slice(0, 5).map(c => c.id);
       setSelectedForInquiry(toSelect);
     } else {
       setSelectedForInquiry([]);
@@ -185,26 +187,24 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
               </div>
             )}
             
-            {isQuickInquiryMode && (
-              <label className="group mt-auto flex cursor-pointer items-center gap-2.5">
-                <div className="relative flex h-[20px] w-[20px] items-center justify-center">
-                  <input 
-                    type="checkbox" 
-                    checked={selectedForInquiry.length > 0}
-                    onChange={handleSelectAll}
-                    className="peer sr-only"
-                  />
-                  <div className="absolute inset-0 rounded-[4px] border-[1.5px] border-slate-300 bg-white transition-colors group-hover:border-slate-400 peer-checked:border-[#2563eb] peer-checked:bg-[#2563eb]"></div>
-                  <svg className="pointer-events-none absolute z-10 h-3.5 w-3.5 text-white opacity-0 transition-opacity peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                </div>
-                <div className="flex items-baseline gap-1.5 text-[14px]">
-                  <span className="font-semibold text-slate-900">Select all</span>
-                  <span className="hidden text-[12.5px] text-slate-500 sm:inline">(upto 5 quick inquiry colleges)</span>
-                </div>
-              </label>
-            )}
+            <label className="group mt-auto flex cursor-pointer items-center gap-2.5">
+              <div className="relative flex h-[20px] w-[20px] items-center justify-center">
+                <input 
+                  type="checkbox" 
+                  checked={selectedForInquiry.length > 0 && selectedForInquiry.length === Math.min(colleges.length, 5)}
+                  onChange={handleSelectAll}
+                  className="peer sr-only"
+                />
+                <div className="absolute inset-0 rounded-[4px] border-[1.5px] border-slate-300 bg-white transition-colors group-hover:border-slate-400 peer-checked:border-[#2563eb] peer-checked:bg-[#2563eb]"></div>
+                <svg className="pointer-events-none absolute z-10 h-3.5 w-3.5 text-white opacity-0 transition-opacity peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div className="flex items-baseline gap-1.5 text-[14px]">
+                <span className="font-semibold text-slate-900">Select all</span>
+                <span className="hidden text-[12.5px] text-slate-500 sm:inline">(upto 5 quick apply colleges)</span>
+              </div>
+            </label>
           </div>
 
           <div className="mt-2 flex w-full shrink-0 flex-col gap-3 sm:mt-0 sm:w-[320px] sm:items-end">
@@ -222,7 +222,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
             </div>
 
             <label className="group flex cursor-pointer items-center gap-2">
-              <span className="text-[13px] font-semibold text-slate-800">Quick Inquiry</span>
+              <span className="text-[13px] font-semibold text-slate-800">Quick Apply</span>
               <div className="relative inline-flex cursor-pointer items-center">
                 <input 
                   type="checkbox" 
@@ -273,19 +273,33 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
           </div>
         )}
 
-        {colleges.map((college: College) => (
-          <ProgramCard
-            key={college.id}
-            college={college}
-            isSaved={savedColleges.includes(college.id)}
-            isSelected={selectedForInquiry.includes(college.id)}
-            isQuickInquiryMode={isQuickInquiryMode}
-            onNavigate={onNavigate}
-            onToggleSaved={() => toggleSavedCollege(college.id)}
-            onToggleSelection={() => toggleSelection(college.id)}
-            onClaim={() => setCollegeToClaim(college)}
-          />
-        ))}
+        {colleges.map((college: College, index: number) => {
+          const globalIndex = (currentPage - 1) * 18 + index;
+          const isAfter2Rows = (index + 1) % 6 === 0;
+          const adCycleIndex = Math.floor(globalIndex / 6) % 3;
+
+          return (
+            <React.Fragment key={college.id}>
+              <ProgramCard
+                college={college}
+                isSaved={savedColleges.includes(college.id)}
+                isSelected={selectedForInquiry.includes(college.id)}
+                isQuickInquiryMode={isQuickInquiryMode}
+                onNavigate={onNavigate}
+                onToggleSaved={() => toggleSavedCollege(college.id)}
+                onToggleSelection={() => toggleSelection(college.id)}
+                onClaim={() => setCollegeToClaim(college)}
+              />
+              {isAfter2Rows && (
+                <div className="col-span-1 md:col-span-2 xl:col-span-3 w-full">
+                  {adCycleIndex === 0 && <LocationAd />}
+                  {adCycleIndex === 1 && <ByTypeAd />}
+                  {adCycleIndex === 2 && <RatingAd />}
+                </div>
+              )}
+            </React.Fragment>
+          );
+        })}
 
         {!isLoading && colleges.length === 0 && (
           <div className="col-span-1 rounded-[16px] border border-gray-100 bg-white py-16 text-center text-gray-500 shadow-[0_2px_15px_rgb(0,0,0,0.04)] md:col-span-2 xl:col-span-3">
@@ -356,7 +370,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
             Clear Selection
           </button>
           <button onClick={() => setIsModalOpen(true)} className="flex items-center gap-2 rounded-full bg-[#2563eb] px-5 py-2.5 text-[14px] font-semibold text-white shadow-md transition-colors hover:bg-blue-800 sm:px-6 sm:text-[15px]">
-            Quick Inquiry <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[12px] font-bold text-[#2563eb]">{selectedForInquiry.length}</span>
+            Quick Apply <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white text-[12px] font-bold text-[#2563eb]">{selectedForInquiry.length}</span>
           </button>
         </div>
       </div>
@@ -367,7 +381,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
           <div className="flex shrink-0 items-center justify-between border-b border-gray-100 px-6 py-5">
             <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
               <i className="fa-solid fa-paper-plane text-[20px] text-[#2563eb]"></i>
-              Send Quick Inquiry
+              Quick Apply to Colleges
             </h3>
             <button onClick={() => setIsModalOpen(false)} className="rounded-full p-1.5 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700">
               <i className="fa-solid fa-xmark text-[20px]"></i>
@@ -377,7 +391,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
             <div className="mb-5 flex items-start gap-3 rounded-lg border border-blue-100 bg-blue-50 p-3.5">
               <i className="fa-solid fa-circle-info mt-0.5 shrink-0 text-[18px] text-blue-600"></i>
               <p className="line-height-extra text-[13px] text-blue-800">
-                You are sending this inquiry to <span className="text-[14px] font-bold text-blue-700">{selectedForInquiry.length}</span> selected college(s). They will get back to you with the requested information.
+                You are applying to <span className="text-[14px] font-bold text-blue-700">{selectedForInquiry.length}</span> selected college(s). They will review your application and get back to you.
               </p>
             </div>
             <form onSubmit={handleInquirySubmit}>
@@ -398,7 +412,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
                   Cancel
                 </button>
                 <button type="submit" className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-6 py-2.5 text-[14px] font-bold text-white shadow-[0_4px_12px_rgb(37,99,235,0.2)] transition-all hover:-translate-y-0.5 hover:bg-blue-700 sm:w-auto">
-                  Send Inquiry
+                  Submit Application
                 </button>
               </div>
             </form>
@@ -436,25 +450,23 @@ const ProgramCard: React.FC<{
           alt={college.name}
           className="w-full h-full object-cover"
         />
-        {college.verified && (
-          <label 
-            className={`absolute right-2 top-2 z-10 cursor-pointer transition-opacity duration-300 ${isQuickInquiryMode || isSelected ? 'opacity-100 pointer-events-auto' : 'pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto'}`}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="relative flex h-6 w-6 items-center justify-center">
-              <input
-                type="checkbox"
-                checked={isSelected}
-                onChange={onToggleSelection}
-                className="peer sr-only"
-              />
-              <div className="absolute inset-0 rounded-[6px] border-[1.5px] border-slate-300 bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-[#2563eb] peer-checked:bg-[#2563eb]"></div>
-              <svg className="pointer-events-none absolute z-10 h-4 w-4 text-white opacity-0 transition-opacity peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-          </label>
-        )}
+        <label 
+          className={`absolute right-2 top-2 z-10 cursor-pointer transition-opacity duration-300 ${isQuickInquiryMode || isSelected ? 'opacity-100 pointer-events-auto' : 'pointer-events-none opacity-0 group-hover:opacity-100 group-hover:pointer-events-auto'}`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="relative flex h-6 w-6 items-center justify-center">
+            <input
+              type="checkbox"
+              checked={isSelected}
+              onChange={onToggleSelection}
+              className="peer sr-only"
+            />
+            <div className="absolute inset-0 rounded-[6px] border-[1.5px] border-slate-300 bg-white/90 shadow-sm backdrop-blur-sm transition-colors hover:border-slate-400 peer-checked:border-[#2563eb] peer-checked:bg-[#2563eb]"></div>
+            <svg className="pointer-events-none absolute z-10 h-4 w-4 text-white opacity-0 transition-opacity peer-checked:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3.5">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+        </label>
       </div>
 
       <div className="flex flex-1 flex-col px-1.5 pb-1 pt-3">

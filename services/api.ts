@@ -668,6 +668,7 @@ class ApiService {
     order?: "ASC" | "DESC";
     page?: number;
     pageSize?: number;
+    courseId?: string;
   }): Promise<CollegesResponse> {
     return this.request<CollegesResponse>({
       method: "GET",

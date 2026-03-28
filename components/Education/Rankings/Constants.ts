@@ -1,7 +1,7 @@
 
 import { College } from './types';
 
-export const MAX_SELECTION = 3;
+export const MAX_SELECTION = 2;
 
 export const COLLEGES: College[] = [
   {
