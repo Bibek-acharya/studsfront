@@ -45,9 +45,8 @@ const UniversityList: React.FC<UniversityListProps> = ({
               onChange={(e) => onStatusFilterChange(e.target.value)}
             >
               <option>All Status</option>
-              <option>Published</option>
-              <option>Draft</option>
-              <option>In Review</option>
+              <option>Popular</option>
+              <option>Standard</option>
             </select>
           </div>
         </div>
@@ -69,7 +68,9 @@ const UniversityList: React.FC<UniversityListProps> = ({
                 <tr>
                   <th className="px-6 py-4 font-semibold">University Name</th>
                   <th className="px-6 py-4 font-semibold">Location</th>
-                  <th className="px-6 py-4 font-semibold">Status</th>
+                  <th className="px-6 py-4 font-semibold text-center">Programs</th>
+                  <th className="px-6 py-4 font-semibold text-center">Colleges</th>
+                  <th className="px-6 py-4 font-semibold">Type</th>
                   <th className="px-6 py-4 font-semibold text-right">Actions</th>
                 </tr>
               </thead>
@@ -85,8 +86,20 @@ const UniversityList: React.FC<UniversityListProps> = ({
                       </div>
                     </td>
                     <td className="px-6 py-4 text-slate-500">{uni.location || "-"}</td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="px-2 py-1 bg-indigo-50 text-indigo-700 rounded-md font-medium text-xs">
+                        {uni.programsCount || 0}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className="px-2 py-1 bg-slate-100 text-slate-700 rounded-md font-medium text-xs">
+                        {uni.collegesCount || 0}
+                      </span>
+                    </td>
                     <td className="px-6 py-4">
-                      <span className={`px-2.5 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-700`}>
+                      <span className={`px-2.5 py-1 text-xs font-semibold rounded-full ${
+                        uni.isPopular ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"
+                      }`}>
                         {uni.isPopular ? "Popular" : "Standard"}
                       </span>
                     </td>

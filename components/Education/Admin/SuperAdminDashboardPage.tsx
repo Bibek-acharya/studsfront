@@ -26,17 +26,28 @@ const SuperAdminDashboardPage: React.FC = () => {
 
   const filteredUniversities = useMemo(() => {
     let result = universities;
+    
+    // Search filter
     if (search.trim()) {
       const q = search.toLowerCase();
       result = result.filter(u => 
         u.name.toLowerCase().includes(q) || 
-        u.location.toLowerCase().includes(q)
+        (u.location && u.location.toLowerCase().includes(q))
       );
     }
-    // Note: status filtering might need a "status" field in the database if it doesn't exist
-    // For now, mapping from isPopular or just showing all
+    
+    // Status filter
+    if (statusFilter !== "All Status") {
+      if (statusFilter === "Popular") {
+        result = result.filter(u => u.isPopular);
+      } else if (statusFilter === "Standard") {
+        result = result.filter(u => !u.isPopular);
+      }
+      // Note: Draft/In Review are not yet supported by the backend
+    }
+    
     return result;
-  }, [universities, search]);
+  }, [universities, search, statusFilter]);
 
   const handleCreate = () => {
     setEditingId(null);
