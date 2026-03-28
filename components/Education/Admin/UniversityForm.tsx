@@ -1,13 +1,64 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css"; 
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { 
   Save, Eye, RotateCcw, Image, Trash2, Plus, Info, Video, Mail, Phone, Globe, 
   Facebook, Instagram, Linkedin, Twitter, Target, Eye as Vision, Lightbulb, 
   MapPin, Zap, Calendar, FileText, Newspaper, Download, GraduationCap, 
-  Star, School, Search, Building2 
+  Star, School, Search, Building2
 } from "lucide-react";
 import { apiService, University } from "../../../services/api";
 import { useAuth } from "../../../services/AuthContext";
+
+// RTE Wrapper using ReactQuill (Optimized for performance)
+const NewsRichEditor: React.FC<{ value: string; onChange: (val: string) => void }> = ({ value, onChange }) => {
+  const [internalValue, setInternalValue] = useState(value || "");
+  const debounceTimer = useRef<NodeJS.Timeout|null>(null);
+
+  // Sync internal state with prop changes (only if substantially different to avoid loops)
+  useEffect(() => {
+    if (value !== internalValue && !debounceTimer.current) {
+      setInternalValue(value || "");
+    }
+  }, [value]);
+
+  const handleQuillChange = (content: string) => {
+    setInternalValue(content);
+    
+    // Debounce state update to prevent re-rendering the entire parent on every keystroke
+    if (debounceTimer.current) clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => {
+      onChange(content);
+      debounceTimer.current = null;
+    }, 500);
+  };
+
+  return (
+    <div className="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-sm ring-1 ring-slate-900/5 focus-within:ring-indigo-500 transition-all font-sans editor-container">
+       <ReactQuill
+          theme="snow"
+          value={internalValue}
+          onChange={handleQuillChange}
+          placeholder="Start writing university news..."
+          className="bg-white"
+          modules={{
+            toolbar: [
+              [{ 'header': [1, 2, 3, false] }],
+              ['bold', 'italic', 'underline', 'strike'],
+              [{'list': 'ordered'}, {'list': 'bullet'}],
+              ['link', 'clean']
+            ],
+          }}
+       />
+       <style>{`
+          .quill .ql-container { min-h-[300px]; font-size: 14px; }
+          .quill .ql-toolbar { border-none; bg-slate-50; border-b: 1px solid #e2e8f0; }
+          .quill .ql-container { border-none; }
+       `}</style>
+    </div>
+  );
+};
 
 interface UniversityFormProps {
   id: number | null;
@@ -34,28 +85,32 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
   const [activeTab, setActiveTab] = useState("about");
   const [saving, setSaving] = useState(false);
 
-  const handleImageUpload = (file: File, path: string, minWidth?: number) => {
+  const handleFileUpload = (file: File, callback: (result: string) => void, minWidth?: number) => {
     if (!file) return;
 
     const reader = new FileReader();
     reader.onload = (e) => {
       const result = e.target?.result as string;
       
-      if (minWidth) {
+      if (minWidth && file.type.startsWith("image/")) {
         const img = new window.Image();
         img.onload = () => {
           if (img.width < minWidth) {
             alert(`Error: Image width must be at least ${minWidth}px. Current width: ${img.width}px.`);
           } else {
-            updateField(path, result);
+            callback(result);
           }
         };
         img.src = result;
       } else {
-        updateField(path, result);
+        callback(result);
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleImageUpload = (file: File, path: string, minWidth?: number) => {
+    handleFileUpload(file, (result) => updateField(path, result), minWidth);
   };
 
   // Initial Form State matching the prototype structure
@@ -747,9 +802,26 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
                            )}
                            {activeTab === "downloads" && (
                              <>
-                               <td className="px-2 py-2"><input type="text" value={row.name} onChange={(e) => { const n = [...formData.downloads]; n[idx].name = e.target.value; updateField("downloads", n); }} className="w-full p-2 border rounded-lg text-sm" /></td>
-                               <td className="px-2 py-2"><input type="text" value={row.file} onChange={(e) => { const n = [...formData.downloads]; n[idx].file = e.target.value; updateField("downloads", n); }} className="w-full p-2 border rounded-lg text-sm" /></td>
-                               <td className="px-2 py-2"><input type="text" value={row.date} onChange={(e) => { const n = [...formData.downloads]; n[idx].date = e.target.value; updateField("downloads", n); }} className="w-full p-2 border rounded-lg text-sm" /></td>
+                               <td className="px-2 py-2"><input type="text" value={row.name} onChange={(e) => { const n = [...formData.downloads]; n[idx].name = e.target.value; updateField("downloads", n); }} className="w-full p-2 border rounded-lg text-sm" placeholder="File Display Name" /></td>
+                               <td className="px-2 py-2">
+                                  <div className="flex items-center space-x-2">
+                                     <input 
+                                        type="file" 
+                                        onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], (res) => {
+                                          const n = [...formData.downloads];
+                                          n[idx].file = res;
+                                          updateField("downloads", n);
+                                        })}
+                                        className="hidden" 
+                                        id={`file-${idx}`}
+                                     />
+                                     <label htmlFor={`file-${idx}`} className="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-xs font-bold rounded hover:bg-indigo-100 cursor-pointer transition-colors flex items-center shrink-0">
+                                        <FileText className="w-3 h-3 mr-1" /> {row.file ? "Change File" : "Upload"}
+                                     </label>
+                                     <input type="text" value={row.file || ""} onChange={(e) => { const n = [...formData.downloads]; n[idx].file = e.target.value; updateField("downloads", n); }} className="w-full p-2 border bg-slate-50 rounded-lg text-[10px] font-mono" placeholder="File URL/Base64" />
+                                  </div>
+                               </td>
+                               <td className="px-2 py-2"><input type="date" value={row.date} onChange={(e) => { const n = [...formData.downloads]; n[idx].date = e.target.value; updateField("downloads", n); }} className="w-full p-2 border rounded-lg text-sm" /></td>
                              </>
                            )}
                            <td className="px-4 py-2 text-center">
@@ -830,32 +902,95 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
                     <p className="text-sm text-slate-500">Add latest updates, notices or news articles.</p>
                  </div>
                  <button 
-                  onClick={() => addArrayRow("news", { heading: "", type: "Notice", desc: "", date: new Date().toLocaleDateString() })}
+                  onClick={() => addArrayRow("news", { heading: "", type: "Notice", excerpt: "", body: "", date: new Date().toLocaleDateString(), image: "" })}
                   className="bg-indigo-600 text-white px-4 py-2 rounded-lg font-bold shadow-sm hover:bg-indigo-700 active:scale-95 transition-all flex items-center"
                  >
                     <Plus className="w-4 h-4 mr-1" /> Add News Item
                  </button>
               </div>
 
-              <div className="space-y-4">
-                 {(formData.news || []).map((item: any, idx: number) => (
-                    <div key={idx} className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm relative flex gap-4 hover:border-indigo-200 transition-colors">
-                       <div className="flex-1 space-y-3">
-                          <div className="flex gap-4">
-                             <input type="text" placeholder="Heading" value={item.heading} onChange={(e) => { const n = [...formData.news]; n[idx].heading = e.target.value; updateField("news", n); }} className="flex-1 p-2 border rounded-lg text-sm font-bold" />
-                             <select value={item.type} onChange={(e) => { const n = [...formData.news]; n[idx].type = e.target.value; updateField("news", n); }} className="w-32 p-2 border rounded-lg text-sm bg-white">
-                                <option>Notice</option><option>News</option><option>Update</option>
-                             </select>
-                          </div>
-                          <textarea placeholder="Brief description..." value={item.desc} onChange={(e) => { const n = [...formData.news]; n[idx].desc = e.target.value; updateField("news", n); }} className="w-full p-2 border rounded-lg text-sm h-20 resize-none" />
-                       </div>
-                       <button onClick={() => removeArrayRow("news", idx)} className="text-slate-300 hover:text-rose-500 self-start p-2">
-                          <Trash2 className="w-4 h-4" />
-                       </button>
-                    </div>
-                 ))}
-              </div>
-           </div>
+              <div className="space-y-8">
+                  {(formData.news || []).map((item: any, idx: number) => (
+                     <div key={idx} className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm relative space-y-6 hover:border-indigo-200 transition-colors group">
+                        <button onClick={() => removeArrayRow("news", idx)} className="absolute top-4 right-4 text-slate-300 hover:text-rose-500 transition-colors">
+                           <Trash2 className="w-5 h-5" />
+                        </button>
+                        
+                        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                           {/* News Banner Upload */}
+                           <div className="lg:col-span-3 space-y-2">
+                              <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest">Banner Image</label>
+                              <div className="relative aspect-[16/10] bg-slate-50 border-2 border-dashed border-slate-200 rounded-xl overflow-hidden group/img cursor-pointer hover:border-indigo-400">
+                                 {item.image ? (
+                                    <img src={item.image} alt="Banner" className="w-full h-full object-cover" />
+                                 ) : (
+                                    <div className="absolute inset-0 flex flex-col items-center justify-center opacity-40">
+                                       <Image className="w-8 h-8 text-slate-400" />
+                                       <span className="text-[10px] font-bold">Upload</span>
+                                    </div>
+                                 )}
+                                 <input 
+                                    type="file" 
+                                    accept="image/*"
+                                    className="absolute inset-0 opacity-0 cursor-pointer"
+                                    onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], (res) => {
+                                       const n = [...formData.news];
+                                       n[idx].image = res;
+                                       updateField("news", n);
+                                    })}
+                                 />
+                              </div>
+                           </div>
+
+                           <div className="lg:col-span-9 space-y-4">
+                              <div className="flex gap-4">
+                                 <input 
+                                    type="text" 
+                                    placeholder="News Heading" 
+                                    value={item.heading} 
+                                    onChange={(e) => { const n = [...formData.news]; n[idx].heading = e.target.value; updateField("news", n); }} 
+                                    className="flex-1 p-3 border rounded-xl text-lg font-bold focus:ring-2 focus:ring-indigo-500 border-slate-200 outline-none" 
+                                 />
+                                 <select 
+                                    value={item.type} 
+                                    onChange={(e) => { const n = [...formData.news]; n[idx].type = e.target.value; updateField("news", n); }} 
+                                    className="w-32 p-3 border rounded-xl bg-slate-50 font-bold text-xs uppercase"
+                                 >
+                                    <option>Notice</option><option>News</option><option>Update</option><option>Press</option>
+                                 </select>
+                              </div>
+                              
+                              <div>
+                                 <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-1 block">Short Excerpt (Brief Summary)</label>
+                                 <textarea 
+                                    placeholder="Enter a brief summary for the news feed..." 
+                                    value={item.excerpt || item.desc || ""} 
+                                    onChange={(e) => { const n = [...formData.news]; n[idx].excerpt = e.target.value; updateField("news", n); }} 
+                                    className="w-full p-3 border rounded-xl text-sm h-16 resize-none bg-slate-50/30 border-slate-200" 
+                                 />
+                              </div>
+                           </div>
+                        </div>
+
+                        <div className="pt-2">
+                           <label className="text-[10px] font-black uppercase text-slate-400 tracking-widest mb-2 block">Content Body (Rich Editor)</label>
+                           <NewsRichEditor 
+                              value={item.body || ""} 
+                              onChange={(val) => {
+                                 const n = [...formData.news];
+                                 n[idx].body = val;
+                                 updateField("news", n);
+                              }}
+                           />
+                           <p className="mt-1.5 text-[10px] text-slate-400 italic font-medium px-2 flex justify-between">
+                              <span>Uses react-rte for professional formatting with state management.</span>
+                              <span>Total length: {item.body?.length || 0} characters</span>
+                           </p>
+                        </div>
+                     </div>
+                  ))}
+               </div>
+            </div>
         )}
 
         {/* Institutes / Faculties Tab (NESTED TABLE) */}
@@ -999,19 +1134,35 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                  {(formData.gallery || []).map((url: string, idx: number) => (
                     <div key={idx} className="group relative aspect-video rounded-xl border-2 border-slate-100 overflow-hidden bg-slate-50 shadow-sm hover:border-indigo-400 transition-all">
+                       <input 
+                          type="file" 
+                          accept="image/*"
+                          className="hidden" 
+                          id={`gall-${idx}`}
+                          onChange={(e) => e.target.files?.[0] && handleFileUpload(e.target.files[0], (res) => {
+                             const n = [...formData.gallery];
+                             n[idx] = res;
+                             updateField("gallery", n);
+                          })}
+                       />
                        {url ? (
-                         <img src={url} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
-                       ) : (
-                         <div className="w-full h-full flex flex-col items-center justify-center space-y-2 opacity-50">
-                            <Image className="w-8 h-8 text-slate-300" />
-                            <span className="text-[10px] uppercase font-bold text-slate-400">Paste URL below</span>
+                         <div className="relative w-full h-full group">
+                            <img src={url} alt={`Gallery ${idx}`} className="w-full h-full object-cover" />
+                            <label htmlFor={`gall-${idx}`} className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs font-bold cursor-pointer transition-opacity">
+                               Change Image
+                            </label>
                          </div>
+                       ) : (
+                         <label htmlFor={`gall-${idx}`} className="w-full h-full flex flex-col items-center justify-center space-y-2 opacity-50 cursor-pointer hover:bg-slate-100 transition-colors">
+                            <Image className="w-8 h-8 text-slate-300" />
+                            <span className="text-[10px] uppercase font-bold text-slate-400">Click to Upload</span>
+                         </label>
                        )}
                        <div className="absolute inset-x-0 bottom-0 p-2 bg-slate-900/80 translate-y-full group-hover:translate-y-0 transition-transform flex gap-2">
                           <input 
                             type="text" 
                             className="flex-1 bg-transparent border-none text-[10px] text-white focus:ring-0 p-0" 
-                            placeholder="https://..." 
+                            placeholder="Or paste image URL" 
                             value={url}
                             onChange={(e) => {
                                const n = [...formData.gallery];
@@ -1019,7 +1170,7 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
                                updateField("gallery", n);
                             }}
                           />
-                          <button onClick={() => removeArrayRow("gallery", idx)} className="text-rose-400 hover:text-rose-600"><Trash2 className="w-3 h-3" /></button>
+                          <button onClick={() => removeArrayRow("gallery", idx)} className="text-rose-400 hover:text-rose-600 outline-none"><Trash2 className="w-3 h-3" /></button>
                        </div>
                     </div>
                  ))}
@@ -1071,16 +1222,7 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
         )}
       </form>
 
-      {/* Footer Info */}
-      <div className="mt-12 p-6 bg-slate-900/5 rounded-2xl border border-slate-200 text-center">
-         <div className="flex items-center justify-center space-x-2 text-slate-400 mb-2">
-            <GraduationCap className="w-5 h-5" />
-            <span className="text-xs font-black uppercase tracking-widest italic">StudSphere University Management System v2.0</span>
-         </div>
-         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-[0.2em] leading-relaxed max-w-2xl mx-auto opacity-60">
-            Secure Admin Portal for managing academic institutions. All changes are logged and trackable. Ensure data accuracy before publishing to public portal.
-         </p>
-      </div>
+    
     </div>
   );
 };
