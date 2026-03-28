@@ -3,7 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { searchDatabase, trendingSearches, searchIcons, SearchItem } from '../../utils/searchDatabase';
 
 export const SearchBar: React.FC = () => {
-  const [locationText, setLocationText] = useState("Detect Location");
+  const [locationText, setLocationText] = useState(() => {
+    return sessionStorage.getItem('navLocation') || "Detect Location";
+  });
   const [isLocationOpen, setIsLocationOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -25,6 +27,26 @@ export const SearchBar: React.FC = () => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  useEffect(() => {
+    const handleNavLocationChange = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      if (customEvent.detail && customEvent.detail !== locationText) {
+        setLocationText(customEvent.detail);
+      }
+    };
+    window.addEventListener('navLocationChange', handleNavLocationChange);
+    return () => window.removeEventListener('navLocationChange', handleNavLocationChange);
+  }, [locationText]);
+
+  useEffect(() => {
+    if (locationText && locationText !== "Detect Location" && locationText !== "Detecting..." && locationText !== "Location Found") {
+      if (sessionStorage.getItem('navLocation') !== locationText) {
+        sessionStorage.setItem('navLocation', locationText);
+        window.dispatchEvent(new CustomEvent('navLocationChange', { detail: locationText }));
+      }
+    }
+  }, [locationText]);
 
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;

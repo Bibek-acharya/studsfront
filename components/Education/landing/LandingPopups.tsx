@@ -10,14 +10,11 @@ const LandingPopups = () => {
   const [toast, setToast] = useState<{ message: string; isError?: boolean } | null>(null);
 
   useEffect(() => {
-    const hasSeenPopup = localStorage.getItem("studsphere_popup_seen");
-    if (!hasSeenPopup) {
-      // Show notification popup after a short delay
-      const timer = setTimeout(() => {
-        setShowNotification(true);
-      }, 1500);
-      return () => clearTimeout(timer);
-    }
+    // Show notification popup after a short delay
+    const timer = setTimeout(() => {
+      setShowNotification(true);
+    }, 1500);
+    return () => clearTimeout(timer);
   }, []);
 
   const showToastMsg = (message: string, isError = false) => {
@@ -27,7 +24,6 @@ const LandingPopups = () => {
 
   const handleDismissNotification = (isSubscribe = false) => {
     setShowNotification(false);
-    localStorage.setItem("studsphere_popup_seen", "true");
     
     if (!isSubscribe) {
       showToastMsg("We'll remind you later!");
@@ -64,7 +60,7 @@ const LandingPopups = () => {
       {showNotification && (
         <div 
           id="notificationCard" 
-          className="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 lg:translate-y-0 lg:translate-x-0 lg:left-auto lg:top-24 lg:right-6 z-[100] bg-white rounded-lg border border-gray-100 max-w-[38rem] w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] p-4 sm:p-5 shadow-2xl animate-[slideDownFade_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards]"
+          className="fixed top-1/2 left-1/2 -translate-y-1/2 -translate-x-1/2 lg:translate-y-0 lg:translate-x-0 lg:left-auto lg:top-24 lg:right-6 z-[120] bg-white rounded-lg border border-gray-100 max-w-[38rem] w-[calc(100%-2rem)] sm:w-[calc(100%-3rem)] p-4 sm:p-5 shadow-2xl animate-[slideDownFade_0.5s_cubic-bezier(0.16,1,0.3,1)_forwards]"
         >
           <button 
             onClick={() => handleDismissNotification()}

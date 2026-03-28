@@ -117,21 +117,13 @@ const EventShowcaseSection = ({ onNavigate }: any) => {
                       Apply Now
                     </button>
 
-                    <div className="flex items-center gap-3">
-                      <div className="flex -space-x-3">
-                        {(slide.avatars || [33, 47, 12]).map((avatarId: number) => (
-                          <img
-                            key={avatarId}
-                            className="w-10 h-10 rounded-full border-2 border-white object-cover shadow-sm"
-                            src={`https://i.pravatar.cc/100?img=${avatarId}`}
-                            alt="Interested user"
-                          />
-                        ))}
-                      </div>
-                      <span className="text-gray-900 font-medium text-sm">
-                        {slide.interested || "100+ Interested"}
-                      </span>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => onNavigate("eventsPage", slide)}
+                      className="inline-flex items-center justify-center bg-white border border-gray-200 hover:bg-gray-50 hover:border-blue-100 text-gray-700 font-semibold py-3.5 px-8 rounded-xl transition-colors shadow-sm"
+                    >
+                      View Details
+                    </button>
                   </div>
                 </div>
               </div>

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { CollegeFilters, DEFAULT_COLLEGE_FILTERS } from "./FindCollegePage";
 
 interface FilterSidebarProps {
@@ -289,6 +289,27 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
   const [provinceSearch, setProvinceSearch] = useState("");
   const [districtSearch, setDistrictSearch] = useState("");
   const [universitySearch, setUniversitySearch] = useState("");
+  const [navLocString, setNavLocString] = useState("");
+
+  useEffect(() => {
+    const updateLocation = (cityStr: string) => {
+      if (!cityStr || cityStr === "Detect Location" || cityStr === "Detecting..." || cityStr === "Location Found") return;
+      setNavLocString(cityStr);
+    };
+
+    const savedLoc = sessionStorage.getItem('navLocation');
+    if (savedLoc) {
+      updateLocation(savedLoc);
+    }
+
+    const handleNavLocation = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      updateLocation(customEvent.detail);
+    };
+
+    window.addEventListener('navLocationChange', handleNavLocation);
+    return () => window.removeEventListener('navLocationChange', handleNavLocation);
+  }, [setFilters]);
 
   // Derived cascade data
   const availablePrograms = useMemo(() => {
@@ -406,6 +427,9 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
               district: Array.from(nextDist),
             };
           });
+          
+          sessionStorage.setItem('navLocation', cityStr);
+          window.dispatchEvent(new CustomEvent('navLocationChange', { detail: cityStr }));
         } else {
           alert("Could not detect your district. Please select it manually.");
         }
@@ -474,16 +498,19 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({ filters, setFilters }) =>
             onClick={handleLocate}
             className="flex w-full items-center justify-center gap-2 rounded-md border border-blue-500 bg-blue-50 px-4 py-3 text-blue-500 outline-none transition-all duration-200 hover:bg-blue-100 active:bg-blue-200"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-              className={locating ? "animate-spin" : ""}>
-              <circle cx="12" cy="12" r="3" />
-              <circle cx="12" cy="12" r="7" />
-              <line x1="12" y1="1" x2="12" y2="5" />
-              <line x1="12" y1="19" x2="12" y2="23" />
-              <line x1="1" y1="12" x2="5" y2="12" />
-              <line x1="19" y1="12" x2="23" y2="12" />
-            </svg>
-            <span className="text-[15px] font-medium">{locating ? "Locating..." : "College Near Me"}</span>
+            {locating ? (
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-spin">
+                <circle cx="12" cy="12" r="3" />
+                <circle cx="12" cy="12" r="7" />
+                <line x1="12" y1="1" x2="12" y2="5" />
+                <line x1="12" y1="19" x2="12" y2="23" />
+                <line x1="1" y1="12" x2="5" y2="12" />
+                <line x1="19" y1="12" x2="23" y2="12" />
+              </svg>
+            ) : (
+              <i className={`fa-solid ${navLocString ? 'fa-location-dot' : 'fa-location-crosshairs'} text-[16px]`}></i>
+            )}
+            <span className="text-[15px] font-medium">{locating ? "Locating..." : navLocString ? navLocString : "College Near Me"}</span>
           </button>
         </div>
 

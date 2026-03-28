@@ -76,6 +76,27 @@ const AdmissionFilterSidebar: React.FC<AdmissionFilterSidebarProps> = ({ activeL
 
   const [isDetecting, setIsDetecting] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [navLocString, setNavLocString] = useState("");
+
+  useEffect(() => {
+    const updateLocation = (cityStr: string) => {
+      if (!cityStr || cityStr === "Detect Location" || cityStr === "Detecting..." || cityStr === "Location Found") return;
+      setNavLocString(cityStr);
+    };
+
+    const savedLoc = sessionStorage.getItem('navLocation');
+    if (savedLoc) {
+      updateLocation(savedLoc);
+    }
+
+    const handleNavLocation = (e: Event) => {
+      const customEvent = e as CustomEvent<string>;
+      updateLocation(customEvent.detail);
+    };
+
+    window.addEventListener('navLocationChange', handleNavLocation);
+    return () => window.removeEventListener('navLocationChange', handleNavLocation);
+  }, []);
 
   useEffect(() => {
     onFilterChange(filters);
@@ -147,14 +168,23 @@ const AdmissionFilterSidebar: React.FC<AdmissionFilterSidebarProps> = ({ activeL
             ) || cities[0];
 
             setFilters(prev => ({ ...prev, province, district, city }));
+            const locStr = `${city}, ${district}`;
+            sessionStorage.setItem('navLocation', locStr);
+            window.dispatchEvent(new CustomEvent('navLocationChange', { detail: locStr }));
           } else {
             // Default Kathmandu
             setFilters(prev => ({ ...prev, province: "Bagmati", district: "Kathmandu", city: "Kathmandu Metropolitan" }));
+            const locStr = "Kathmandu Metropolitan, Kathmandu";
+            sessionStorage.setItem('navLocation', locStr);
+            window.dispatchEvent(new CustomEvent('navLocationChange', { detail: locStr }));
           }
         } catch (e) {
           console.error("Discovery Location Error:", e);
           // Standard fallback
           setFilters(prev => ({ ...prev, province: "Bagmati", district: "Kathmandu", city: "Kathmandu Metropolitan" }));
+          const locStr = "Kathmandu Metropolitan, Kathmandu";
+          sessionStorage.setItem('navLocation', locStr);
+          window.dispatchEvent(new CustomEvent('navLocationChange', { detail: locStr }));
         } finally {
           setIsDetecting(false);
         }
@@ -164,6 +194,9 @@ const AdmissionFilterSidebar: React.FC<AdmissionFilterSidebarProps> = ({ activeL
         setIsDetecting(false);
         // Fallback to Kathmandu if user denies
         setFilters(prev => ({ ...prev, province: "Bagmati", district: "Kathmandu", city: "Kathmandu Metropolitan" }));
+        const locStr = "Kathmandu Metropolitan, Kathmandu";
+        sessionStorage.setItem('navLocation', locStr);
+        window.dispatchEvent(new CustomEvent('navLocationChange', { detail: locStr }));
       },
       { enableHighAccuracy: false, timeout: 10000, maximumAge: 30000 }
     );
@@ -221,13 +254,13 @@ const AdmissionFilterSidebar: React.FC<AdmissionFilterSidebarProps> = ({ activeL
         className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-blue-50 text-blue-600 hover:bg-blue-100 hover:text-blue-700 rounded-lg transition-colors font-semibold text-sm mb-2 border border-blue-100 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed group"
         onClick={detectLocation}
       >
-        <i className={`fa-solid ${isDetecting ? 'fa-spinner fa-spin' : filters.province ? 'fa-location-dot' : 'fa-location-crosshairs'} text-[14px]`}></i>
+        <i className={`fa-solid ${isDetecting ? 'fa-spinner fa-spin' : navLocString ? 'fa-location-dot' : 'fa-location-crosshairs'} text-[14px]`}></i>
         <div className="flex flex-col items-center">
            <span className="leading-tight">
-             {isDetecting ? 'Detecting...' : filters.city ? `${filters.city}, ${filters.district}` : filters.province ? `${filters.district || filters.province}` : 'Detect Location'}
+             {isDetecting ? 'Detecting...' : navLocString ? navLocString : filters.city ? `${filters.city}, ${filters.district}` : filters.province ? `${filters.district || filters.province}` : 'Detect Location'}
            </span>
-           {filters.province && !isDetecting && (
-             <span className="text-[10px] opacity-70 font-medium">Recent Detection</span>
+           {navLocString && !isDetecting && (
+             <span className="text-[10px] opacity-70 font-medium">Detected Location</span>
            )}
         </div>
       </button>

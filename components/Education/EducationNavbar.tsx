@@ -101,57 +101,59 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
               <span className="shimmer-effect"></span>
             </button>
 
-            <div className="relative menu-anchor">
-              <button
-                onClick={() =>
-                  setActiveMenu((prev) =>
-                    prev === "notification-menu" ? null : "notification-menu",
-                  )
-                }
-                className="relative p-1.5 sm:p-2 rounded-full border border-gray-200 text-[#475569] hover:bg-gray-50 transition-colors"
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-[20px] sm:h-[20px]"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
-                <span className="absolute -top-1.5 -right-1.5 w-[16px] h-[16px] bg-[#ef4444] border-2 border-white rounded-full flex items-center justify-center text-white text-[9px] font-bold shadow-sm">3</span>
-              </button>
+            {user && (
+              <div className="relative menu-anchor">
+                <button
+                  onClick={() =>
+                    setActiveMenu((prev) =>
+                      prev === "notification-menu" ? null : "notification-menu",
+                    )
+                  }
+                  className="relative p-1.5 sm:p-2 rounded-full border border-gray-200 text-[#475569] hover:bg-gray-50 transition-colors"
+                >
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="sm:w-[20px] sm:h-[20px]"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"></path><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"></path></svg>
+                  <span className="absolute -top-1.5 -right-1.5 w-[16px] h-[16px] bg-[#ef4444] border-2 border-white rounded-full flex items-center justify-center text-white text-[9px] font-bold shadow-sm">3</span>
+                </button>
 
-              {activeMenu === "notification-menu" && (
-                <div className="absolute right-0 z-50 mt-3 w-[340px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
-                  <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
-                    <span className="text-[15px] font-semibold text-gray-800">Notifications</span>
-                    <span className="cursor-pointer text-xs font-medium text-[#4264f5] hover:underline">
-                      Mark all as read
-                    </span>
+                {activeMenu === "notification-menu" && (
+                  <div className="absolute right-0 z-50 mt-3 w-[340px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
+                    <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+                      <span className="text-[15px] font-semibold text-gray-800">Notifications</span>
+                      <span className="cursor-pointer text-xs font-medium text-[#4264f5] hover:underline">
+                        Mark all as read
+                      </span>
+                    </div>
+                    <div className="custom-scrollbar max-h-[360px] overflow-y-auto">
+                      <NotificationItem
+                        icon="fa-thumbs-up"
+                        color="bg-blue-100 text-blue-600"
+                        text="Your review for Harvard University was approved and is now live!"
+                        time="2 mins ago"
+                        unread
+                      />
+                      <NotificationItem
+                        icon="fa-circle-check"
+                        color="bg-green-100 text-green-600"
+                        text="Successfully enrolled in Advanced Computer Science Masterclass."
+                        time="1 hour ago"
+                        unread
+                      />
+                      <NotificationItem
+                        icon="fa-reply"
+                        color="bg-purple-100 text-purple-600"
+                        text="Sarah Jenkins replied to your comment in the Campus Feed."
+                        time="4 hours ago"
+                      />
+                    </div>
+                    <div className="border-t border-gray-100 pb-1 pt-2 text-center">
+                      <button className="text-[13px] font-medium text-[#4264f5] hover:underline">
+                        View all notifications
+                      </button>
+                    </div>
                   </div>
-                  <div className="custom-scrollbar max-h-[360px] overflow-y-auto">
-                    <NotificationItem
-                      icon="fa-thumbs-up"
-                      color="bg-blue-100 text-blue-600"
-                      text="Your review for Harvard University was approved and is now live!"
-                      time="2 mins ago"
-                      unread
-                    />
-                    <NotificationItem
-                      icon="fa-circle-check"
-                      color="bg-green-100 text-green-600"
-                      text="Successfully enrolled in Advanced Computer Science Masterclass."
-                      time="1 hour ago"
-                      unread
-                    />
-                    <NotificationItem
-                      icon="fa-reply"
-                      color="bg-purple-100 text-purple-600"
-                      text="Sarah Jenkins replied to your comment in the Campus Feed."
-                      time="4 hours ago"
-                    />
-                  </div>
-                  <div className="border-t border-gray-100 pb-1 pt-2 text-center">
-                    <button className="text-[13px] font-medium text-[#4264f5] hover:underline">
-                      View all notifications
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            )}
 
             <div className="ml-1 flex items-center gap-3 border-l border-gray-200 pl-4">
               {!user ? (
