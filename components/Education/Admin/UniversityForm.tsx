@@ -134,7 +134,14 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
     type: "Public",
     established: "",
     description: "",
-    isPopular: false,
+    rank: 0,
+    rating: 0,
+    review_count: 0,
+    verified: false,
+    students: "",
+    chancellor: "",
+    vice_chancellor: "",
+    founder: "",
     about: {
       yt1: "",
       yt2: "",
@@ -163,6 +170,13 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
       size: "",
       students: "",
       campuses: 0,
+      teachingStaff: "",
+      nonTeachingStaff: "",
+      constituentCampuses: "",
+      affiliatedColleges: "",
+      centralDepartments: "",
+      researchCenters: "",
+      intlCollabs: "",
     },
     overview: [],
     leadership: [],
@@ -232,7 +246,14 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
         ...formData,
         status: status,
         popular: formData.isPopular, // Mapping verified/isPopular
-        rank: formData.rank || 0,
+        verified: formData.verified,
+        rating: Number(formData.rating || 0),
+        review_count: Number(formData.review_count || 0),
+        rank: Number(formData.rank || 0),
+        students: formData.students || formData.quick?.students,
+        chancellor: formData.chancellor,
+        vice_chancellor: formData.vice_chancellor,
+        founder: formData.founder,
         description: formData.about?.desc || formData.description,
         // Ensure nested structures are clean
         about: formData.about,
@@ -355,14 +376,25 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
             <section className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
               <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 font-bold text-slate-800 flex justify-between items-center">
                 <span>1. Basic Information</span>
-                <div className="flex items-center space-x-2">
-                  <span className="text-xs text-slate-500 uppercase font-black tracking-wider">Popular</span>
-                  <input 
-                    type="checkbox" 
-                    checked={formData.isPopular} 
-                    onChange={(e) => setFormData(prev => ({ ...prev, isPopular: e.target.checked }))}
-                    className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
-                  />
+                <div className="flex items-center space-x-6">
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-slate-500 uppercase font-black tracking-wider">Popular</span>
+                    <input 
+                      type="checkbox" 
+                      checked={formData.isPopular} 
+                      onChange={(e) => setFormData(prev => ({ ...prev, isPopular: e.target.checked }))}
+                      className="w-5 h-5 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
+                    />
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className="text-xs text-slate-500 uppercase font-black tracking-wider">Verified</span>
+                    <input 
+                      type="checkbox" 
+                      checked={formData.verified} 
+                      onChange={(e) => setFormData(prev => ({ ...prev, verified: e.target.checked }))}
+                      className="w-5 h-5 rounded border-slate-300 text-emerald-600 focus:ring-emerald-500"
+                    />
+                  </div>
                 </div>
               </div>
               <div className="p-6 space-y-6">
@@ -421,6 +453,7 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
                    </div>
                 </div>
 
+                {/* Section 1: Basic Info - Row 2: Name, Location, Website */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-bold text-slate-700 mb-1">University Name *</label>
@@ -432,7 +465,7 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
                       required
                     />
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-bold text-slate-700 mb-1">Location</label>
                       <input 
@@ -451,6 +484,113 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
                         className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border" 
                       />
                     </div>
+                  </div>
+                </div>
+
+                {/* Section 1: Basic Info - Row 3: Established & Students */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Established Year</label>
+                      <input 
+                        type="text" 
+                        value={formData.established || ""} 
+                        onChange={(e) => updateField("established", e.target.value)}
+                        className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border" 
+                        placeholder="e.g. 1959"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-bold text-slate-700 mb-1">Total Students</label>
+                      <input 
+                        type="text" 
+                        value={formData.students || ""} 
+                        onChange={(e) => updateField("students", e.target.value)}
+                        className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border" 
+                        placeholder="e.g. 400,000+"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                     <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">Rank</label>
+                        <input 
+                          type="number" 
+                          value={formData.rank || 0} 
+                          onChange={(e) => updateField("rank", parseInt(e.target.value))}
+                          className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border" 
+                        />
+                     </div>
+                     <div>
+                        <label className="block text-sm font-bold text-slate-700 mb-1">University Type</label>
+                        <select 
+                          value={formData.type || "Public"} 
+                          onChange={(e) => updateField("type", e.target.value)}
+                          className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border bg-white"
+                        >
+                          <option>Public</option>
+                          <option>Private</option>
+                          <option>Deemed</option>
+                          <option>Autonomous</option>
+                        </select>
+                     </div>
+                  </div>
+                </div>
+
+                {/* Section 1: Basic Info - Row 4: Ratings & Reviews */}
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Rating</label>
+                    <input 
+                      type="number" 
+                      step="0.1"
+                      value={formData.rating || 0} 
+                      onChange={(e) => updateField("rating", parseFloat(e.target.value))}
+                      className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border" 
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Review Count</label>
+                    <input 
+                      type="number" 
+                      value={formData.review_count || 0} 
+                      onChange={(e) => updateField("review_count", parseInt(e.target.value))}
+                      className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border" 
+                    />
+                  </div>
+                </div>
+
+                {/* Section 1: Basic Info - Row 5: Leadership */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Founder</label>
+                    <input 
+                      type="text" 
+                      value={formData.founder || ""} 
+                      onChange={(e) => updateField("founder", e.target.value)}
+                      className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border" 
+                      placeholder="e.g. King Mahendra..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Chancellor</label>
+                    <input 
+                      type="text" 
+                      value={formData.chancellor || ""} 
+                      onChange={(e) => updateField("chancellor", e.target.value)}
+                      className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border" 
+                      placeholder="e.g. Prime Minister..."
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-slate-700 mb-1">Vice-Chancellor</label>
+                    <input 
+                      type="text" 
+                      value={formData.vice_chancellor || ""} 
+                      onChange={(e) => updateField("vice_chancellor", e.target.value)}
+                      className="w-full rounded-lg border-slate-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm p-3 border" 
+                      placeholder="e.g. Prof. Dr. Dharma..."
+                    />
                   </div>
                 </div>
               </div>
@@ -643,11 +783,83 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
                           onChange={(e) => updateField("quick.campuses", parseInt(e.target.value))}
                           className="w-full text-sm p-2 border border-slate-300 rounded" 
                         />
-                     </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1 font-bold">Teaching Staff</label>
+                          <input 
+                            type="text" 
+                            value={formData.quick?.teachingStaff || ""} 
+                            onChange={(e) => updateField("quick.teachingStaff", e.target.value)}
+                            className="w-full text-sm p-2 border border-slate-300 rounded" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1 font-bold">Non-Teaching Staff</label>
+                          <input 
+                            type="text" 
+                            value={formData.quick?.nonTeachingStaff || ""} 
+                            onChange={(e) => updateField("quick.nonTeachingStaff", e.target.value)}
+                            className="w-full text-sm p-2 border border-slate-300 rounded" 
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1 font-bold">Constituent Campuses</label>
+                          <input 
+                            type="text" 
+                            value={formData.quick?.constituentCampuses || ""} 
+                            onChange={(e) => updateField("quick.constituentCampuses", e.target.value)}
+                            className="w-full text-sm p-2 border border-slate-300 rounded" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1 font-bold">Affiliated Colleges</label>
+                          <input 
+                            type="text" 
+                            value={formData.quick?.affiliatedColleges || ""} 
+                            onChange={(e) => updateField("quick.affiliatedColleges", e.target.value)}
+                            className="w-full text-sm p-2 border border-slate-300 rounded" 
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1 font-bold">Central Departments</label>
+                          <input 
+                            type="text" 
+                            value={formData.quick?.centralDepartments || ""} 
+                            onChange={(e) => updateField("quick.centralDepartments", e.target.value)}
+                            className="w-full text-sm p-2 border border-slate-300 rounded" 
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1 font-bold">Research Centers</label>
+                          <input 
+                            type="text" 
+                            value={formData.quick?.researchCenters || ""} 
+                            onChange={(e) => updateField("quick.researchCenters", e.target.value)}
+                            className="w-full text-sm p-2 border border-slate-300 rounded" 
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1 font-bold">International Collaborations</label>
+                          <input 
+                            type="text" 
+                            value={formData.quick?.intlCollabs || ""} 
+                            onChange={(e) => updateField("quick.intlCollabs", e.target.value)}
+                            className="w-full text-sm p-2 border border-slate-300 rounded" 
+                          />
+                        </div>
+                        <div />
+                      </div>
                   </div>
-               </section>
+                </section>
+              </div>
             </div>
-          </div>
         )}
 
         {/* Section: Courses & Fees */}
