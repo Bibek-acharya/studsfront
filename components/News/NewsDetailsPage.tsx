@@ -17,11 +17,12 @@ interface CommentItem {
 
 const NewsDetailsPage: React.FC<NewsDetailsPageProps> = ({ onNavigate }) => {
   const location = useLocation();
-  const state = location.state as { id?: string } | null;
+  const state = location.state as { id?: string, article?: any } | null;
   const articleId = state?.id || "1";
 
-  const article = getNewsById(articleId);
-  const related = article ? getRelatedNews(articleId, article.category) : [];
+  // Priority: Use passed article object, fallback to static fetch
+  const article = state?.article || getNewsById(articleId);
+  const related = article ? getRelatedNews(articleId, article?.category || "General") : [];
 
   const [commentInput, setCommentInput] = useState("");
   const [comments, setComments] = useState<CommentItem[]>([
@@ -128,47 +129,18 @@ const NewsDetailsPage: React.FC<NewsDetailsPageProps> = ({ onNavigate }) => {
             {article.excerpt}
           </div>
 
-          <div className="mb-10">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Revised Schedule</h2>
-            <p className="mb-5 text-gray-700 leading-relaxed text-[1.05rem]">
-              The previous deadline for counseling registration was set for December 10th, 2024. The new revised schedule is as follows:
-            </p>
-            <ul className="list-disc pl-6 space-y-2.5 text-gray-700 text-[1.05rem] marker:text-gray-400">
-              <li>
-                <strong className="text-gray-900 font-semibold">New Registration Deadline:</strong> December 20th, 2024 (5:00 PM NST)
-              </li>
-              <li>
-                <strong className="text-gray-900 font-semibold">Choice Filling Deadline:</strong> December 20th, 2024
-              </li>
-              <li>
-                <strong className="text-gray-900 font-semibold">Seat Allotment (Round 1):</strong> December 25th, 2024
-              </li>
-              <li>
-                <strong className="text-gray-900 font-semibold">Fee Payment & Document Verification:</strong> December 26th - 28th, 2024
-              </li>
-            </ul>
-          </div>
 
-          <div className="mb-12">
-            <h2 className="text-2xl font-bold mb-4 text-gray-900">Instructions for Applicants</h2>
-            <p className="mb-5 text-gray-700 leading-relaxed text-[1.05rem]">All registered candidates must follow these steps:</p>
-            <ol className="list-decimal pl-6 space-y-2.5 text-gray-700 text-[1.05rem] font-medium marker:text-gray-600 marker:font-semibold">
-              <li>Log in to the admission portal using your credentials</li>
-              <li>Verify and update your personal information if needed</li>
-              <li>Complete the choice filling process carefully</li>
-              <li>Submit the application before the deadline</li>
-              <li>Keep your documents ready for verification</li>
-            </ol>
-          </div>
-
-          <div className="mb-12 text-gray-700 leading-relaxed text-[1.05rem] whitespace-pre-line">{article.content}</div>
+          <div 
+            className="prose prose-slate max-w-none mb-12 text-gray-700 leading-relaxed text-[1.05rem]" 
+            dangerouslySetInnerHTML={{ __html: article.content || article.body || "" }} 
+          />
 
           <hr className="border-gray-100 mb-8" />
 
           <div className="mb-10">
             <h3 className="text-lg font-bold mb-4 text-gray-900">Tags:</h3>
             <div className="flex flex-wrap gap-2.5">
-              {article.tags.map((tag) => (
+              {(article.tags || []).map((tag: string) => (
                 <button
                   key={tag}
                   className="bg-gray-100 hover:bg-gray-200 text-gray-600 px-4 py-1.5 rounded-full text-sm font-medium transition-colors"

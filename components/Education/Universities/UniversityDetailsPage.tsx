@@ -2,6 +2,12 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 import { apiService } from "../../../services/api";
+import { 
+  BadgeCheck, MapPin, Star, ArrowUpRight, Building2, Download, Share2, 
+  Play, MessageSquareQuote, Video, Eye, Target, Gem, Landmark, Users, 
+  Layers, Globe2, Award, Info, PhoneCall, Mail, Phone, Globe, ChevronDown,
+  Cpu, Stethoscope, TreePine, BookOpen, Briefcase, Scale, Heart, FileDown, Book, GraduationCap, ScrollText, HelpCircle, ChevronRight, Clock, Newspaper, Scroll, Image as ImageIcon
+} from "lucide-react";
 
 interface UniversityDetailsPageProps {
   id?: number;
@@ -37,235 +43,6 @@ const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "review", label: "Review" },
 ];
 
-const courses = [
-  {
-    title: "B.Tech Computer Science",
-    subtitle: "AI, Data Science",
-    duration: "4 Year",
-    format: "Full Time",
-    fee: "Rs. 4,50,000",
-    eligibility: "10+2 with 75% (PCM)",
-    seats: "120 Seats",
-    level: "Bachelor" as LevelFilter,
-  },
-  {
-    title: "BBA Finance",
-    subtitle: "Finance, Accounting",
-    duration: "3 Year",
-    format: "Full Time",
-    fee: "Rs. 2,80,000",
-    eligibility: "10+2 with 60%",
-    seats: "90 Seats",
-    level: "Bachelor" as LevelFilter,
-  },
-  {
-    title: "B.Sc. CSIT",
-    subtitle: "Computing",
-    duration: "4 Year",
-    format: "Semester",
-    fee: "Rs. 3,20,000",
-    eligibility: "10+2 with 65%",
-    seats: "100 Seats",
-    level: "Bachelor" as LevelFilter,
-  },
-  {
-    title: "MBA Financial Mgt",
-    subtitle: "Finance",
-    duration: "2 Year",
-    format: "Full Time",
-    fee: "Rs. 3,50,000",
-    eligibility: "Bachelor's Degree (Min 50%)",
-    seats: "60 Seats",
-    level: "Master" as LevelFilter,
-  },
-  {
-    title: "M.Sc. Data Science",
-    subtitle: "ML & AI",
-    duration: "2 Year",
-    format: "Full Time",
-    fee: "Rs. 3,00,000",
-    eligibility: "B.Sc. CSIT / related",
-    seats: "40 Seats",
-    level: "Master" as LevelFilter,
-  },
-  {
-    title: "MA Sociology",
-    subtitle: "Anthropology",
-    duration: "2 Year",
-    format: "Yearly",
-    fee: "Rs. 1,20,000",
-    eligibility: "Bachelor's degree",
-    seats: "80 Seats",
-    level: "Master" as LevelFilter,
-  },
-];
-
-const offeredPrograms = [
-  { name: "Science (Biology)", level: "+2" as LevelFilter, status: "Ongoing" },
-  { name: "Science (Math)", level: "+2" as LevelFilter, status: "Ongoing" },
-  { name: "B.Sc. CSIT", level: "Bachelor" as LevelFilter, status: "Ongoing" },
-  { name: "BBA", level: "Bachelor" as LevelFilter, status: "Closed" },
-  { name: "MBA", level: "Master" as LevelFilter, status: "Ongoing" },
-  { name: "M.Sc. Data Science", level: "Master" as LevelFilter, status: "Closed" },
-];
-
-const scholarships = [
-  { program: "+2 Science", title: "Merit Scholarship", benefit: "Up to 100% waiver", audience: "Top 5% in SEE", level: "+2" as LevelFilter },
-  { program: "+2 Management", title: "Need-Based Grant", benefit: "Variable", audience: "Low income families", level: "+2" as LevelFilter },
-  { program: "B.Sc. CSIT", title: "Merit Scholarship", benefit: "Up to 100% waiver", audience: "60%+ in +2", level: "Bachelor" as LevelFilter },
-  { program: "BBA", title: "Sports Excellence", benefit: "Fee reduction", audience: "State/national players", level: "Bachelor" as LevelFilter },
-  { program: "MBA", title: "Merit Scholarship", benefit: "50% waiver", audience: "70% in Bachelor", level: "Master" as LevelFilter },
-];
-
-const newsCards = [
-  {
-    tag: "Exam",
-    tagClass: "bg-orange-50 text-orange-500",
-    title: "JEE Main 2025: Registration Process Extended.",
-    body: "NTA extends JEE Main 2025 registration deadline due to high volume of applications.",
-    image: "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?q=80&w=800&auto=format&fit=crop",
-    time: "2 days ago",
-  },
-  {
-    tag: "Admission",
-    tagClass: "bg-blue-50 text-blue-500",
-    title: "UG Admissions 2025 Open",
-    body: "Apply now for all bachelor programs. Last date extended.",
-    image: "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=800&auto=format&fit=crop",
-    time: "5 days ago",
-  },
-  {
-    tag: "Scholarship",
-    tagClass: "bg-green-50 text-green-600",
-    title: "Merit Scholarship 2025 Application Open",
-    body: "Apply for merit-based scholarships for outstanding students.",
-    image: "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=800&auto=format&fit=crop",
-    time: "1 week ago",
-  },
-];
-
-const eventCards = [
-  {
-    day: "15",
-    month: "MAY",
-    color: "bg-blue-50 text-blue-600",
-    monthColor: "text-blue-500",
-    title: "International Conference on AI",
-    time: "10:00 AM - 4:00 PM",
-    body: "Central Library Auditorium. Keynote by Prof. Yoshua Bengio.",
-  },
-  {
-    day: "22",
-    month: "JUN",
-    color: "bg-green-50 text-green-600",
-    monthColor: "text-green-500",
-    title: "Alumni Meet 2025",
-    time: "5:00 PM onwards",
-    body: "University Guest House. Registration open.",
-  },
-  {
-    day: "05",
-    month: "JUL",
-    color: "bg-purple-50 text-purple-600",
-    monthColor: "text-purple-500",
-    title: "Research Symposium 2025",
-    time: "9:00 AM - 3:00 PM",
-    body: "Present your research. Prizes for best papers.",
-  },
-  {
-    day: "12",
-    month: "AUG",
-    color: "bg-amber-50 text-amber-600",
-    monthColor: "text-amber-500",
-    title: "Career Fair 2025",
-    time: "10:00 AM - 5:00 PM",
-    body: "50+ top companies participating. Register now.",
-  },
-];
-
-const downloads = [
-  {
-    title: "General Prospectus 2025",
-    meta: "PDF, 12 MB · Updated Feb 2025",
-    icon: "fa-book",
-    color: "bg-blue-100 text-blue-600",
-    linkColor: "text-blue-600 hover:text-blue-700",
-    action: "Download PDF",
-  },
-  {
-    title: "Course Guide (Bachelor)",
-    meta: "PDF, 8.5 MB · Updated Jan 2025",
-    icon: "fa-graduation-cap",
-    color: "bg-green-100 text-green-600",
-    linkColor: "text-green-600 hover:text-green-700",
-    action: "Download",
-  },
-  {
-    title: "Scholarship Application Form",
-    meta: "DOCX, 2.1 MB",
-    icon: "fa-scroll",
-    color: "bg-purple-100 text-purple-600",
-    linkColor: "text-purple-600 hover:text-purple-700",
-    action: "Download",
-  },
-  {
-    title: "International Student Guide",
-    meta: "PDF, 5.3 MB",
-    icon: "fa-landmark",
-    color: "bg-amber-100 text-amber-600",
-    linkColor: "text-amber-600 hover:text-amber-700",
-    action: "Download",
-  },
-];
-
-const galleryImages = [
-  "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1555438848-18e874ce2ab2?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1541829070764-84a5d30cb270?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=500&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1606326608606-aa0b62935f2b?q=80&w=500&auto=format&fit=crop",
-];
-
-const instituteSections = [
-  {
-    key: "inst-eng-drop",
-    icon: "fa-microchip",
-    title: "Institute of Engineering",
-    items: ["Department of Architecture", "Civil Engineering", "Electronics & Computer", "Mechanical Engineering"],
-  },
-  {
-    key: "inst-med-drop",
-    icon: "fa-stethoscope",
-    title: "Institute of Medicine",
-    items: ["MBBS", "Nursing", "Public Health", "Dental Surgery"],
-  },
-  {
-    key: "inst-for-drop",
-    icon: "fa-tree",
-    title: "Institute of Forestry",
-    items: ["Forestry", "Natural Resources"],
-  },
-];
-
-const facultySections = [
-  {
-    key: "fac-humanities-drop",
-    icon: "fa-users",
-    title: "Faculty of Humanities",
-    items: ["Sociology", "English", "History", "Economics", "Psychology"],
-  },
-  {
-    key: "fac-law-drop",
-    icon: "fa-scale-balanced",
-    title: "Faculty of Law",
-    items: ["LL.B.", "LL.M.", "Constitutional Law", "International Law"],
-  },
-];
-
 const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNavigate }) => {
   const location = useLocation();
   const routeId = Number((location.state as { id?: number | string } | null)?.id);
@@ -275,10 +52,7 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
   const [coursesFilter, setCoursesFilter] = useState<LevelFilter>("all");
   const [programFilter, setProgramFilter] = useState<LevelFilter>("all");
   const [scholarshipFilter, setScholarshipFilter] = useState<LevelFilter>("all");
-  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({
-    "institutes-master-drop": true,
-    "fac-management-drop": true,
-  });
+  const [openDropdowns, setOpenDropdowns] = useState<Record<string, boolean>>({});
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ["university-details", resolvedId],
@@ -291,119 +65,109 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [resolvedId]);
+  }, [resolvedId, activeTab]);
 
   const initials = useMemo(() => {
     const name = university?.name || "University";
-    return name
-      .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .slice(0, 2)
-      .toUpperCase();
+    return name.split(" ").map((part) => part[0]).join("").slice(0, 2).toUpperCase();
   }, [university?.name]);
 
   const website = university?.website || "WWW.Studsphere.Com";
   const websiteHref = website.startsWith("http") ? website : `https://${website}`;
 
-  const parsedCourses = useMemo(() => {
-    if (!university?.courses) return courses;
-    try {
-      const { bachelor = [], master = [] } = typeof university.courses === 'string' ? JSON.parse(university.courses) : university.courses;
-      const b = bachelor.map((c: any) => ({
-        title: c.name,
-        subtitle: "",
-        duration: c.duration,
-        format: "Full Time",
-        fee: c.fees,
-        eligibility: c.eligibility,
-        seats: c.seats ? `${c.seats} Seats` : "-",
-        level: "Bachelor" as LevelFilter,
-      }));
-      const m = master.map((c: any) => ({
-        title: c.name,
-        subtitle: "",
-        duration: c.duration,
-        format: "Full Time",
-        fee: c.fees,
-        eligibility: c.eligibility,
-        seats: c.seats ? `${c.seats} Seats` : "-",
-        level: "Master" as LevelFilter,
-      }));
-      return b.length || m.length ? [...b, ...m] : courses;
-    } catch { return courses; }
-  }, [university?.courses]);
-
-  const parsedPrograms = useMemo(() => {
-    if (!university?.programs) return offeredPrograms;
-    try {
-      const progs = typeof university.programs === 'string' ? JSON.parse(university.programs) : university.programs;
-      return Array.isArray(progs) && progs.length ? progs.map((p: any) => ({
-        name: p.name,
-        level: p.level as LevelFilter,
-        status: String(p.status) === "false" || p.status === "Closed" ? "Closed" : "Ongoing"
-      })) : offeredPrograms;
-    } catch { return offeredPrograms; }
-  }, [university?.programs]);
-
-  const parsedScholarships = useMemo(() => {
-    if (!university?.scholarships) return scholarships;
-    try {
-      const schols = typeof university.scholarships === 'string' ? JSON.parse(university.scholarships) : university.scholarships;
-      return Array.isArray(schols) && schols.length ? schols.map((s: any) => ({
-        program: s.program,
-        title: s.name,
-        benefit: s.benefit,
-        audience: s.for,
-        level: "all" as LevelFilter,
-      })) : scholarships;
-    } catch { return scholarships; }
-  }, [university?.scholarships]);
-
-  const courseRows = coursesFilter === "all" ? parsedCourses : parsedCourses.filter((row: any) => row.level === coursesFilter);
-  const programRows = programFilter === "all" ? parsedPrograms : parsedPrograms.filter((row: any) => row.level === programFilter);
-  const scholarshipRows = scholarshipFilter === "all" ? parsedScholarships : parsedScholarships.filter((row: any) => row.level === scholarshipFilter || row.level === "all");
-
-
-  const affiliatedTableRows = useMemo(() => {
-    const sampleAddresses = [
-      ["Biratnagar", "Morang", "BSW-48, PGDCP-33, MSW-33"],
-      ["Kathmandu", "Kathmandu", "BA (Hon.)-100, MA (Eng.)-100"],
-      ["Kathmandu", "Kathmandu", "BAMCJ-25, MAMCJ-25, MDC-25"],
-      ["Kathmandu", "Kathmandu", "BSW-48, MSW-33"],
-      ["Kathmandu", "Kathmandu", "BID-96"],
-      ["Karfok", "Ilam", "B.A.-40"],
-      ["Kathmandu", "Kathmandu", "BMT-48, MMT-33"],
-      ["Kathmandu", "Kathmandu", "BLAS-25"],
-      ["Biratnagar", "Morang", "M. Sc. PRD-33"],
-      ["Kathmandu", "Kathmandu", "MAMCJ-33"],
-      ["Kathmandu", "Kathmandu", "MAMCJ-40"],
-      ["Kathmandu", "Kathmandu", "MDS-33"],
-      ["Kathmandu", "Kathmandu", "MA (Sociology/Anthropology)-50"],
-    ];
-
-    return affiliatedColleges.slice(0, 13).map((college, index) => {
-      const sample = sampleAddresses[index] || [university?.location || "Kathmandu", "Kathmandu", `${college.affiliation || "General"}-50`];
-      return {
-        sn: index + 1,
-        college: college.name,
-        address: sample[0],
-        district: sample[1],
-        programs: sample[2],
-      };
-    });
-  }, [affiliatedColleges, university?.location]);
-
-
-  const toggleDropdown = (key: string) => {
-    setOpenDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
+  // Data Parsers
   const parsedAbout = useMemo(() => {
     try {
-      return typeof university?.about === 'string' ? JSON.parse(university.about) : university?.about || {};
+      if (typeof university?.about === 'string') return JSON.parse(university.about);
+      return university?.about || {};
     } catch { return {}; }
   }, [university?.about]);
+
+  const parsedCourses = useMemo(() => {
+    try {
+      const c = typeof university?.courses === 'string' ? JSON.parse(university.courses) : university?.courses || [];
+      return Array.isArray(c) ? c : [];
+    } catch { return []; }
+  }, [university?.courses]);
+
+  const parsedScholarships = useMemo(() => {
+    try {
+      const s = typeof university?.scholarships === 'string' ? JSON.parse(university.scholarships) : university?.scholarships || [];
+      return Array.isArray(s) ? s : [];
+    } catch { return []; }
+  }, [university?.scholarships]);
+
+  const parsedOfferedPrograms = useMemo(() => {
+    try {
+      const p = typeof university?.programs === 'string' ? JSON.parse(university.programs) : university?.programs || [];
+      return Array.isArray(p) ? p : [];
+    } catch { return []; }
+  }, [university?.programs]);
+
+  const parsedEvents = useMemo(() => {
+    try {
+      const eVs = typeof university?.events === 'string' ? JSON.parse(university.events) : university?.events || [];
+      return Array.isArray(eVs) ? eVs.map((e: any) => ({
+        day: e.date?.split('-')[2] || "01",
+        month: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"][parseInt(e.date?.split('-')[1] || "1") - 1] || "JAN",
+        title: e.heading,
+        time: e.time || "All Day",
+        body: e.desc || `Type: ${e.type} | Venue: ${e.venue}`
+      })) : [];
+    } catch { return []; }
+  }, [university?.events]);
+
+  const parsedNews = useMemo(() => {
+    try {
+      const nWs = typeof university?.news === 'string' ? JSON.parse(university.news) : university?.news || [];
+      return Array.isArray(nWs) ? nWs.map((n: any, idx: number) => ({
+        id: `news-${idx}`,
+        tag: n.type || "News",
+        tagClass: n.type === "Notice" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600",
+        image: n.image || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80",
+        title: n.heading,
+        excerpt: n.excerpt || n.desc || "",
+        body: n.body || n.desc || "",
+        tags: [n.type, "University News"].filter(Boolean),
+        time: n.date || "Recently"
+      })) : [];
+    } catch { return []; }
+  }, [university?.news]);
+
+  const parsedDownloads = useMemo(() => {
+    try {
+      const d = typeof university?.downloads === 'string' ? JSON.parse(university.downloads) : university?.downloads || [];
+      return Array.isArray(d) ? d : [];
+    } catch { return []; }
+  }, [university?.downloads]);
+
+  const parsedGallery = useMemo(() => {
+    try {
+      const g = typeof university?.gallery === 'string' ? JSON.parse(university.gallery) : university?.gallery || [];
+      return Array.isArray(g) ? g : [];
+    } catch { return []; }
+  }, [university?.gallery]);
+
+  const parsedFaculties = useMemo(() => {
+    try {
+      const f = typeof university?.faculties === 'string' ? JSON.parse(university.faculties) : university?.faculties || [];
+      return Array.isArray(f) ? f : [];
+    } catch { return []; }
+  }, [university?.faculties]);
+
+  const parsedReviews = useMemo(() => {
+    try {
+      const r = typeof university?.reviews === 'string' ? JSON.parse(university.reviews) : university?.reviews || [];
+      return Array.isArray(r) ? r : [];
+    } catch { return []; }
+  }, [university?.reviews]);
+
+  const parsedAdmissions = useMemo(() => {
+    try {
+      const a = typeof university?.admissions === 'string' ? JSON.parse(university.admissions) : university?.admissions || [];
+      return Array.isArray(a) ? a : [];
+    } catch { return []; }
+  }, [university?.admissions]);
 
   const parsedQuick = useMemo(() => {
     try {
@@ -417,284 +181,275 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
     } catch { return []; }
   }, [university?.overview]);
 
-  const parsedLeadership = useMemo(() => {
-    try {
-      return typeof university?.leadership === 'string' ? JSON.parse(university.leadership) : university?.leadership || [];
-    } catch { return []; }
-  }, [university?.leadership]);
-
   const parsedContact = useMemo(() => {
     try {
       return typeof university?.contact === 'string' ? JSON.parse(university.contact) : university?.contact || {};
     } catch { return {}; }
   }, [university?.contact]);
 
-  const parsedEvents = useMemo(() => {
+  const parsedLeadership = useMemo(() => {
     try {
-      const eVs = typeof university?.events === 'string' ? JSON.parse(university.events) : university?.events || [];
-      return Array.isArray(eVs) && eVs.length ? eVs.map((e: any) => ({
-        day: e.date?.split('-')[2] || "01",
-        month: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"][parseInt(e.date?.split('-')[1] || "0") - 1] || "JAN",
-        color: "bg-blue-50 text-blue-600",
-        monthColor: "text-blue-600",
-        title: e.heading,
-        time: "All Day",
-        body: e.desc || `Type: ${e.type} | Venue: ${e.venue}`
-      })) : eventCards;
-    } catch { return eventCards; }
-  }, [university?.events]);
-
-  const parsedNews = useMemo(() => {
-    try {
-      const nWs = typeof university?.news === 'string' ? JSON.parse(university.news) : university?.news || [];
-      return Array.isArray(nWs) && nWs.length ? nWs.map((n: any) => ({
-        tag: n.type || "News",
-        tagClass: n.type === "Notice" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600",
-        image: n.image || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80&w=2070&auto=format&fit=crop",
-        title: n.heading,
-        body: n.desc,
-        time: "Recently"
-      })) : newsCards;
-    } catch { return newsCards; }
-  }, [university?.news]);
-
-  const parsedDownloads = useMemo(() => {
-    try {
-      const dL = typeof university?.downloads === 'string' ? JSON.parse(university.downloads) : university?.downloads || [];
-      return Array.isArray(dL) && dL.length ? dL.map((d: any) => ({
-        title: d.name,
-        meta: `Updated ${d.date}`,
-        action: "Download",
-        icon: "fa-file-pdf",
-        color: "bg-red-50 text-red-500",
-        linkColor: "text-red-500 hover:text-red-700"
-      })) : downloads;
-    } catch { return downloads; }
-  }, [university?.downloads]);
-
-  const parsedGallery = useMemo(() => {
-    try {
-      const gL = typeof university?.gallery === 'string' ? JSON.parse(university.gallery) : university?.gallery || [];
-      return Array.isArray(gL) && gL.length ? gL : galleryImages;
-    } catch { return galleryImages; }
-  }, [university?.gallery]);
-
-  const instituteSections = useMemo(() => {
-    try {
-      if (!university?.faculties) return [];
-      const facs = typeof university.faculties === 'string' ? JSON.parse(university.faculties) : university.faculties;
-      return Array.isArray(facs) ? facs.map((f: any) => ({
-        key: f.name.toLowerCase().replace(/\s+/g, '-'),
-        title: f.name,
-        colleges: Array.isArray(f.colleges) ? f.colleges : []
-      })) : [];
+      return typeof university?.leadership === 'string' ? JSON.parse(university.leadership) : university?.leadership || [];
     } catch { return []; }
-  }, [university?.faculties]);
+  }, [university?.leadership]);
 
-  const parsedAdmissions = useMemo(() => {
-    try {
-      if (!university?.admissions) return [];
-      const data = typeof university.admissions === "string" ? JSON.parse(university.admissions) : university.admissions;
-      return Array.isArray(data) ? data : [];
-    } catch { return []; }
-  }, [university?.admissions]);
+  const toggleDropdown = (key: string) => {
+    setOpenDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
-  const parsedReviews = useMemo(() => {
-    try {
-      if (!university?.reviews) return [];
-      const data = typeof university.reviews === "string" ? JSON.parse(university.reviews) : university.reviews;
-      return Array.isArray(data) ? data : [];
-    } catch { return []; }
-  }, [university?.reviews]);
-
-  if (!resolvedId) {
-    return <StatusState text="University not selected." tone="default" />;
-  }
-  if (isLoading) {
-    return <StatusState text="Loading university details..." tone="default" />;
-  }
-  if (isError || !university) {
-    return <StatusState text="Failed to load university details." tone="error" />;
-  }
+  if (!resolvedId) return <StatusState text="University not selected." tone="default" />;
+  if (isLoading) return <StatusState text="Loading university details..." tone="default" />;
+  if (isError || !university) return <StatusState text="Failed to load university details." tone="error" />;
 
   return (
-    <div className="w-full bg-white">
-      <div
-        className="h-[220px] w-full bg-cover bg-center md:h-[360px]"
-        style={{
-          backgroundImage:
-            `url('${university?.cover || "https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=2070&auto=format&fit=crop"}')`,
-        }}
-      />
+    <div className="w-full bg-white min-h-screen font-['Inter',sans-serif]">
+      {/* Main Container */}
+      <div className="w-full overflow-hidden">
+        
+        {/* Hero Section / Banner Area */}
+        <div className={`relative w-full h-64 md:h-80 lg:h-96 ${!university.cover ? 'bg-[#1a65f5]' : ''}`}>
+          {university.cover && (
+            <img 
+              src={university.cover} 
+              alt={university.name} 
+              className="w-full h-full object-cover" 
+            />
+          )}
 
-      <div className="relative bg-white">
-        <div className="relative px-6 pb-8 md:px-12 lg:px-24 xl:px-32">
-          <div className="absolute left-6 -top-2 z-10 flex h-[120px] w-[120px] items-center justify-center overflow-hidden rounded-xl border border-gray-100 bg-white p-2 shadow-[0_4px_20px_-3px_rgba(0,0,0,0.1)] md:left-12 md:-top-4 md:h-[150px] md:w-[150px] lg:left-24 xl:left-32">
-            {university.logo ? (
-              <img src={university.logo} alt={university.name} className="h-full w-full object-contain" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-lg bg-[#0f172a] text-[36px] font-extrabold text-white md:text-[46px]">
-                {initials}
+          {/* Info Tooltip Icon */}
+          <div className="absolute top-3 right-3 md:top-4 md:right-4 z-30 group">
+            <div className="cursor-help bg-black/30 group-hover:bg-black/50 text-white/90 rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold transition-colors">
+              <Info className="w-4 h-4" />
+            </div>
+            {/* Tooltip Content */}
+            <div className="absolute hidden group-hover:block right-0 top-6 pt-2 w-64 md:w-72 z-40">
+              <div className="p-3 bg-gray-900 text-white text-xs leading-relaxed rounded-lg shadow-xl border border-gray-700">
+                Note: All information and images on this page are sourced from the respective university’s official website and public references. If you find any errors or outdated details, please <button onClick={() => alert("Report Feature Coming Soon")} className="text-blue-400 hover:text-blue-300 underline whitespace-nowrap">Report here</button>.
               </div>
+            </div>
+          </div>
+
+          {/* Image Attribution */}
+          <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 bg-black/40 px-2 py-1 rounded text-white/80 text-[10px] tracking-wide z-10">
+            Image Courtesy: Official University Website
+          </div>
+        </div>
+
+        {/* Profile Content Section */}
+        <div className="px-6 md:px-12 lg:px-24 xl:px-32 pb-8 relative flex flex-col md:flex-row">
+            
+          {/* Logo Box */}
+          <div className="absolute left-6 md:left-12 lg:left-24 xl:left-32 -top-16 md:-top-20 border-4 border-white rounded-lg bg-[#1a65f5] w-32 h-32 md:w-40 md:h-40 flex items-center justify-center shadow-sm z-10 overflow-hidden">
+            {university.logo ? (
+              <img src={university.logo} alt={university.name} className="w-full h-full object-contain p-2 bg-white" />
+            ) : (
+              <span className="text-white text-5xl md:text-6xl font-medium tracking-wide">{initials}</span>
             )}
           </div>
 
-          <div className="flex flex-col items-start justify-between pt-20 lg:ml-[180px] lg:flex-row lg:items-end lg:pt-6">
-            <div className="w-full space-y-3 lg:w-auto">
+          {/* Spacer for Absolute Logo (Desktop only) */}
+          <div className="w-32 md:w-40 flex-shrink-0 mr-8 hidden md:block" />
+
+          {/* Main Info and Actions */}
+          <div className="pt-20 md:pt-6 flex-1 flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 lg:gap-0">
+                
+            {/* Text Information */}
+            <div className="flex flex-col gap-2">
+                    
+              {/* Title Row */}
               <div className="flex items-center gap-2">
-                <h1 className="text-[24px] font-bold tracking-tight text-gray-900 md:text-3xl">
-                  {university.name}
-                </h1>
-                <i className="fa-solid fa-circle-check text-blue-500"></i>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 tracking-tight">{university.name}</h1>
+                <BadgeCheck className="w-6 h-6 text-[#1a65f5]" />
               </div>
 
-              <div className="flex flex-col gap-4 text-[14px] font-medium text-gray-600 sm:flex-row sm:items-center md:text-[15px]">
-                <div className="flex items-center gap-1.5">
-                  <i className="fa-solid fa-location-dot text-gray-500"></i>
-                  <span>{university.location}</span>
-                </div>
+              {/* Location Row */}
+              <div className="flex items-center gap-1.5 text-gray-500 font-medium text-sm md:text-base">
+                <MapPin className="w-4 h-4 text-gray-400" />
+                <span>{university.location}</span>
               </div>
 
-              <div className="flex flex-col gap-5 pt-1 text-[14px] font-medium sm:flex-row sm:items-center">
-                <div className="flex items-center gap-1.5">
-                  <i className="fa-solid fa-star text-blue-500"></i>
-                  <span className="font-bold text-gray-900">{Number(university.rating || 0).toFixed(1)}</span>
-                  <span className="text-gray-500">({(affiliatedColleges.length || 12) * 1002} Reviews)</span>
+              {/* Ratings and Link Row */}
+              <div className="flex flex-wrap items-center gap-4 mt-1 text-sm md:text-base">
+                {/* Rating */}
+                <div className="flex items-center gap-1.5 font-bold">
+                  <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+                  <span className="text-gray-900">{Number(university.rating || 0).toFixed(1)}</span>
+                  <span className="text-gray-500 font-medium">(6012 Reviews)</span>
                 </div>
-                <a
-                  href={websiteHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex items-center gap-1 text-[13px] font-bold uppercase tracking-wide text-blue-600 transition-colors hover:text-blue-700"
+                        
+                {/* Website Link */}
+                <a 
+                  href={websiteHref} 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="flex items-center gap-1 font-semibold text-[#1a65f5] hover:underline uppercase text-sm"
                 >
-                  {website.toUpperCase()}
-                  <i className="fa-solid fa-arrow-up-right-from-square text-[11px]"></i>
+                  {website}
+                  <Globe className="w-4 h-4" />
                 </a>
               </div>
             </div>
 
-            <div className="mt-8 flex w-full items-center gap-3 lg:mt-0 lg:w-auto">
-              <button
-                className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-3 text-[15px] font-semibold text-white shadow-sm shadow-blue-600/20 transition-colors hover:bg-blue-700 lg:flex-none"
+            {/* Action Buttons */}
+            <div className="flex items-center gap-3 w-full lg:w-auto">
+              <button 
                 onClick={() => setActiveTab("institutes")}
+                className="flex-1 lg:flex-none flex items-center justify-center gap-2 bg-[#1a65f5] hover:bg-[#1554d4] text-white px-5 py-2.5 rounded-lg font-medium transition-colors duration-200 shadow-sm"
               >
-                <i className="fa-solid fa-building"></i>
+                <Building2 className="w-5 h-5" />
                 View Affiliated Colleges
               </button>
+
               <button 
-                className="flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 py-3 text-[15px] font-semibold text-gray-700 shadow-sm transition-colors hover:bg-gray-50"
                 onClick={() => {
-                  try {
-                    const downloads = typeof university?.downloads === 'string' ? JSON.parse(university.downloads) : university.downloads;
-                    if (downloads && downloads[0]?.file) {
-                      window.open(downloads[0].file, '_blank');
-                    } else {
-                      alert("Prospectus not available yet.");
-                    }
-                  } catch (e) {
-                      alert("Prospectus not available yet.");
-                  }
+                  const doc = parsedDownloads.find(d => d.name?.toLowerCase().includes('prospectus') || d.title?.toLowerCase().includes('prospectus')) || parsedDownloads[0];
+                  if (doc?.file) window.open(doc.file, '_blank');
+                  else alert("Prospectus not available.");
                 }}
+                className="flex items-center justify-center gap-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 px-5 py-2.5 rounded-lg font-medium transition-colors duration-200 shadow-sm"
               >
-                <i className="fa-solid fa-download"></i>
+                <Download className="w-5 h-5 text-gray-500" />
                 Prospectus
               </button>
-              <button className="flex items-center justify-center rounded-xl border border-gray-200 bg-white p-3 text-gray-700 shadow-sm transition-colors hover:bg-gray-50">
-                <i className="fa-solid fa-share-nodes"></i>
+
+              <button className="flex items-center justify-center bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 p-2.5 rounded-lg transition-colors duration-200 shadow-sm" aria-label="Share">
+                <Share2 className="w-5 h-5 text-gray-500" />
               </button>
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="sticky top-[106px] z-40 overflow-x-auto border-y border-gray-100 bg-white px-6 shadow-sm shadow-gray-100/50 no-scrollbar md:px-12 lg:px-24 xl:px-32">
-          <nav className="flex space-x-8 whitespace-nowrap">
-            {tabs.map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
-                className={`border-b-2 py-4 text-[15px] transition-colors ${
-                  activeTab === tab.key
-                    ? "border-blue-600 font-bold text-gray-900"
-                    : "border-transparent font-semibold text-gray-500 hover:text-gray-900"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </nav>
-        </div>
+      {/* Tabs Navigation */}
+      <div className="border-t border-b border-gray-100 px-6 md:px-12 lg:px-24 xl:px-32 overflow-x-auto no-scrollbar bg-white sticky top-0 z-40 shadow-sm shadow-gray-100/50">
+        <nav className="flex space-x-8 whitespace-nowrap">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`border-b-2 py-4 text-[15px] transition-colors ${
+                activeTab === tab.key ? "border-blue-600 text-gray-900 font-bold" : "border-transparent text-gray-500 hover:text-gray-900 font-semibold"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
+      </div>
 
-        <div className="grid grid-cols-1 gap-10 bg-[#fafbfc] px-6 py-8 md:gap-14 md:px-12 md:py-12 lg:grid-cols-3 lg:px-24 xl:px-32">
+      {/* Main Content Area */}
+      <div className="px-6 md:px-12 lg:px-24 xl:px-32 py-8 md:py-12 bg-[#fafbfc]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 md:gap-14">
           <div className="lg:col-span-2">
+            
+            {/* About Tab */}
             {activeTab === "about" && (
               <div className="space-y-10">
-                <div className="grid grid-cols-1 gap-5 md:grid-cols-2 md:gap-8">
-                  {parsedAbout.yt1 ? (
-                    <div className="overflow-hidden rounded-xl h-64 shadow-sm bg-gray-100"><iframe className="w-full h-full" src={parsedAbout.yt1.replace("watch?v=", "embed/")} frameBorder="0" allowFullScreen></iframe></div>
-                  ) : <MediaCard title="VC's Message" icon="fa-comment-dots" image="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop" />}
-                  {parsedAbout.yt2 ? (
-                    <div className="overflow-hidden rounded-xl h-64 shadow-sm bg-gray-100"><iframe className="w-full h-full" src={parsedAbout.yt2.replace("watch?v=", "embed/")} frameBorder="0" allowFullScreen></iframe></div>
-                  ) : <MediaCard title="Campus Tour" icon="fa-video" image="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop" />}
+                {/* Media Intro */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-8">
+                  <div className="relative w-full h-[240px] md:h-[300px] rounded-[24px] overflow-hidden group cursor-pointer shadow-sm">
+                    <img 
+                      src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?q=80&w=2070&auto=format&fit=crop" 
+                      alt="University Message" 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center z-10">
+                      <div className="w-16 h-16 bg-white/95 rounded-full flex items-center justify-center pl-1 shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                        <Play className="w-7 h-7 text-blue-600 fill-blue-600" />
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/90 via-[#0f172a]/30 to-transparent flex flex-col justify-end p-6 md:p-8 z-20">
+                      <h3 className="font-bold text-white text-[19px] md:text-[21px] mb-1.5 flex items-center gap-2.5">
+                        <MessageSquareQuote className="w-5 h-5 text-blue-400" /> VC's Message
+                      </h3>
+                      <p className="text-[14px] text-gray-200 line-clamp-1">Listen to our Vice-Chancellor's welcome</p>
+                    </div>
+                  </div>
+                  <div className="relative w-full h-[240px] md:h-[300px] rounded-[24px] overflow-hidden group cursor-pointer shadow-sm">
+                    <img 
+                      src="https://images.unsplash.com/photo-1562774053-701939374585?q=80&w=2086&auto=format&fit=crop" 
+                      alt="Campus Tour" 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                    />
+                    <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-colors duration-300 flex items-center justify-center z-10">
+                      <div className="w-16 h-16 bg-white/95 rounded-full flex items-center justify-center pl-1 shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
+                        <Play className="w-7 h-7 text-blue-600 fill-blue-600" />
+                      </div>
+                    </div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0f172a]/90 via-[#0f172a]/30 to-transparent flex flex-col justify-end p-6 md:p-8 z-20">
+                      <h3 className="font-bold text-white text-[19px] md:text-[21px] mb-1.5 flex items-center gap-2.5">
+                        <Video className="w-5 h-5 text-blue-400" /> Campus Tour
+                      </h3>
+                      <p className="text-[14px] text-gray-200 line-clamp-1">Explore our beautiful university campus</p>
+                    </div>
+                  </div>
                 </div>
 
-                <div className="space-y-6 text-[15px] leading-[1.8] text-gray-600 md:text-[16px]">
+                {/* Description */}
+                <div className="prose prose-slate max-w-none text-gray-600 text-[15px] md:text-[16px] leading-[1.8]">
                   {parsedAbout.desc ? (
                     <div dangerouslySetInnerHTML={{ __html: parsedAbout.desc }} />
                   ) : (
-                    <>
-                      <p className="text-lg font-medium text-gray-800">
-                        Welcome to {university.name} - the pioneer of higher education in Nepal.
-                      </p>
-                      <p>
-                        Established in {parsedQuick.est || university.established || "1959"}, <strong className="font-bold text-gray-900">{university.name}</strong> is one of Nepal's oldest and largest universities. With a central campus in {university.location} and numerous constituent and affiliated colleges across the country, it has been a cornerstone of academic excellence for decades.
-                      </p>
-                      <p>
-                        The university comprises multiple institutes, faculties, central departments, and over <strong className="text-gray-900">{university.collegesCount || affiliatedColleges.length}+ affiliated colleges</strong>. It offers a broad range of programs from intermediate to PhD levels.
-                      </p>
-                      <p>
-                        Our mission is to produce socially responsible, skilled, and research-oriented graduates who can contribute to national development through quality education and international collaboration.
-                      </p>
-                    </>
+                    <div className="space-y-4">
+                      <p className="text-lg font-medium text-gray-800">Welcome to {university.name}.</p>
+                      <p>{university.description || "No description provided."}</p>
+                    </div>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                  <InfoPanel title="Our Vision" body={parsedAbout.vision || "To be a leading center of higher learning globally recognized for excellence in research, teaching, and contribution to society's progress."} panelClass="bg-[#f4f7fb]" iconClass="bg-blue-100/80 text-blue-600" icon="fa-eye" />
-                  <InfoPanel title="Our Mission" body={parsedAbout.mission || "To provide affordable, quality higher education that empowers individuals and cultivates intellectual growth across diverse communities."} panelClass="bg-[#f0fdf4]" iconClass="bg-green-100/80 text-green-600" icon="fa-bullseye" />
-                  <InfoPanel title="Core Values" body={parsedAbout.values || "Excellence, Inclusivity, Integrity, Innovation, and Social Responsibility."} panelClass="bg-[#fef2f2]" iconClass="bg-red-50 text-red-500" icon="fa-gem" />
+                {/* Vision, Mission, Values */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-[#f4f7fb] p-8 rounded-[20px]">
+                    <div className="flex items-center gap-3.5 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-blue-100/80 flex items-center justify-center text-blue-600"><Eye className="w-5 h-5" /></div>
+                      <h3 className="font-bold text-gray-900 text-[16px]">Our Vision</h3>
+                    </div>
+                    <p className="text-[14.5px] text-gray-600 leading-[1.7]">{parsedAbout.vision || "To be a leading center of higher learning globally recognized for excellence."}</p>
+                  </div>
+                  <div className="bg-[#f0fdf4] p-8 rounded-[20px]">
+                    <div className="flex items-center gap-3.5 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-green-100/80 flex items-center justify-center text-green-600"><Target className="w-5 h-5" /></div>
+                      <h3 className="font-bold text-gray-900 text-[16px]">Our Mission</h3>
+                    </div>
+                    <p className="text-[14.5px] text-gray-600 leading-[1.7]">{parsedAbout.mission || "To provide affordable, quality higher education that empowers individuals."}</p>
+                  </div>
+                  <div className="bg-[#fef2f2] p-8 rounded-[20px]">
+                    <div className="flex items-center gap-3.5 mb-4">
+                      <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500"><Gem className="w-5 h-5" /></div>
+                      <h3 className="font-bold text-gray-900 text-[16px]">Core Values</h3>
+                    </div>
+                    <p className="text-[14.5px] text-gray-600 leading-[1.7]">{parsedAbout.values || "Excellence, Inclusivity, Integrity, Innovation, and Social Responsibility."}</p>
+                  </div>
                 </div>
 
-                <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
-                  <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
-                    <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
-                      <i className="fa-solid fa-landmark text-blue-600"></i> University Overview
-                    </h3>
+                {/* Overview Table */}
+                <div className="bg-white border border-gray-100 rounded-[20px] shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100 bg-[#f8fafc]">
+                    <h3 className="text-[16px] font-bold text-gray-900 flex items-center gap-2"><Landmark className="w-5 h-5 text-blue-600" /> University Overview</h3>
                   </div>
                   <div className="divide-y divide-gray-100">
-                    {parsedOverview.length > 0 ? parsedOverview.map((item: any, i: number) => (
-                      <OverviewRow key={i} label={item.label} value={item.fact} />
+                    {parsedOverview.length > 0 ? parsedOverview.map((item: any, idx: number) => (
+                      <div key={idx} className="flex flex-col sm:flex-row p-4 hover:bg-gray-50 transition-colors">
+                        <div className="w-full sm:w-1/3 font-semibold text-gray-800 text-[14px]">{item.label}</div>
+                        <div className="w-full sm:w-2/3 text-gray-600 text-[14px]">{item.value}</div>
+                      </div>
                     )) : (
                       <>
-                        <OverviewRow label="Established" value={String(parsedQuick.est || university.established || "1959")} />
-                        <OverviewRow label="Location" value={`${university.location} (Central Campus)`} />
-                        <OverviewRow label="Type" value={parsedQuick.type || university.type || "Public / Non-profit / Autonomous"} />
-                        <OverviewRow label="Affiliated Colleges" value={String(parsedQuick.campuses || university.collegesCount || affiliatedColleges.length)} />
-                        <OverviewRow label="Programs" value={String(university.programsCount || 150)} />
-                        <OverviewRow label="Total Students" value={parsedQuick.students || "Unknown"} />
+                        <div className="flex flex-col sm:flex-row p-4 hover:bg-gray-50 transition-colors"><div className="w-full sm:w-1/3 font-semibold text-gray-800 text-[14px]">Location</div><div className="w-full sm:w-2/3 text-gray-600 text-[14px]">{university.location}</div></div>
+                        <div className="flex flex-col sm:flex-row p-4 hover:bg-gray-50 transition-colors"><div className="w-full sm:w-1/3 font-semibold text-gray-800 text-[14px]">Type</div><div className="w-full sm:w-2/3 text-gray-600 text-[14px]">Public / Non-profit</div></div>
                       </>
                     )}
                   </div>
                 </div>
 
-                <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
-                  <div className="border-b border-gray-100 bg-[#f8fafc] px-6 py-4">
-                    <h3 className="flex items-center gap-2 text-[16px] font-bold text-gray-900">
-                      <i className="fa-solid fa-users text-blue-600"></i> Leadership & Administration
-                    </h3>
+                {/* Leadership Table */}
+                <div className="bg-white border border-gray-100 rounded-[20px] shadow-sm overflow-hidden">
+                  <div className="px-6 py-4 border-b border-gray-100 bg-[#f8fafc]">
+                    <h3 className="text-[16px] font-bold text-gray-900 flex items-center gap-2"><Users className="w-5 h-5 text-blue-600" /> Leadership & Administration</h3>
                   </div>
                   <div className="overflow-x-auto">
                     <table className="w-full text-left text-[14px] text-gray-600">
-                      <thead className="border-b border-gray-100 bg-gray-50/50 text-[13px] uppercase tracking-wider text-gray-800">
+                      <thead className="bg-gray-50/50 text-[13px] text-gray-800 uppercase tracking-wider border-b border-gray-100">
                         <tr>
                           <th className="px-6 py-4 font-bold">Position</th>
                           <th className="px-6 py-4 font-bold">Role</th>
@@ -702,503 +457,532 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-gray-100">
-                        {parsedLeadership.length > 0 ? parsedLeadership.map((item: any, i: number) => (
-                           <AdminRow key={i} position={item.position} role={item.role} holder={item.holder} />
+                        {parsedLeadership.length > 0 ? parsedLeadership.map((lead: any, idx: number) => (
+                          <tr key={idx}>
+                            <td className="px-6 py-4 font-bold text-gray-900">{lead.position}</td>
+                            <td className="px-6 py-4">{lead.role}</td>
+                            <td className="px-6 py-4 font-semibold">{lead.holder}</td>
+                          </tr>
                         )) : (
-                          <>
-                            <AdminRow position="Chancellor" role="Ceremonial head (Prime Minister)" holder="Rt. Hon'ble Prime Minister" />
-                            <AdminRow position="Vice Chancellor" role="Chief Executive" holder="Prof. Dr. Dharma Kant Baskota" />
-                            <AdminRow position="Rector" role="Academic affairs" holder="Prof. Dr. Khadga K.C." />
-                            <AdminRow position="Registrar" role="Administration & finance" holder="Prof. Dr. Kedar Prasad Rijal" />
-                          </>
+                          <tr><td colSpan={3} className="px-6 py-4 text-center">No leadership data available.</td></tr>
                         )}
                       </tbody>
                     </table>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                  <FeatureCallout 
-                    title={parsedAbout.feature1Title || "Semester System"} 
-                    body={parsedAbout.feature1Body || "Implemented at master's level, expanding to undergraduate for timely completion."} 
-                    cardClass="bg-blue-50 border-blue-100" 
-                    iconClass="bg-blue-100 text-blue-600" 
-                    icon="fa-layer-group" 
-                  />
-                  <FeatureCallout 
-                    title={parsedAbout.feature2Title || "Global Ties"} 
-                    body={parsedAbout.feature2Body || "Partnerships with 200+ universities for research and exchange."} 
-                    cardClass="bg-emerald-50 border-emerald-100" 
-                    iconClass="bg-emerald-100 text-emerald-600" 
-                    icon="fa-globe" 
-                  />
+                {/* Structure & Innovations */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0"><Layers className="w-5 h-5 text-blue-600" /></div>
+                    <div><h4 className="text-[15px] font-bold text-gray-900">Academic Excellence</h4><p className="text-[14px] text-gray-600 mt-1">Dedicated to providing world-class education and research opportunities.</p></div>
+                  </div>
+                  <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-5 flex items-start gap-4">
+                    <div className="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center shrink-0"><Globe2 className="w-5 h-5 text-emerald-600" /></div>
+                    <div><h4 className="text-[15px] font-bold text-gray-900">Global Connectivity</h4><p className="text-[14px] text-gray-600 mt-1">Partnerships with leading international universities and organizations.</p></div>
+                  </div>
                 </div>
-
-                <div className="flex items-start gap-4 rounded-xl border border-gray-100 bg-white p-5 shadow-sm">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-amber-50 text-amber-600">
-                    <i className="fa-solid fa-award"></i>
-                  </div>
-                  <div>
-                    <h4 className="text-[15px] font-bold text-gray-900">{parsedAbout.bannerTitle || "Commitment to Excellence"}</h4>
-                    <p className="mt-1 text-[14px] text-gray-600">
-                      {parsedAbout.bannerBody || "Aims to be a global center for quality education, fostering peace and learning."}
-                    </p>
-                  </div>
+                <div className="bg-white p-5 rounded-xl border border-gray-100 shadow-sm flex items-start gap-4">
+                  <div className="w-10 h-10 rounded-full bg-amber-50 flex items-center justify-center shrink-0"><Award className="w-5 h-5 text-amber-600" /></div>
+                  <div><h4 className="text-[15px] font-bold text-gray-900">Accreditations</h4><p className="text-[14px] text-gray-600 mt-1">Fully accredited and recognized as a center of higher learning excellence.</p></div>
                 </div>
               </div>
             )}
 
+            {/* Courses Tab */}
             {activeTab === "courses" && (
-              <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-                  <p className="text-[14px] font-semibold tracking-wide text-blue-600">Courses & fees - filter by level</p>
-                  <FilterPills active={coursesFilter} onChange={setCoursesFilter} options={["all", "Bachelor", "Master"]} />
-                </div>
-                <div className="w-full overflow-x-auto">
-                  <div className="min-w-[700px]">
-                    <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
-                      <div className="col-span-4 text-[13px] font-bold uppercase tracking-wider text-gray-800">COURSES NAME</div>
-                      <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">DURATION</div>
-                      <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">FEES / YEAR</div>
-                      <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">ELIGIBILITY & SEAT</div>
-                    </div>
-                    {courseRows.map((course) => (
-                      <div key={course.title} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50">
-                        <div className="col-span-4 pr-4">
-                          <h4 className="text-[15.5px] font-bold text-gray-900">{course.title}</h4>
-                          <p className="mt-1 text-[12px] text-gray-500">{course.subtitle}</p>
-                        </div>
-                        <div className="col-span-2">
-                          <h4 className="text-[15.5px] font-bold text-gray-900">{course.duration}</h4>
-                          <p className="mt-1 text-[12px] text-gray-500">{course.format}</p>
-                        </div>
-                        <div className="col-span-3">
-                          <h4 className="text-[15.5px] font-bold text-[#2563eb]">{course.fee}</h4>
-                          <p className="mt-1 text-[12px] text-gray-500">/ Year</p>
-                        </div>
-                        <div className="col-span-3">
-                          <p className="mb-2 text-[12.5px] font-medium text-gray-600">{course.eligibility}</p>
-                          <span className="inline-block rounded bg-[#eafaef] px-2.5 py-1 text-[11px] font-bold text-[#16a34a]">{course.seats}</span>
-                        </div>
-                      </div>
+              <div className="border border-gray-100 bg-white rounded-[20px] overflow-hidden shadow-sm">
+                <div className="bg-[#f4f8fc] px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                  <p className="text-blue-600 text-[14px] font-semibold tracking-wide">Courses & fees – filter by level</p>
+                  <div className="flex gap-2 text-xs font-medium">
+                    {["all", "Bachelor", "Master"].map((level) => (
+                      <button
+                        key={level}
+                        onClick={() => setCoursesFilter(level as LevelFilter)}
+                        className={`px-4 py-1.5 rounded-full transition-all ${
+                          coursesFilter === level
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+                        }`}
+                      >
+                        {level}
+                      </button>
                     ))}
                   </div>
                 </div>
+                <div className="w-full overflow-x-auto">
+                  <div className="min-w-[700px]">
+                    <div className="grid grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 bg-white items-center">
+                      <div className="col-span-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider">COURSE NAME</div>
+                      <div className="col-span-2 text-[13px] font-bold text-gray-800 uppercase tracking-wider">DURATION</div>
+                      <div className="col-span-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider">FEES / YEAR</div>
+                      <div className="col-span-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider">ELIGIBILITY</div>
+                    </div>
+                    <div className="divide-y divide-gray-100">
+                      {parsedCourses.filter(c => coursesFilter === 'all' || c.level === coursesFilter).map((course, idx) => (
+                        <div key={idx} className="grid grid-cols-12 gap-4 px-6 py-5 hover:bg-gray-50/50 transition-colors items-center">
+                          <div className="col-span-4 pr-4">
+                            <h4 className="font-bold text-gray-900 text-[15.5px]">{course.title}</h4>
+                            <p className="text-[12px] text-gray-500 mt-1">{course.subtitle || "Academic Program"}</p>
+                          </div>
+                          <div className="col-span-2">
+                            <h4 className="font-bold text-gray-900 text-[15.5px]">{course.duration}</h4>
+                            <p className="text-[12px] text-gray-500 mt-1">Full Time</p>
+                          </div>
+                          <div className="col-span-3">
+                            <h4 className="font-bold text-[#2563eb] text-[15.5px]">{course.fee}</h4>
+                            <p className="text-[12px] text-gray-500 mt-1">/ Year</p>
+                          </div>
+                          <div className="col-span-3">
+                            <p className="text-[12.5px] text-gray-600 mb-2 font-medium">{course.eligibility || "Standard Criteria"}</p>
+                            <span className="inline-block bg-[#eafaef] text-[#16a34a] text-[11px] font-bold px-2.5 py-1 rounded">Available</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             )}
 
+            {/* Institutes Tab */}
             {activeTab === "institutes" && (
               <div className="space-y-10">
                 <div>
-                  <div className="mb-6 flex items-center gap-3 border-b border-gray-100 pb-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50">
-                      <i className="fa-solid fa-building text-blue-600"></i>
-                    </div>
-                    <div>
-                      <h3 className="text-[18px] font-bold text-gray-900">Institutes & Affiliated Colleges</h3>
-                      <p className="mt-0.5 text-[13px] text-gray-500">Constituent and affiliated campuses</p>
-                    </div>
+                  <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0"><Building2 className="w-5 h-5 text-blue-600" /></div>
+                    <div><h3 className="text-[18px] font-bold text-gray-900">Institutes & Faculties</h3><p className="text-[13px] text-gray-500 mt-0.5">Constituent campus and departments</p></div>
                   </div>
                   <div className="grid grid-cols-1 gap-5">
-                    {instituteSections.map((section: any, idx: number) => (
-                      <DropdownCard
-                        key={section.key || idx}
-                        title={section.title}
-                        icon={section.icon || "fa-building-columns"}
-                        isOpen={idx === 0 || !!openDropdowns[section.key]}
-                        onToggle={() => toggleDropdown(section.key || `fac-idx-${idx}`)}
-                        compact={!section.colleges}
-                      >
-                        {section.colleges ? (
-                          <div className="overflow-x-auto">
-                            <table className="w-full border-collapse text-[13px]">
+                    {parsedFaculties.length > 0 ? parsedFaculties.map((f: any, idx: number) => (
+                      <div key={idx} className="bg-white p-5 rounded-[16px] border border-gray-100 shadow-sm">
+                        <div className="flex items-center justify-between cursor-pointer" onClick={() => toggleDropdown(f.title)}>
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center">
+                              {idx % 2 === 0 ? <Cpu className="w-5 h-5 text-blue-600" /> : <Stethoscope className="w-5 h-5 text-blue-600" />}
+                            </div>
+                            <h4 className="text-[16px] font-bold text-gray-900">{f.title}</h4>
+                          </div>
+                          <ChevronDown className={`w-5 h-5 text-gray-500 transition-transform ${openDropdowns[f.title] ? 'rotate-180' : ''}`} />
+                        </div>
+                        {openDropdowns[f.title] && (
+                          <div className="mt-6">
+                            <table className="w-full text-[13px] border-collapse">
                               <thead>
-                                <tr>
-                                  <ProgTh>SN</ProgTh>
-                                  <ProgTh>College</ProgTh>
-                                  <ProgTh>Address</ProgTh>
-                                  <ProgTh>Programs/Quotas</ProgTh>
+                                <tr className="bg-gray-50/50">
+                                  <th className="p-2 border-b text-left font-bold text-gray-800">SN</th>
+                                  <th className="p-2 border-b text-left font-bold text-gray-800">Program / Department</th>
+                                  <th className="p-2 border-b text-left font-bold text-gray-800">Level</th>
                                 </tr>
                               </thead>
                               <tbody>
-                                {section.colleges.map((row: any, i: number) => (
+                                {f.items?.map((item: string, i: number) => (
                                   <tr key={i}>
-                                    <ProgTd>{row.sn}</ProgTd>
-                                    <ProgTd>{row.college}</ProgTd>
-                                    <ProgTd>{row.address}</ProgTd>
-                                    <ProgTd>{row.programs}</ProgTd>
+                                    <td className="p-2 border-b text-gray-600">{i + 1}</td>
+                                    <td className="p-2 border-b text-gray-700 font-medium">{item}</td>
+                                    <td className="p-2 border-b text-gray-600">Standard</td>
                                   </tr>
                                 ))}
                               </tbody>
                             </table>
                           </div>
-                        ) : (
-                          <div className="space-y-1 pl-2 text-sm text-gray-600">
-                            {section.items?.map((item: any) => (
-                              <p key={item}>• {item}</p>
-                            ))}
-                          </div>
                         )}
-                      </DropdownCard>
-                    ))}
-                    {instituteSections.length === 0 && (
-                       <DropdownCard
-                        title="Affiliated Colleges (Sample)"
-                        icon="fa-building-columns"
-                        isOpen={!!openDropdowns["institutes-master-drop"]}
-                        onToggle={() => toggleDropdown("institutes-master-drop")}
-                      >
-                         <table className="w-full border-collapse text-[13px]">
-                          <thead><tr><ProgTh>SN</ProgTh><ProgTh>College</ProgTh><ProgTh>Address</ProgTh><ProgTh>District</ProgTh><ProgTh>Approved Programs/Quotas</ProgTh></tr></thead>
-                          <tbody>
-                            {affiliatedTableRows.map((row) => (
-                              <tr key={row.sn}><ProgTd>{row.sn}</ProgTd><ProgTd>{row.college}</ProgTd><ProgTd>{row.address}</ProgTd><ProgTd>{row.district}</ProgTd><ProgTd>{row.programs}</ProgTd></tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </DropdownCard>
+                      </div>
+                    )) : (
+                      <div className="py-10 text-center bg-white border border-dashed rounded-2xl text-gray-400">No faculty data available.</div>
                     )}
                   </div>
                 </div>
-
-                <div>
-                  <div className="mb-6 flex items-center gap-3 border-b border-gray-100 pb-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50">
-                      <i className="fa-solid fa-book-open text-green-600"></i>
-                    </div>
-                    <div>
-                      <h3 className="text-[18px] font-bold text-gray-900">Faculties</h3>
-                      <p className="mt-0.5 text-[13px] text-gray-500">Programs under each faculty</p>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-5">
-                    <DropdownCard
-                      title="Faculty of Management"
-                      icon="fa-briefcase"
-                      iconBg="bg-green-50"
-                      iconText="text-green-600"
-                      isOpen={!!openDropdowns["fac-management-drop"]}
-                      onToggle={() => toggleDropdown("fac-management-drop")}
-                    >
-                      <table className="w-full border-collapse text-[13px]">
-                        <thead>
-                          <tr>
-                            <ProgTh>SN</ProgTh>
-                            <ProgTh>Programs</ProgTh>
-                            <ProgTh>Duration</ProgTh>
-                            <ProgTh>Year/Semester</ProgTh>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {[
-                            ["1", "Bachelor of Arts (BA)", "4 Years", "Yearly"],
-                            ["2", "Bachelor of Arts (BA Honours)", "4 Years", "Yearly"],
-                            ["3", "Bachelor of Social Work (BSW)", "4 Years/8 Semesters", "Semester"],
-                            ["4", "Bachelor of Mass Communication & Journalism (BAMCJ)", "4 Years/8 Semesters", "Semester"],
-                            ["5", "Bachelor of Media Technology (BMT)", "4 Years/8 Semesters", "Semester"],
-                            ["6", "Bachelor of Liberal Arts & Science (BLAS)", "4 Years/8 Semesters", "Semester"],
-                            ["7", "Bachelor of Interior Design (BID)", "4 Years/8 Semesters", "Semester"],
-                            ["8", "Master of Journalism & Mass Communication (MAMCJ)", "2 Years/4 Semesters", "Semester"],
-                          ].map((row) => (
-                            <tr key={row[0]}>
-                              <ProgTd>{row[0]}</ProgTd>
-                              <ProgTd>{row[1]}</ProgTd>
-                              <ProgTd>{row[2]}</ProgTd>
-                              <ProgTd>{row[3]}</ProgTd>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </DropdownCard>
-
-                    {facultySections.map((section) => (
-                      <DropdownCard
-                        key={section.key}
-                        title={section.title}
-                        icon={section.icon}
-                        iconBg="bg-green-50"
-                        iconText="text-green-600"
-                        isOpen={!!openDropdowns[section.key]}
-                        onToggle={() => toggleDropdown(section.key)}
-                        compact
-                      >
-                        <div className="space-y-1 pl-2 text-sm text-gray-600">
-                          {section.items.map((item) => (
-                            <p key={item}>• {item}</p>
-                          ))}
-                        </div>
-                      </DropdownCard>
-                    ))}
-                  </div>
-                </div>
               </div>
             )}
 
-            {activeTab === "admissions" && (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {parsedAdmissions.length > 0 ? parsedAdmissions.map((adm: any, i: number) => {
-                  const isOngoing = ["Ongoing", "Open", "Coming Soon"].includes(adm.status);
-                  return (
-                    <AdmissionCard 
-                      key={i}
-                      title={adm.title} 
-                      status={adm.status} 
-                      statusClass={isOngoing ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"} 
-                      image={adm.image || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80&w=2070&auto=format&fit=crop"} 
-                      faculty={adm.faculty} 
-                      admissionOpen={adm.admissionOpen} 
-                      deadline={adm.deadline} 
-                      darkButton={isOngoing} 
-                    />
-                  );
-                }) : (
-                  <div className="col-span-1 md:col-span-2 py-12 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                    <i className="fa-solid fa-graduation-cap text-4xl text-gray-300 mb-4 block"></i>
-                    <p className="text-gray-500 font-medium">No active admissions posted yet for this university.</p>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {activeTab === "review" && (
-              <div className="space-y-6">
-                 {parsedReviews.length > 0 ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {parsedReviews.map((rev: any, i: number) => (
-                      <ReviewCard
-                        key={i}
-                        name={rev.name}
-                        program={rev.program}
-                        rating={rev.rating}
-                        body={rev.body}
-                        initials={rev.name?.split(' ').map((n:any)=>n[0]).join('').toUpperCase() || 'S'}
-                        initialsClass="bg-blue-100 text-blue-600"
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="py-12 text-center bg-gray-50 rounded-2xl border-2 border-dashed border-gray-200">
-                    <i className="fa-solid fa-star text-4xl text-gray-300 mb-4 block"></i>
-                    <p className="text-gray-500 font-medium">No reviews yet for this university.</p>
-                  </div>
-                )}
-              </div>
-            )}
-
+            {/* Offered Tab */}
             {activeTab === "offered" && (
-              <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-                  <p className="text-[14px] font-semibold tracking-wide text-blue-600">Programs offered - filter by level</p>
-                  <FilterPills active={programFilter} onChange={setProgramFilter} options={["all", "+2", "Bachelor", "Master"]} />
+              <div className="border border-gray-100 rounded-[20px] overflow-hidden shadow-sm bg-white">
+                <div className="bg-[#f4f8fc] px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                  <p className="text-blue-600 text-[14px] font-semibold tracking-wide">Programs offered – filter by level</p>
+                  <div className="flex gap-2 text-xs font-medium">
+                    {["all", "+2", "Bachelor", "Master"].map((level) => (
+                      <button
+                        key={level}
+                        onClick={() => setProgramFilter(level as LevelFilter)}
+                        className={`px-4 py-1.5 rounded-full transition-all ${
+                          programFilter === level
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="w-full overflow-x-auto">
                   <div className="min-w-[700px]">
-                    <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
-                      <div className="col-span-4 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM NAME</div>
-                      <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">LEVEL</div>
-                      <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">STATUS</div>
-                      <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">ACTION</div>
+                    <div className="grid grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 bg-white items-center">
+                      <div className="col-span-4 text-[13px] font-bold text-gray-800 uppercase tracking-wider">PROGRAM NAME</div>
+                      <div className="col-span-2 text-[13px] font-bold text-gray-800 uppercase tracking-wider">LEVEL</div>
+                      <div className="col-span-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider">STATUS</div>
+                      <div className="col-span-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider">ACTION</div>
                     </div>
-                    {programRows.map((program) => (
-                      <div key={`${program.level}-${program.name}`} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50">
-                        <div className="col-span-4"><h4 className="text-[15.5px] font-bold text-gray-900">{program.name}</h4></div>
-                        <div className="col-span-2"><span className="text-[14px] text-gray-600">{program.level}</span></div>
-                        <div className="col-span-3">
-                          <span className={`rounded-md px-3 py-1.5 text-[12px] font-bold tracking-wide ${program.status === "Ongoing" ? "bg-[#ecfdf5] text-[#10b981]" : "bg-[#fef2f2] text-[#ef4444]"}`}>
-                            {program.status}
-                          </span>
+                    <div className="divide-y divide-gray-100">
+                      {parsedOfferedPrograms.filter(p => programFilter === 'all' || p.level === programFilter).map((prog, idx) => (
+                        <div key={idx} className="grid grid-cols-12 gap-4 px-6 py-5 hover:bg-gray-50/50 transition-colors items-center">
+                          <div className="col-span-4"><h4 className="font-bold text-gray-900 text-[15.5px]">{prog.name}</h4></div>
+                          <div className="col-span-2"><span className="text-[14px] text-gray-600">{prog.level}</span></div>
+                          <div className="col-span-3">
+                            <span className={`px-3 py-1.5 rounded-md text-[12px] font-bold tracking-wide ${
+                              prog.status === 'Ongoing' ? 'bg-[#ecfdf5] text-[#10b981]' : 'bg-[#fef2f2] text-[#ef4444]'
+                            }`}>
+                              {prog.status}
+                            </span>
+                          </div>
+                          <div className="col-span-3"><button className="bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold px-4 py-2 rounded-lg transition-colors">View Details</button></div>
                         </div>
-                        <div className="col-span-3">
-                          <button className="rounded-lg bg-blue-50 px-4 py-2 text-xs font-bold text-blue-700 transition-colors hover:bg-blue-100">View Details</button>
-                        </div>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* Scholarship Tab */}
             {activeTab === "scholarship" && (
-              <div className="overflow-hidden rounded-[20px] border border-gray-100 bg-white shadow-sm">
-                <div className="flex flex-wrap items-center justify-between gap-4 border-b border-gray-100 bg-[#f4f8fc] px-6 py-4">
-                  <p className="text-[14px] font-semibold tracking-wide text-blue-600">Scholarship opportunities - filter by level</p>
-                  <FilterPills active={scholarshipFilter} onChange={setScholarshipFilter} options={["all", "+2", "Bachelor", "Master"]} />
+              <div className="border border-gray-100 rounded-[20px] overflow-hidden shadow-sm bg-white">
+                <div className="bg-[#f4f8fc] px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
+                  <p className="text-blue-600 text-[14px] font-semibold tracking-wide">Scholarship opportunities – filter by level</p>
+                  <div className="flex gap-2 text-xs font-medium">
+                    {["all", "+2", "Bachelor", "Master"].map((level) => (
+                      <button
+                        key={level}
+                        onClick={() => setScholarshipFilter(level as LevelFilter)}
+                        className={`px-4 py-1.5 rounded-full transition-all ${
+                          scholarshipFilter === level
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-100"
+                        }`}
+                      >
+                        {level}
+                      </button>
+                    ))}
+                  </div>
                 </div>
                 <div className="w-full overflow-x-auto">
                   <div className="min-w-[800px]">
-                    <div className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 bg-white px-6 py-5">
-                      <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">PROGRAM</div>
-                      <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">SCHOLARSHIP</div>
-                      <div className="col-span-2 text-[13px] font-bold uppercase tracking-wider text-gray-800">BENEFIT</div>
-                      <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800">FOR WHOM</div>
-                      <div className="col-span-3 text-[13px] font-bold uppercase tracking-wider text-gray-800"></div>
+                    <div className="grid grid-cols-12 gap-4 px-6 py-5 border-b border-gray-100 bg-white items-center">
+                      <div className="col-span-2 text-[13px] font-bold text-gray-800 uppercase tracking-wider">PROGRAM</div>
+                      <div className="col-span-2 text-[13px] font-bold text-gray-800 uppercase tracking-wider">SCHOLARSHIP</div>
+                      <div className="col-span-2 text-[13px] font-bold text-gray-800 uppercase tracking-wider">BENEFIT</div>
+                      <div className="col-span-3 text-[13px] font-bold text-gray-800 uppercase tracking-wider">FOR WHOM</div>
+                      <div className="col-span-3 text-right"></div>
                     </div>
-                    {scholarshipRows.map((item) => (
-                      <div key={`${item.program}-${item.title}`} className="grid grid-cols-12 items-center gap-4 border-b border-gray-100 px-6 py-5 transition-colors hover:bg-gray-50/50">
-                        <div className="col-span-2"><h4 className="text-[14px] font-bold text-gray-900">{item.program}</h4></div>
-                        <div className="col-span-2"><h4 className="text-[14px] font-bold text-gray-900">{item.title}</h4></div>
-                        <div className="col-span-2"><span className="text-[13px] font-medium text-green-600">{item.benefit}</span></div>
-                        <div className="col-span-3"><span className="text-[13px] text-gray-600">{item.audience}</span></div>
-                        <div className="col-span-3"><button className="rounded-lg bg-blue-600 px-5 py-2 text-xs font-bold text-white transition-colors hover:bg-blue-700">Get Scholarship</button></div>
-                      </div>
-                    ))}
+                    <div className="divide-y divide-gray-100">
+                      {parsedScholarships.filter(s => scholarshipFilter === 'all' || s.level === scholarshipFilter).map((s, idx) => (
+                        <div key={idx} className="grid grid-cols-12 gap-4 px-6 py-5 hover:bg-gray-50/50 transition-colors items-center">
+                          <div className="col-span-2"><h4 className="font-bold text-gray-900 text-[14px]">{s.program}</h4></div>
+                          <div className="col-span-2"><h4 className="font-bold text-gray-900 text-[14px]">{s.title}</h4></div>
+                          <div className="col-span-2"><span className="text-[13px] font-medium text-green-600">{s.benefit}</span></div>
+                          <div className="col-span-3"><span className="text-[13px] text-gray-600">{s.audience}</span></div>
+                          <div className="col-span-3 text-right"><button className="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-5 py-2 rounded-lg transition-colors">Get Scholarship</button></div>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* Events Tab */}
             {activeTab === "events" && (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-                {parsedEvents.map((event: any, idx: number) => (
-                  <div key={idx} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all hover:-translate-y-[2px] hover:shadow-md">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {parsedEvents.length > 0 ? parsedEvents.map((evt, idx) => (
+                  <div key={idx} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-start gap-4">
-                      <div className={`min-w-[70px] rounded-xl p-3 text-center ${event.color}`}>
-                        <span className="block text-2xl font-black">{event.day}</span>
-                        <span className={`text-xs font-bold ${event.monthColor}`}>{event.month}</span>
+                      <div className="bg-blue-50 rounded-xl p-3 text-center min-w-[70px]">
+                        <span className="block text-2xl font-black text-blue-600">{evt.day}</span>
+                        <span className="text-xs font-bold text-blue-500 uppercase">{evt.month}</span>
                       </div>
                       <div>
-                        <h4 className="mb-1 text-[16px] font-bold text-gray-900">{event.title}</h4>
-                        <p className="mb-2 flex items-center gap-1 text-[13px] text-gray-500"><i className="fa-regular fa-clock text-[12px]"></i> {event.time}</p>
-                        <p className="text-[13px] text-gray-600">{event.body}</p>
+                        <h4 className="font-bold text-gray-900 text-[16px] mb-1">{evt.title}</h4>
+                        <p className="text-[13px] text-gray-500 mb-2 flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" /> {evt.time}
+                        </p>
+                        <p className="text-[13px] text-gray-600 line-clamp-2">{evt.body}</p>
                       </div>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="col-span-full py-10 text-center bg-white border border-dashed rounded-2xl text-gray-400">No events scheduled.</div>
+                )}
               </div>
             )}
 
+            {/* News Tab */}
             {activeTab === "news" && (
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {parsedNews.map((card: any, idx: number) => (
-                  <div key={idx} className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
-                    <div className="flex flex-1 flex-col p-5">
-                      <div className="mb-4"><span className={`inline-block rounded-full px-3.5 py-1 text-[12px] font-bold ${card.tagClass}`}>{card.tag}</span></div>
-                      <div className="mb-4 h-[140px] w-full overflow-hidden rounded-xl shrink-0">
-                        <img src={card.image} className="h-full w-full object-cover transition-transform duration-500 hover:scale-105" alt={card.title} />
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {parsedNews.length > 0 ? parsedNews.map((card, idx) => (
+                  <div key={idx} className="border border-gray-100 rounded-2xl bg-white shadow-sm flex flex-col hover:shadow-md transition-shadow overflow-hidden">
+                    <div className="p-5 flex-1 flex flex-col">
+                      <div className="mb-4">
+                        <span className={`inline-block px-3.5 py-1 rounded-full text-[12px] font-bold ${card.tagClass}`}>
+                          {card.tag}
+                        </span>
                       </div>
-                      <h3 className="mb-2 text-[17px] font-bold leading-tight text-gray-900">{card.title}</h3>
-                      <p className="mb-2 line-clamp-2 text-[13.5px] text-gray-500">{card.body}</p>
+                      <div className="w-full h-[140px] mb-4 rounded-xl overflow-hidden shrink-0">
+                        <img 
+                          src={card.image} 
+                          className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" 
+                          alt="News" 
+                        />
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-[17px] mb-2 leading-tight">{card.title}</h3>
+                      <p className="text-[13.5px] text-gray-500 mb-2 line-clamp-2">{card.excerpt}</p>
                     </div>
-                    <div className="mt-auto flex items-center justify-between border-t border-gray-50 bg-white px-5 py-4">
-                      <div className="flex items-center gap-1.5 text-gray-400"><i className="fa-regular fa-clock"></i><span className="text-[12.5px] font-medium">{card.time}</span></div>
-                      <button className="flex items-center text-[13px] font-bold text-blue-600 transition-colors hover:text-blue-700">Read more <i className="fa-solid fa-chevron-right ml-1 text-[11px]"></i></button>
+                    <div className="px-5 py-4 border-t border-gray-50 flex items-center justify-between mt-auto bg-white">
+                      <div className="flex items-center text-gray-400 gap-1.5">
+                        <Clock className="w-4 h-4" />
+                        <span className="text-[12.5px] font-medium">{card.time}</span>
+                      </div>
+                      <button 
+                        onClick={() => onNavigate("newsDetails", { id: card.id, article: card })}
+                        className="flex items-center text-blue-600 hover:text-blue-700 text-[13px] font-bold transition-colors"
+                      >
+                        Read more <ChevronRight className="w-4 h-4 ml-0.5" />
+                      </button>
                     </div>
                   </div>
-                ))}
+                )) : (
+                  <div className="col-span-full py-10 text-center bg-white border border-dashed rounded-2xl text-gray-400">No news updates available.</div>
+                )}
               </div>
             )}
 
+            {/* Download Tab */}
             {activeTab === "download" && (
               <div className="space-y-6">
-                <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                  <h3 className="mb-5 flex items-center gap-3 border-b border-gray-100 pb-3 text-[20px] font-bold text-gray-900">
-                    <i className="fa-solid fa-download text-blue-600"></i> Brochures & Forms
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                  <h3 className="font-bold text-gray-900 text-[20px] mb-5 flex items-center gap-3 border-b border-gray-100 pb-3">
+                    <Download className="w-6 h-6 text-blue-600" /> Brochures & Forms
                   </h3>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    {parsedDownloads.map((item: any, idx: number) => (
-                      <div key={idx} className="flex items-start gap-3 rounded-xl border border-gray-100 bg-[#f8fafc] p-5 transition-all hover:-translate-y-[3px] hover:border-blue-200 hover:shadow-[0_8px_20px_rgba(0,0,0,0.08)]">
-                        <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg ${item.color}`}>
-                          <i className={`fa-solid ${item.icon}`}></i>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {parsedDownloads.length > 0 ? parsedDownloads.map((dl: any, idx: number) => (
+                      <div key={idx} className="bg-[#f8fafc] rounded-xl p-5 flex items-start gap-3 border border-gray-100 hover:border-blue-200 transition-all group">
+                        <div className="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                          <Book className="w-6 h-6 text-blue-600" />
                         </div>
                         <div className="flex-1">
-                          <h4 className="text-[15px] font-bold text-gray-900">{item.title}</h4>
-                          <p className="mb-2 text-[12px] text-gray-500">{item.meta}</p>
-                          <button className={`flex items-center gap-1.5 text-[13px] font-bold transition-colors ${item.linkColor}`}>
-                            <i className="fa-solid fa-file-arrow-down"></i> {item.action}
+                          <h4 className="font-bold text-gray-900 text-[15px]">{dl.name || dl.title}</h4>
+                          <p className="text-[12px] text-gray-500 mb-2">PDF · Updated Recently</p>
+                          <button 
+                            onClick={() => dl.file && window.open(dl.file, '_blank')}
+                            className="flex items-center gap-1.5 text-blue-600 hover:text-blue-700 text-[13px] font-bold transition-colors"
+                          >
+                            <FileDown className="w-4 h-4" /> Download PDF
                           </button>
                         </div>
                       </div>
-                    ))}
+                    )) : (
+                      <div className="col-span-full py-10 text-center text-gray-400">No documents listed for download.</div>
+                    )}
                   </div>
-                  <div className="mt-8 flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50/50 p-5">
+                  <div className="mt-8 p-5 bg-blue-50/50 rounded-xl border border-blue-100 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <i className="fa-regular fa-circle-question text-blue-600"></i>
+                      <HelpCircle className="w-5 h-5 text-blue-600" />
                       <span className="text-[14px] text-gray-700">Need more documents? Request and we'll email you.</span>
                     </div>
-                    <button className="rounded-lg border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-700 transition-colors hover:bg-blue-50">Request</button>
+                    <button className="bg-white border border-blue-200 hover:bg-blue-50 text-blue-700 text-sm font-semibold px-4 py-2 rounded-lg transition-colors">Request</button>
                   </div>
                 </div>
               </div>
             )}
 
+            {/* Gallery Tab */}
             {activeTab === "gallery" && (
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3">
-                {parsedGallery.map((image: any, idx: number) => (
-                  <div key={idx} className="aspect-[16/10] overflow-hidden rounded-lg shadow-[0_4px_20px_rgba(0,0,0,0.05)]">
-                    <img src={image} alt="Gallery" className="h-full w-full object-cover transition-transform duration-300 hover:scale-105" />
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {parsedGallery.length > 0 ? parsedGallery.map((img: string, idx: number) => (
+                  <div key={idx} className="aspect-[16/10] rounded-xl overflow-hidden shadow-sm group">
+                    <img 
+                      src={img} 
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" 
+                      alt="Gallery" 
+                    />
                   </div>
-                ))}
+                )) : (
+                  <div className="col-span-full py-10 text-center bg-white border border-dashed rounded-2xl text-gray-400">Gallery is empty.</div>
+                )}
               </div>
             )}
 
-            {activeTab === "review" && (
-              <div>
-                <div className="mb-6 flex flex-col items-center gap-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm md:flex-row md:p-8">
-                  <div className="shrink-0 text-center md:text-left">
-                    <h2 className="mb-2 text-5xl font-bold text-gray-900">4.8</h2>
-                    <div className="mb-2 flex items-center justify-center gap-1 md:justify-start">
-                      {Array.from({ length: 4 }).map((_, index) => (
-                        <i key={index} className="fa-solid fa-star text-yellow-400"></i>
-                      ))}
-                      <i className="fa-solid fa-star-half-stroke text-yellow-400"></i>
+            {/* Admissions Tab */}
+            {activeTab === "admissions" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {parsedAdmissions.length > 0 ? parsedAdmissions.map((adm: any, idx: number) => (
+                  <div key={idx} className="border border-gray-100 rounded-2xl overflow-hidden bg-white shadow-sm flex flex-col hover:shadow-md transition-shadow">
+                    <div className="h-[180px] w-full relative">
+                      <img src={adm.image || "https://images.unsplash.com/photo-1523240795612-9a054b0db644?q=80"} className="w-full h-full object-cover" alt="Course" />
                     </div>
-                    <p className="text-[13px] font-medium text-gray-500">Based on 12,024 reviews</p>
+                    <div className="p-5 flex-1 flex flex-col">
+                      <div className="mb-3">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wide ${
+                          adm.status === 'Ongoing' ? 'bg-[#ecfdf5] text-[#10b981]' : 'bg-[#fef2f2] text-[#ef4444]'
+                        }`}>
+                          <div className={`w-1.5 h-1.5 rounded-full ${adm.status === 'Ongoing' ? 'bg-[#10b981]' : 'bg-[#ef4444]'}`}></div> {adm.status}
+                        </span>
+                      </div>
+                      <h3 className="font-bold text-gray-900 text-[17px] mb-2 leading-tight">{adm.title}</h3>
+                      <div className="flex items-center gap-2 text-[12.5px] text-gray-500 font-medium mb-5">
+                        <Building2 className="w-4 h-4 text-blue-500" />
+                        <span>{adm.faculty || "Main Campus"}</span>
+                      </div>
+                      <div className="bg-[#f8fafc] border border-gray-100 rounded-xl p-4 flex justify-between items-center mb-5">
+                        <div>
+                          <div className="flex items-center gap-1.5 mb-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
+                            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Start</span>
+                          </div>
+                          <p className="font-bold text-gray-900 text-[13px]">{adm.start || "TBA"}</p>
+                        </div>
+                        <div className="text-right">
+                          <div className="flex items-center justify-end gap-1.5 mb-1">
+                            <div className="w-1.5 h-1.5 rounded-full bg-red-500"></div>
+                            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">DEADLINE</span>
+                          </div>
+                          <p className="font-bold text-gray-900 text-[13px]">{adm.deadline}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3 mt-auto">
+                        <button className="flex-1 border border-gray-200 hover:bg-gray-50 text-gray-700 font-bold py-2.5 rounded-xl text-[13.5px] transition-colors">Details</button>
+                        <button className="flex-[1.5] bg-[#111827] hover:bg-black text-white font-bold py-2.5 rounded-xl text-[13.5px] transition-colors">Apply Now</button>
+                        <button className="w-[42px] h-[42px] border border-gray-200 hover:bg-gray-50 rounded-xl flex items-center justify-center shrink-0 transition-colors">
+                          <Heart className="w-4 h-4 text-gray-600" />
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )) : (
+                  <div className="col-span-full py-10 text-center bg-white border border-dashed rounded-2xl text-gray-400">No active admissions announced.</div>
+                )}
+              </div>
+            )}
+
+            {/* Review Tab */}
+            {activeTab === "review" && (
+              <div className="space-y-8">
+                <div className="bg-white border border-gray-100 rounded-2xl p-6 md:p-8 shadow-sm flex flex-col md:flex-row gap-8 items-center">
+                  <div className="text-center md:text-left flex-shrink-0">
+                    <h2 className="text-5xl font-bold text-gray-900 mb-2">{Number(university.rating || 0).toFixed(1)}</h2>
+                    <div className="flex items-center justify-center md:justify-start gap-1 mb-2">
+                       {[...Array(5)].map((_, i) => (
+                         <Star key={i} className={`w-5 h-5 ${i < Math.floor(university.rating || 0) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'}`} />
+                       ))}
+                    </div>
+                    <p className="text-[13px] text-gray-500 font-medium">Based on 12,024 reviews</p>
                   </div>
                   <div className="w-full space-y-2">
-                    <RatingBar label="5 Star" value="80%" width="80%" color="bg-green-500" />
-                    <RatingBar label="4 Star" value="15%" width="15%" color="bg-blue-500" />
-                    <RatingBar label="3 Star" value="3%" width="3%" color="bg-yellow-500" />
-                    <RatingBar label="2 Star" value="1%" width="1%" color="bg-orange-500" />
-                    <RatingBar label="1 Star" value="1%" width="1%" color="bg-red-500" />
+                    {[
+                      { label: "5 Star", width: "80%", color: "bg-green-500" },
+                      { label: "4 Star", width: "15%", color: "bg-blue-500" },
+                      { label: "3 Star", width: "3%", color: "bg-yellow-500" },
+                      { label: "2 Star", width: "1%", color: "bg-orange-500" },
+                      { label: "1 Star", width: "1%", color: "bg-red-500" },
+                    ].map((row, idx) => (
+                      <div key={idx} className="flex items-center text-[13px] font-medium text-gray-600">
+                        <span className="w-12">{row.label}</span>
+                        <div className="mx-3 h-2 flex-grow rounded-full bg-gray-100 overflow-hidden">
+                          <div className={`h-full rounded-full ${row.color}`} style={{ width: row.width }}></div>
+                        </div>
+                        <span className="w-10 text-right">{row.width}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
 
-                {parsedReviews.length > 0 ? parsedReviews.map((rev: any, i: number) => (
-                  <ReviewCard 
-                    key={i}
-                    initials={rev.name ? rev.name.charAt(0) : "U"} 
-                    initialsClass={i % 2 === 0 ? "bg-blue-100 text-blue-600" : "bg-green-100 text-green-600"} 
-                    name={rev.name} 
-                    program={rev.program} 
-                    rating={rev.rating || 5} 
-                    body={rev.body} 
-                    className={i > 0 ? "mt-4" : ""}
-                  />
-                )) : (
-                  <>
-                    <ReviewCard initials="AK" initialsClass="bg-blue-100 text-blue-600" name="Aarav Kumar" program="B.Tech Computer Science" rating={5} body="The university has an amazing infrastructure with top-notch labs for Data Science. The faculties are extremely helpful and the placement cell is very active. I got placed in a top MNC right after my final semester." />
-                    <ReviewCard initials="SP" initialsClass="bg-green-100 text-green-600" name="Sita Paudel" program="MA Sociology" rating={4} body="Great environment for research in social sciences. The central library has an extensive collection. Hostel facilities are decent." className="mt-4" />
-                  </>
-                )}
+                <div className="space-y-4">
+                  {parsedReviews.length > 0 ? parsedReviews.map((rev: any, idx: number) => (
+                    <div key={idx} className="bg-[#fafafa] p-6 rounded-xl border border-gray-100">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-[14px]">
+                            {rev.user?.[0] || 'U'}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-gray-900 text-[15px]">{rev.user}</h4>
+                            <p className="text-[12px] text-gray-500">{rev.program || "Student"}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-0.5">
+                          {[...Array(5)].map((_, i) => (
+                             <Star key={i} className={`w-3.5 h-3.5 ${i < (rev.rating || 5) ? 'text-yellow-400 fill-yellow-400' : 'text-gray-200'}`} />
+                          ))}
+                        </div>
+                      </div>
+                      <p className="text-[14px] text-gray-600 leading-relaxed">{rev.comment}</p>
+                    </div>
+                  )) : (
+                    <div className="py-10 text-center text-gray-400">No reviews yet. Be the first to review!</div>
+                  )}
+                </div>
               </div>
             )}
           </div>
 
-          <div className="space-y-6 lg:col-span-1">
-            <div className="rounded-[20px] border border-gray-100 bg-white p-6 shadow-sm">
-              <h3 className="mb-5 flex items-center gap-2 text-[17px] font-bold text-gray-900">
-                <i className="fa-solid fa-circle-info text-blue-500"></i> Quick Facts
+          {/* Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-[20px] p-6 border border-gray-100 shadow-sm">
+              <h3 className="font-bold text-gray-900 text-[17px] mb-5 flex items-center gap-2">
+                <Info className="w-5 h-5 text-blue-500" /> Quick Facts
               </h3>
               <div className="space-y-4">
-                <FactRow label="Established" value={String(parsedQuick.est || university.established || "1959")} />
-                <FactRow label="University Type" value={parsedQuick.type || university.type || "Public"} />
-                <FactRow label="Campus Size" value={parsedQuick.size || "154+ Hectares"} />
-                <FactRow label="Total Students" value={parsedQuick.students || "400,000+"} />
-                <FactRow label="Constituent Campuses" value={String(parsedQuick.campuses || university.collegesCount || 64)} noBorder />
+                {[
+                  { label: "Established", value: university.established || "N/A" },
+                  { label: "Founder", value: university.founder || "N/A" },
+                  { label: "Location", value: university.location || "N/A" },
+                  { label: "University Type", value: university.type || "N/A" },
+                  { label: "Chancellor", value: university.chancellor || "N/A" },
+                  { label: "Vice-Chancellor", value: university.vice_chancellor || "N/A" },
+                  { label: "Campus Size", value: parsedQuick.size || "N/A" },
+                  { label: "Total Students", value: university.students || "N/A" },
+                  { label: "Teaching Staff", value: parsedQuick.teachingStaff || "N/A" },
+                  { label: "Non-Teaching Staff", value: parsedQuick.nonTeachingStaff || "N/A" },
+                  { label: "Constituent Campuses", value: parsedQuick.constituentCampuses || "N/A" },
+                  { label: "Affiliated Colleges", value: parsedQuick.affiliatedColleges || "N/A" },
+                  { label: "Central Departments", value: parsedQuick.centralDepartments || "N/A" },
+                  { label: "Research Centers", value: parsedQuick.researchCenters || "N/A" },
+                  { label: "International Collaborations", value: parsedQuick.intlCollabs || "N/A" },
+                ].map((fact, idx, array) => (
+                  <div key={idx} className={`flex justify-between items-center ${idx !== array.length - 1 ? 'border-b border-gray-50 pb-3' : ''}`}>
+                    <span className="text-[13.5px] text-gray-500">{fact.label}</span>
+                    <span className="text-[13.5px] font-bold text-gray-800 text-right ml-2">{fact.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            <div className="rounded-[20px] bg-[#1e293b] p-6 text-white shadow-sm">
-              <h3 className="mb-5 flex items-center gap-2 text-[17px] font-bold text-white">
-                <i className="fa-solid fa-phone-volume text-blue-400"></i> Contact Info
+            <div className="bg-[#1e293b] rounded-[20px] p-6 shadow-sm text-white">
+              <h3 className="font-bold text-white text-[17px] mb-5 flex items-center gap-2">
+                <PhoneCall className="w-5 h-5 text-blue-400" /> Contact Info
               </h3>
               <div className="space-y-4">
-                <ContactRow icon="fa-location-dot" text={`${university.location}, Nepal`} />
-                <ContactRow icon="fa-envelope" text={parsedAbout.email || parsedContact?.email || "info@tribhuvan.edu.np"} />
-                <ContactRow icon="fa-phone" text={parsedAbout.phone || parsedContact?.phone || "+977-1-4330437"} />
-                <ContactRow icon="fa-globe" text={website} />
+                <div className="flex items-start gap-3">
+                  <MapPin className="w-4 h-4 text-gray-400 mt-0.5" />
+                  <p className="text-[13.5px] text-gray-300 leading-relaxed">{university.location}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Mail className="w-4 h-4 text-gray-400" />
+                  <p className="text-[13.5px] text-gray-300">{parsedContact.email || "info@university.edu"}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Phone className="w-4 h-4 text-gray-400" />
+                  <p className="text-[13.5px] text-gray-300">{parsedContact.phone || "N/A"}</p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Globe className="w-4 h-4 text-gray-400" />
+                  <p className="text-[13.5px] text-gray-300">{website}</p>
+                </div>
               </div>
-              <button className="mt-6 w-full rounded-xl bg-blue-600 py-3 text-[13.5px] font-bold text-white shadow-sm transition-colors hover:bg-blue-700">Get Directions</button>
+              <button className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-[13.5px] transition-colors shadow-sm">
+                Get Directions
+              </button>
             </div>
           </div>
         </div>
@@ -1207,241 +991,16 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
   );
 };
 
+// Sub-components
 const StatusState: React.FC<{ text: string; tone: "default" | "error" }> = ({ text, tone }) => (
-  <div className="min-h-screen bg-[#fafbfc] px-6 py-24 text-center">
-    <p className={`text-[15px] font-semibold ${tone === "error" ? "text-red-600" : "text-gray-600"}`}>{text}</p>
-  </div>
-);
-
-const MediaCard: React.FC<{ title: string; icon: string; image: string }> = ({ title, icon, image }) => (
-  <div className="group relative h-[240px] w-full cursor-pointer overflow-hidden rounded-[24px] shadow-sm md:h-[300px]">
-    <img src={image} alt={title} className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105" />
-    <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/20 transition-colors duration-300 group-hover:bg-black/40">
-      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-white/95 pl-1 shadow-[0_8px_30px_rgba(0,0,0,0.2)] backdrop-blur-sm transition-transform duration-300 group-hover:scale-110">
-        <i className="fa-solid fa-play text-blue-600"></i>
+  <div className="flex min-h-[400px] w-full items-center justify-center bg-gray-50 p-8 rounded-2xl border-2 border-dashed border-gray-200">
+    <div className="text-center">
+      <div className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${tone === 'error' ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>
+        <Info className="w-8 h-8" />
       </div>
+      <p className="text-lg font-bold text-gray-900">{text}</p>
+      <p className="mt-2 text-sm text-gray-500 font-medium">Please check back later or refresh the page.</p>
     </div>
-    <div className="absolute inset-0 z-20 flex flex-col justify-end bg-gradient-to-t from-[#0f172a]/90 via-[#0f172a]/30 to-transparent p-6 md:p-8">
-      <h3 className="mb-1.5 flex items-center gap-2.5 text-[19px] font-bold text-white md:text-[21px]">
-        <i className={`fa-solid ${icon} text-blue-400`}></i> {title}
-      </h3>
-      <p className="line-clamp-1 text-[14px] text-gray-200">{title === "VC's Message" ? "Listen to our Vice-Chancellor's welcome" : "Explore our beautiful university campus"}</p>
-    </div>
-  </div>
-);
-
-const InfoPanel: React.FC<{
-  title: string;
-  body: string;
-  panelClass: string;
-  iconClass: string;
-  icon: string;
-}> = ({ title, body, panelClass, iconClass, icon }) => (
-  <div className={`${panelClass} rounded-[20px] p-8`}>
-    <div className="mb-4 flex items-center gap-3.5">
-      <div className={`flex h-10 w-10 items-center justify-center rounded-full ${iconClass}`}>
-        <i className={`fa-solid ${icon}`}></i>
-      </div>
-      <h3 className="text-[16px] font-bold text-gray-900">{title}</h3>
-    </div>
-    <p className="text-[14.5px] leading-[1.7] text-gray-600">{body}</p>
-  </div>
-);
-
-const OverviewRow: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-  <div className="flex flex-col p-4 transition-colors hover:bg-gray-50 sm:flex-row">
-    <div className="w-full text-[14px] font-semibold text-gray-800 sm:w-1/3">{label}</div>
-    <div className="w-full text-[14px] text-gray-600 sm:w-2/3">{value}</div>
-  </div>
-);
-
-const AdminRow: React.FC<{ position: string; role: string; holder: string }> = ({ position, role, holder }) => (
-  <tr>
-    <td className="px-6 py-4 font-bold text-gray-900">{position}</td>
-    <td className="px-6 py-4">{role}</td>
-    <td className="px-6 py-4 font-semibold">{holder}</td>
-  </tr>
-);
-
-const FeatureCallout: React.FC<{
-  title: string;
-  body: string;
-  cardClass: string;
-  iconClass: string;
-  icon: string;
-}> = ({ title, body, cardClass, iconClass, icon }) => (
-  <div className={`flex items-start gap-4 rounded-xl border p-5 ${cardClass}`}>
-    <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${iconClass}`}>
-      <i className={`fa-solid ${icon}`}></i>
-    </div>
-    <div>
-      <h4 className="text-[15px] font-bold text-gray-900">{title}</h4>
-      <p className="mt-1 text-[14px] text-gray-600">{body}</p>
-    </div>
-  </div>
-);
-
-const FilterPills: React.FC<{
-  active: LevelFilter;
-  onChange: (value: LevelFilter) => void;
-  options: LevelFilter[];
-}> = ({ active, onChange, options }) => (
-  <div className="flex gap-2 text-xs font-medium">
-    {options.map((option) => (
-      <button
-        key={option}
-        onClick={() => onChange(option)}
-        className={`rounded-full px-4 py-1.5 ${
-          active === option
-            ? "bg-blue-600 text-white shadow-sm"
-            : "border border-gray-200 bg-white text-gray-700 hover:bg-gray-100"
-        }`}
-      >
-        {option}
-      </button>
-    ))}
-  </div>
-);
-
-const DropdownCard: React.FC<{
-  title: string;
-  icon: string;
-  isOpen: boolean;
-  onToggle: () => void;
-  children: React.ReactNode;
-  compact?: boolean;
-  iconBg?: string;
-  iconText?: string;
-}> = ({
-  title,
-  icon,
-  isOpen,
-  onToggle,
-  children,
-  compact = false,
-  iconBg = "bg-blue-50",
-  iconText = "text-blue-600",
-}) => (
-  <div className="rounded-[16px] border border-gray-100 bg-white p-5 shadow-sm">
-    <div className="flex cursor-pointer items-center justify-between" onClick={onToggle}>
-      <div className="flex items-center gap-3">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-full ${iconBg}`}>
-          <i className={`fa-solid ${icon} ${iconText}`}></i>
-        </div>
-        <h4 className={`${compact ? "text-[15px]" : "text-[17px]"} font-bold text-gray-900`}>{title}</h4>
-      </div>
-      <i className={`fa-solid ${isOpen ? "fa-chevron-up" : "fa-chevron-down"} text-gray-500`}></i>
-    </div>
-    {isOpen && <div className={`${compact ? "mt-4" : "mt-6"}`}>{children}</div>}
-  </div>
-);
-
-const ProgTh: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <th className="border-b border-[#e2e8f0] bg-[#f8fafc] px-2 py-[10px] text-left font-semibold text-[#1e293b]">{children}</th>
-);
-
-const ProgTd: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <td className="border-b border-[#f1f5f9] px-2 py-2 text-[#334155]">{children}</td>
-);
-
-const AdmissionCard: React.FC<{
-  title: string;
-  status: string;
-  statusClass: string;
-  image: string;
-  faculty: string;
-  admissionOpen: string;
-  deadline: string;
-  darkButton?: boolean;
-}> = ({ title, status, statusClass, image, faculty, admissionOpen, deadline, darkButton = false }) => (
-  <div className="flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md">
-    <div className="relative h-[180px] w-full">
-      <img src={image} className="h-full w-full object-cover" alt={title} />
-    </div>
-    <div className="flex flex-1 flex-col p-5">
-      <div className="mb-3">
-        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-bold tracking-wide ${statusClass}`}>
-          <div className={`h-1.5 w-1.5 rounded-full ${status === "Ongoing" ? "bg-[#10b981]" : "bg-[#ef4444]"}`}></div>
-          {status}
-        </span>
-      </div>
-      <h3 className="mb-2 text-[17px] font-bold leading-tight text-gray-900">{title}</h3>
-      <div className="mb-5 flex items-center gap-2 text-[12.5px] font-medium text-gray-500">
-        <i className="fa-solid fa-building text-blue-500"></i>
-        <span>Main Campus</span>
-        <span className="text-gray-300">|</span>
-        <span>{faculty}</span>
-      </div>
-      <div className="mb-5 flex items-center justify-between rounded-xl border border-gray-100 bg-[#f8fafc] p-4">
-        <div>
-          <div className="mb-1 flex items-center gap-1.5"><div className="h-1.5 w-1.5 rounded-full bg-blue-500"></div><span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">Admission open</span></div>
-          <p className="text-[13px] font-bold text-gray-900">{admissionOpen}</p>
-        </div>
-        <div className="text-right">
-          <div className="mb-1 flex items-center justify-end gap-1.5"><div className="h-1.5 w-1.5 rounded-full bg-red-500"></div><span className="text-[11px] font-bold uppercase tracking-wider text-gray-500">DEADLINE</span></div>
-          <p className="text-[13px] font-bold text-gray-900">{deadline}</p>
-        </div>
-      </div>
-      <div className="mt-auto flex items-center gap-3">
-        <button className="flex-1 rounded-xl border border-gray-200 py-2.5 text-[13.5px] font-bold text-gray-700 transition-colors hover:bg-gray-50">Details</button>
-        <button className={`flex-[1.5] rounded-xl py-2.5 text-[13.5px] font-bold text-white transition-colors ${darkButton ? "bg-[#111827] hover:bg-black" : "bg-blue-600 hover:bg-blue-700"}`}>Apply Now</button>
-        <button className="flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-xl border border-gray-200 transition-colors hover:bg-gray-50">
-          <i className="fa-regular fa-heart text-gray-600"></i>
-        </button>
-      </div>
-    </div>
-  </div>
-);
-
-const RatingBar: React.FC<{ label: string; value: string; width: string; color: string }> = ({ label, value, width, color }) => (
-  <div className="flex items-center text-[13px] font-medium text-gray-600">
-    <span className="w-12">{label}</span>
-    <div className="mx-3 h-2 flex-grow rounded bg-[#f1f5f9]">
-      <div className={`h-full rounded ${color}`} style={{ width }}></div>
-    </div>
-    <span className="w-10 text-right">{value}</span>
-  </div>
-);
-
-const ReviewCard: React.FC<{
-  initials: string;
-  initialsClass: string;
-  name: string;
-  program: string;
-  rating: number;
-  body: string;
-  className?: string;
-}> = ({ initials, initialsClass, name, program, rating, body, className = "" }) => (
-  <div className={`rounded-lg border border-gray-100 bg-[#fafafa] p-6 ${className}`}>
-    <div className="mb-4 flex items-start justify-between">
-      <div className="flex items-center gap-3">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-full text-[14px] font-bold ${initialsClass}`}>{initials}</div>
-        <div>
-          <h4 className="text-[15px] font-bold text-gray-900">{name}</h4>
-          <p className="text-[12px] text-gray-500">{program}</p>
-        </div>
-      </div>
-      <div className="flex items-center gap-0.5">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <i key={index} className={`${index < rating ? "fa-solid" : "fa-regular"} fa-star text-[12px] text-yellow-400`}></i>
-        ))}
-      </div>
-    </div>
-    <p className="text-[14px] leading-relaxed text-gray-600">{body}</p>
-  </div>
-);
-
-const FactRow: React.FC<{ label: string; value: string; noBorder?: boolean }> = ({ label, value, noBorder }) => (
-  <div className={`flex items-center justify-between ${noBorder ? "" : "border-b border-gray-50 pb-3"}`}>
-    <span className="text-[13.5px] text-gray-500">{label}</span>
-    <span className="text-[13.5px] font-bold text-gray-800">{value}</span>
-  </div>
-);
-
-const ContactRow: React.FC<{ icon: string; text: string }> = ({ icon, text }) => (
-  <div className="flex items-center gap-3">
-    <i className={`fa-solid ${icon} text-gray-400`}></i>
-    <p className="text-[13.5px] text-gray-300">{text}</p>
   </div>
 );
 

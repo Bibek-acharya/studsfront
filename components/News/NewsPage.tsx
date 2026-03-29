@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { getAllNews, NewsArticle } from "../../lib/news-data";
+import { apiService } from "../../services/api";
+import { useEffect } from "react";
 
 interface NewsPageProps {
   onNavigate: (view: any, data?: any) => void;
@@ -47,8 +49,50 @@ const categoryBadgeClass = (category: NewsCategoryFilter) => {
 const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
   const [activeCategory, setActiveCategory] = useState<NewsCategoryFilter>("All News");
   const [sortBy, setSortBy] = useState<"Newest First" | "Oldest First">("Newest First");
+  const [dynamicNews, setDynamicNews] = useState<NewsArticle[]>([]);
 
-  const allNews = getAllNews();
+  const staticNews = getAllNews();
+
+  useEffect(() => {
+    const fetchUniNews = async () => {
+      try {
+        const res = await apiService.getUniversities();
+        if (res.success && res.data?.universities) {
+          const allUniNews: NewsArticle[] = [];
+          res.data.universities.forEach(uni => {
+            try {
+              const nWs = typeof uni.news === 'string' ? JSON.parse(uni.news) : uni.news || [];
+              if (Array.isArray(nWs)) {
+                nWs.forEach((n: any, idx: number) => {
+                  allUniNews.push({
+                    id: `uni-${uni.id}-${idx}`,
+                    category: n.type === "Notice" ? "Policy" : "Academic",
+                    title: n.heading,
+                    excerpt: n.excerpt || n.desc || "",
+                    content: n.body || n.desc || "",
+                    image: n.image || uni.logo || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80",
+                    author: uni.name,
+                    date: n.date || "Recently",
+                    readTime: "3 min",
+                    source: uni.name,
+                    tags: [uni.name, n.type].filter(Boolean) as string[]
+                  });
+                });
+              }
+            } catch (err) {
+              console.error("Error parsing news for university:", uni.name, err);
+            }
+          });
+          setDynamicNews(allUniNews);
+        }
+      } catch (err) {
+        console.error("Error fetching university news:", err);
+      }
+    };
+    fetchUniNews();
+  }, []);
+
+  const allNews = useMemo(() => [...staticNews, ...dynamicNews], [staticNews, dynamicNews]);
   const featuredNews = allNews[0];
 
   const processedNews = useMemo(() => {
@@ -59,9 +103,9 @@ const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
 
     const sorted = [...filtered].sort((a, b) => {
       if (sortBy === "Newest First") {
-        return Number(b.id) - Number(a.id);
+        return b.id.localeCompare(a.id, undefined, { numeric: true, sensitivity: 'base' });
       }
-      return Number(a.id) - Number(b.id);
+      return a.id.localeCompare(b.id, undefined, { numeric: true, sensitivity: 'base' });
     });
 
     return sorted;
@@ -162,7 +206,7 @@ const NewsPage: React.FC<NewsPageProps> = ({ onNavigate }) => {
             return (
               <article
                 key={item.id}
-                onClick={() => onNavigate("newsDetails", { id: item.id })}
+                onClick={() => onNavigate("newsDetails", { id: item.id, article: item })}
                 className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 group cursor-pointer"
               >
                 <div className="mb-4">
