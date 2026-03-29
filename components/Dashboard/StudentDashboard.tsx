@@ -393,11 +393,6 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) => {
         <nav className="flex-1 overflow-y-auto py-6 px-3 space-y-1 mt-16 md:mt-0 flex flex-col">
           {[
             { id: "dashboard", icon: "fas fa-th-large", label: "Dashboard" },
-            {
-              id: "applications",
-              icon: "fas fa-file-contract",
-              label: "Inquiries",
-            },
             { id: "chat", icon: "fas fa-comment-dots", label: "Messages" },
             {
               id: "calendar",
