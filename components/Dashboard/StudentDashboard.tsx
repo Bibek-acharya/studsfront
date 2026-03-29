@@ -382,11 +382,11 @@ const StudentDashboard: React.FC<StudentDashboardProps> = ({ onLogout }) => {
         <div className="h-20 flex items-center px-8 border-b border-slate-100 hidden md:flex">
           <a href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold mr-3 shadow-lg shadow-blue-500/30">
-            S
-          </div>
-          <span className="font-bold text-xl tracking-tight text-slate-800">
-            StudSphere
-          </span>
+              S
+            </div>
+            <span className="font-bold text-xl tracking-tight text-slate-800">
+              StudSphere
+            </span>
           </a>
         </div>
 
