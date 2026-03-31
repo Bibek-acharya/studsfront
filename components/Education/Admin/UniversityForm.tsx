@@ -192,38 +192,310 @@ const UniversityForm: React.FC<UniversityFormProps> = ({ id, onSuccess, onCancel
     reviews: [],
   });
 
-  // Fetch University if editing
+  // Fetch base university info
   const universityQuery = useQuery({
     queryKey: ["admin-university", id],
     queryFn: () => apiService.getUniversityById(id!),
     enabled: !!id && !!token,
   });
 
+  // Fetch each tab separately (like the display page does)
+  const { data: aboutData } = useQuery({
+    queryKey: ["admin-university-tab", id, "about"],
+    queryFn: () => apiService.getUniversityTab(id!, "about"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: contactData } = useQuery({
+    queryKey: ["admin-university-tab", id, "contact"],
+    queryFn: () => apiService.getUniversityTab(id!, "contact"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: quickData } = useQuery({
+    queryKey: ["admin-university-tab", id, "quick"],
+    queryFn: () => apiService.getUniversityTab(id!, "quick"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: overviewData } = useQuery({
+    queryKey: ["admin-university-tab", id, "overview"],
+    queryFn: () => apiService.getUniversityTab(id!, "overview"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: leadershipData } = useQuery({
+    queryKey: ["admin-university-tab", id, "leadership"],
+    queryFn: () => apiService.getUniversityTab(id!, "leadership"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: coursesData } = useQuery({
+    queryKey: ["admin-university-tab", id, "courses"],
+    queryFn: () => apiService.getUniversityTab(id!, "courses"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: programsData } = useQuery({
+    queryKey: ["admin-university-tab", id, "programs"],
+    queryFn: () => apiService.getUniversityTab(id!, "programs"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: scholarshipsData } = useQuery({
+    queryKey: ["admin-university-tab", id, "scholarships"],
+    queryFn: () => apiService.getUniversityTab(id!, "scholarships"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: eventsData } = useQuery({
+    queryKey: ["admin-university-tab", id, "events"],
+    queryFn: () => apiService.getUniversityTab(id!, "events"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: newsData } = useQuery({
+    queryKey: ["admin-university-tab", id, "news"],
+    queryFn: () => apiService.getUniversityTab(id!, "news"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: facultiesData } = useQuery({
+    queryKey: ["admin-university-tab", id, "faculties"],
+    queryFn: () => apiService.getUniversityTab(id!, "faculties"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: downloadsData } = useQuery({
+    queryKey: ["admin-university-tab", id, "downloads"],
+    queryFn: () => apiService.getUniversityTab(id!, "downloads"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: galleryData } = useQuery({
+    queryKey: ["admin-university-tab", id, "gallery"],
+    queryFn: () => apiService.getUniversityTab(id!, "gallery"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: admissionsData } = useQuery({
+    queryKey: ["admin-university-tab", id, "admissions"],
+    queryFn: () => apiService.getUniversityTab(id!, "admissions"),
+    enabled: !!id && !!token,
+  });
+
+  const { data: reviewsData } = useQuery({
+    queryKey: ["admin-university-tab", id, "reviews"],
+    queryFn: () => apiService.getUniversityTab(id!, "reviews"),
+    enabled: !!id && !!token,
+  });
+
+  const parseJson = (val: any, fallback: any) => {
+    if (!val) return fallback;
+    if (typeof val === 'string') {
+      try { return JSON.parse(val); } catch { return fallback; }
+    }
+    return val;
+  };
+
+  // Populate base university fields
   useEffect(() => {
     if (universityQuery.data?.data?.university) {
       const u = universityQuery.data.data.university;
-      // Merge with default state to ensure nested objects exist
       setFormData(prev => ({
         ...prev,
-        ...u,
-        about: { ...prev.about, ...u.about },
-        contact: { ...prev.contact, ...u.contact },
-        quick: { ...prev.quick, ...u.quick },
-        courses: u.courses || { bachelor: [], master: [] },
-        overview: u.overview || [],
-        leadership: u.leadership || [],
-        programs: u.programs || [],
-        scholarships: u.scholarships || [],
-        events: u.events || [],
-        news: u.news || [],
-        faculties: u.faculties || [],
-        downloads: u.downloads || [],
-        gallery: u.gallery || [],
-        admissions: u.admissions || [],
-        reviews: u.reviews || [],
+        name: u.name || prev.name,
+        location: u.location || prev.location,
+        website: u.website || prev.website,
+        logo: u.logo || prev.logo,
+        cover: u.cover || prev.cover,
+        type: u.type || prev.type,
+        established: u.established || prev.established,
+        students: u.students || prev.students,
+        chancellor: u.chancellor || prev.chancellor,
+        vice_chancellor: u.vice_chancellor || prev.vice_chancellor,
+        founder: u.founder || prev.founder,
+        rank: u.rank || prev.rank,
+        rating: u.rating || prev.rating,
+        review_count: u.review_count || prev.review_count,
+        verified: u.verified ?? prev.verified,
+        isPopular: u.isPopular ?? prev.isPopular,
       }));
     }
   }, [universityQuery.data]);
+
+  // Populate about tab
+  useEffect(() => {
+    const raw = aboutData?.data?.data;
+    const parsed = parseJson(raw, {});
+    if (parsed && Object.keys(parsed).length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        about: { ...prev.about, ...parsed },
+      }));
+    }
+  }, [aboutData]);
+
+  // Populate contact tab
+  useEffect(() => {
+    const raw = contactData?.data?.data;
+    const parsed = parseJson(raw, {});
+    if (parsed && Object.keys(parsed).length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        contact: { ...prev.contact, ...parsed },
+      }));
+    }
+  }, [contactData]);
+
+  // Populate quick facts tab
+  useEffect(() => {
+    const raw = quickData?.data?.data;
+    const parsed = parseJson(raw, {});
+    if (parsed && Object.keys(parsed).length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        quick: { ...prev.quick, ...parsed },
+      }));
+    }
+  }, [quickData]);
+
+  // Populate overview
+  useEffect(() => {
+    const raw = overviewData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, overview: parsed }));
+    }
+  }, [overviewData]);
+
+  // Populate leadership
+  useEffect(() => {
+    const raw = leadershipData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, leadership: parsed }));
+    }
+  }, [leadershipData]);
+
+  // Populate courses - handle flat array or grouped format
+  useEffect(() => {
+    const raw = coursesData?.data?.data;
+    const parsed = parseJson(raw, null);
+    if (parsed) {
+      let coursesObj: any;
+      if (Array.isArray(parsed)) {
+        const bachelor = parsed
+          .filter((c: any) => c.level === 'Bachelor' || c.level === '+2')
+          .map((c: any) => ({
+            name: c.title || c.name || c.course || '',
+            duration: c.duration || '',
+            fees: c.fee || c.fees || '',
+            eligibility: c.eligibility || '',
+            seats: c.seats || '',
+          }));
+        const master = parsed
+          .filter((c: any) => c.level === 'Master')
+          .map((c: any) => ({
+            name: c.title || c.name || c.course || '',
+            duration: c.duration || '',
+            fees: c.fee || c.fees || '',
+            eligibility: c.eligibility || '',
+            seats: c.seats || '',
+          }));
+        coursesObj = { bachelor, master };
+      } else if (parsed && typeof parsed === 'object') {
+        coursesObj = {
+          bachelor: Array.isArray(parsed.bachelor) ? parsed.bachelor : [],
+          master: Array.isArray(parsed.master) ? parsed.master : [],
+        };
+      } else {
+        coursesObj = { bachelor: [], master: [] };
+      }
+      setFormData(prev => ({ ...prev, courses: coursesObj }));
+    }
+  }, [coursesData]);
+
+  // Populate programs
+  useEffect(() => {
+    const raw = programsData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, programs: parsed }));
+    }
+  }, [programsData]);
+
+  // Populate scholarships
+  useEffect(() => {
+    const raw = scholarshipsData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, scholarships: parsed }));
+    }
+  }, [scholarshipsData]);
+
+  // Populate events
+  useEffect(() => {
+    const raw = eventsData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, events: parsed }));
+    }
+  }, [eventsData]);
+
+  // Populate news
+  useEffect(() => {
+    const raw = newsData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, news: parsed }));
+    }
+  }, [newsData]);
+
+  // Populate faculties
+  useEffect(() => {
+    const raw = facultiesData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, faculties: parsed }));
+    }
+  }, [facultiesData]);
+
+  // Populate downloads
+  useEffect(() => {
+    const raw = downloadsData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, downloads: parsed }));
+    }
+  }, [downloadsData]);
+
+  // Populate gallery
+  useEffect(() => {
+    const raw = galleryData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, gallery: parsed }));
+    }
+  }, [galleryData]);
+
+  // Populate admissions
+  useEffect(() => {
+    const raw = admissionsData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, admissions: parsed }));
+    }
+  }, [admissionsData]);
+
+  // Populate reviews
+  useEffect(() => {
+    const raw = reviewsData?.data?.data;
+    const parsed = parseJson(raw, []);
+    if (Array.isArray(parsed) && parsed.length > 0) {
+      setFormData(prev => ({ ...prev, reviews: parsed }));
+    }
+  }, [reviewsData]);
 
   const saveMutation = useMutation({
     mutationFn: (data: any) => 

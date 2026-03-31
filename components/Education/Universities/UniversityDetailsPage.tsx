@@ -63,6 +63,98 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
   const university = data?.data?.university;
   const affiliatedColleges = data?.data?.colleges || [];
 
+  // Tab Data Fetching Hooks
+  const { data: aboutData, isLoading: isLoadingAbout } = useQuery({
+    queryKey: ["university-tab", resolvedId, "about"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "about"),
+    enabled: !!resolvedId && activeTab === "about",
+  });
+
+  const { data: coursesData, isLoading: isLoadingCourses } = useQuery({
+    queryKey: ["university-tab", resolvedId, "courses"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "courses"),
+    enabled: !!resolvedId && activeTab === "courses",
+  });
+
+  const { data: facultiesData, isLoading: isLoadingFaculties } = useQuery({
+    queryKey: ["university-tab", resolvedId, "faculties"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "faculties"),
+    enabled: !!resolvedId && activeTab === "institutes",
+  });
+
+  const { data: admissionsData, isLoading: isLoadingAdmissions } = useQuery({
+    queryKey: ["university-tab", resolvedId, "admissions"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "admissions"),
+    enabled: !!resolvedId && activeTab === "admissions",
+  });
+
+  const { data: programsData, isLoading: isLoadingPrograms } = useQuery({
+    queryKey: ["university-tab", resolvedId, "programs"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "programs"),
+    enabled: !!resolvedId && activeTab === "offered",
+  });
+
+  const { data: scholarshipData, isLoading: isLoadingScholarship } = useQuery({
+    queryKey: ["university-tab", resolvedId, "scholarships"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "scholarships"),
+    enabled: !!resolvedId && activeTab === "scholarship",
+  });
+
+  const { data: eventsData, isLoading: isLoadingEvents } = useQuery({
+    queryKey: ["university-tab", resolvedId, "events"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "events"),
+    enabled: !!resolvedId && activeTab === "events",
+  });
+
+  const { data: newsData, isLoading: isLoadingNews } = useQuery({
+    queryKey: ["university-tab", resolvedId, "news"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "news"),
+    enabled: !!resolvedId && activeTab === "news",
+  });
+
+  const { data: downloadData, isLoading: isLoadingDownload } = useQuery({
+    queryKey: ["university-tab", resolvedId, "downloads"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "downloads"),
+    enabled: !!resolvedId && activeTab === "download",
+  });
+
+  const { data: galleryData, isLoading: isLoadingGallery } = useQuery({
+    queryKey: ["university-tab", resolvedId, "gallery"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "gallery"),
+    enabled: !!resolvedId && activeTab === "gallery",
+  });
+
+  const { data: reviewData, isLoading: isLoadingReview } = useQuery({
+    queryKey: ["university-tab", resolvedId, "reviews"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "reviews"),
+    enabled: !!resolvedId && activeTab === "review",
+  });
+
+  // Additional helper queries for sidebar/overview if needed
+  const { data: overviewData } = useQuery({
+    queryKey: ["university-tab", resolvedId, "overview"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "overview"),
+    enabled: !!resolvedId && activeTab === "about",
+  });
+
+  const { data: leadershipData } = useQuery({
+    queryKey: ["university-tab", resolvedId, "leadership"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "leadership"),
+    enabled: !!resolvedId && activeTab === "about",
+  });
+
+  const { data: quickData } = useQuery({
+    queryKey: ["university-tab", resolvedId, "quick"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "quick"),
+    enabled: !!resolvedId, 
+  });
+
+  const { data: contactData } = useQuery({
+    queryKey: ["university-tab", resolvedId, "contact"],
+    queryFn: () => apiService.getUniversityTab(resolvedId as number, "contact"),
+    enabled: !!resolvedId,
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [resolvedId, activeTab]);
@@ -75,123 +167,201 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
   const website = university?.website || "WWW.Studsphere.Com";
   const websiteHref = website.startsWith("http") ? website : `https://${website}`;
 
-  // Data Parsers
+  // Data Parsers using tab-specific data
   const parsedAbout = useMemo(() => {
     try {
-      if (typeof university?.about === 'string') return JSON.parse(university.about);
-      return university?.about || {};
+      const about = aboutData?.data;
+      if (typeof about === 'string') return JSON.parse(about);
+      return about || {};
     } catch { return {}; }
-  }, [university?.about]);
+  }, [aboutData]);
 
   const parsedCourses = useMemo(() => {
     try {
-      const c = typeof university?.courses === 'string' ? JSON.parse(university.courses) : university?.courses || [];
-      return Array.isArray(c) ? c : [];
+      const c = coursesData?.data;
+      const raw = typeof c === 'string' ? JSON.parse(c) : c || {};
+      const coursesRaw = raw?.data ?? raw;
+
+      let flattened: any[] = [];
+      if (Array.isArray(coursesRaw)) {
+        flattened = coursesRaw;
+      } else if (coursesRaw && typeof coursesRaw === 'object') {
+        const bachelors = Array.isArray(coursesRaw.bachelor) ? coursesRaw.bachelor : [];
+        const masters = Array.isArray(coursesRaw.master) ? coursesRaw.master : [];
+        flattened = [...bachelors.map((x: any) => ({ ...x, level: 'Bachelor' })), ...masters.map((x: any) => ({ ...x, level: 'Master' }))];
+      }
+
+      return flattened.map((item: any) => ({
+        title: item.title || item.name || item.course || '',
+        duration: item.duration || '',
+        fee: item.fees || item.fee || '',
+        eligibility: item.eligibility || '',
+        seats: item.seats || '',
+        level: item.level || '',
+      }));
     } catch { return []; }
-  }, [university?.courses]);
+  }, [coursesData]);
 
   const parsedScholarships = useMemo(() => {
     try {
-      const s = typeof university?.scholarships === 'string' ? JSON.parse(university.scholarships) : university?.scholarships || [];
-      return Array.isArray(s) ? s : [];
+      const s = scholarshipData?.data;
+      const raw = typeof s === 'string' ? JSON.parse(s) : s || [];
+      const scholarshipRaw = raw?.data ?? raw;
+      const scholarships = Array.isArray(scholarshipRaw) ? scholarshipRaw : [];
+      return scholarships.map((item: any) => ({
+        program: item.program || '',
+        title: item.name || item.title || '',
+        benefit: item.benefit || '',
+        audience: item.for || item.audience || '',
+      }));
     } catch { return []; }
-  }, [university?.scholarships]);
+  }, [scholarshipData]);
 
   const parsedOfferedPrograms = useMemo(() => {
     try {
-      const p = typeof university?.programs === 'string' ? JSON.parse(university.programs) : university?.programs || [];
-      return Array.isArray(p) ? p : [];
+      const p = programsData?.data;
+      const raw = typeof p === 'string' ? JSON.parse(p) : p || [];
+      const programsRaw = raw?.data ?? raw;
+      const programs = Array.isArray(programsRaw) ? programsRaw : [];
+      return programs.map((item: any) => ({
+        name: item.name || item.title || '',
+        level: item.level || '+2',
+        status: item.status || 'Ongoing',
+      }));
     } catch { return []; }
-  }, [university?.programs]);
+  }, [programsData]);
 
   const parsedEvents = useMemo(() => {
     try {
-      const eVs = typeof university?.events === 'string' ? JSON.parse(university.events) : university?.events || [];
-      return Array.isArray(eVs) ? eVs.map((e: any) => ({
+      const eVs = eventsData?.data;
+      const raw = typeof eVs === 'string' ? JSON.parse(eVs) : eVs || [];
+      const eventsRaw = raw?.data ?? raw;
+      return Array.isArray(eventsRaw) ? eventsRaw.map((e: any) => ({
         day: e.date?.split('-')[2] || "01",
         month: ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"][parseInt(e.date?.split('-')[1] || "1") - 1] || "JAN",
-        title: e.heading,
+        title: e.heading || e.title || '',
         time: e.time || "All Day",
-        body: e.desc || `Type: ${e.type} | Venue: ${e.venue}`
+        body: e.desc || e.content || `Type: ${e.type} | Venue: ${e.venue}`
       })) : [];
     } catch { return []; }
-  }, [university?.events]);
+  }, [eventsData]);
 
   const parsedNews = useMemo(() => {
     try {
-      const nWs = typeof university?.news === 'string' ? JSON.parse(university.news) : university?.news || [];
-      return Array.isArray(nWs) ? nWs.map((n: any, idx: number) => ({
-        id: `news-${idx}`,
+      const nWs = newsData?.data;
+      const raw = typeof nWs === 'string' ? JSON.parse(nWs) : nWs || [];
+      const newsRaw = raw?.data ?? raw;
+      return Array.isArray(newsRaw) ? newsRaw.map((n: any, idx: number) => ({
+        id: n.id || `news-${idx}`,
         tag: n.type || "News",
         tagClass: n.type === "Notice" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600",
         image: n.image || "https://images.unsplash.com/photo-1523050854058-8df90110c9f1?q=80",
-        title: n.heading,
+        title: n.heading || n.title || '',
         excerpt: n.excerpt || n.desc || "",
         body: n.body || n.desc || "",
         tags: [n.type, "University News"].filter(Boolean),
         time: n.date || "Recently"
       })) : [];
     } catch { return []; }
-  }, [university?.news]);
+  }, [newsData]);
 
   const parsedDownloads = useMemo(() => {
     try {
-      const d = typeof university?.downloads === 'string' ? JSON.parse(university.downloads) : university?.downloads || [];
-      return Array.isArray(d) ? d : [];
+      const d = downloadData?.data;
+      const raw = typeof d === 'string' ? JSON.parse(d) : d || [];
+      const downloadsRaw = raw?.data ?? raw;
+      return Array.isArray(downloadsRaw) ? downloadsRaw : [];
     } catch { return []; }
-  }, [university?.downloads]);
+  }, [downloadData]);
 
   const parsedGallery = useMemo(() => {
     try {
-      const g = typeof university?.gallery === 'string' ? JSON.parse(university.gallery) : university?.gallery || [];
-      return Array.isArray(g) ? g : [];
+      const g = galleryData?.data;
+      const raw = typeof g === 'string' ? JSON.parse(g) : g || [];
+      const galleryRaw = raw?.data ?? raw;
+      return Array.isArray(galleryRaw) ? galleryRaw : [];
     } catch { return []; }
-  }, [university?.gallery]);
+  }, [galleryData]);
 
   const parsedFaculties = useMemo(() => {
     try {
-      const f = typeof university?.faculties === 'string' ? JSON.parse(university.faculties) : university?.faculties || [];
-      return Array.isArray(f) ? f : [];
+      const f = facultiesData?.data;
+      const raw = typeof f === 'string' ? JSON.parse(f) : f || [];
+      const facultiesRaw = raw?.data ?? raw;
+      const faculties = Array.isArray(facultiesRaw) ? facultiesRaw : [];
+      return faculties.map((item: any) => ({
+        title: item.title || item.name || '',
+        items: Array.isArray(item.items) ? item.items : Array.isArray(item.colleges) ? item.colleges : [],
+      }));
     } catch { return []; }
-  }, [university?.faculties]);
+  }, [facultiesData]);
 
   const parsedReviews = useMemo(() => {
     try {
-      const r = typeof university?.reviews === 'string' ? JSON.parse(university.reviews) : university?.reviews || [];
-      return Array.isArray(r) ? r : [];
+      const r = reviewData?.data;
+      const raw = typeof r === 'string' ? JSON.parse(r) : r || [];
+      const reviewsRaw = raw?.data ?? raw;
+      const reviews = Array.isArray(reviewsRaw) ? reviewsRaw : [];
+      return reviews.map((item: any) => ({
+        user: item.user || item.name || 'Anonymous',
+        program: item.program || '',
+        rating: item.rating || 0,
+        comment: item.comment || item.body || item.content || '',
+      }));
     } catch { return []; }
-  }, [university?.reviews]);
+  }, [reviewData]);
 
   const parsedAdmissions = useMemo(() => {
     try {
-      const a = typeof university?.admissions === 'string' ? JSON.parse(university.admissions) : university?.admissions || [];
-      return Array.isArray(a) ? a : [];
+      const a = admissionsData?.data;
+      const raw = typeof a === 'string' ? JSON.parse(a) : a || [];
+      const admissionsRaw = raw?.data ?? raw;
+      const admissions = Array.isArray(admissionsRaw) ? admissionsRaw : [];
+      return admissions.map((item: any) => ({
+        title: item.title || item.heading || '',
+        status: item.status || 'Open',
+        faculty: item.faculty || '',
+        start: item.start || item.admissionOpen || '',
+        deadline: item.deadline || '',
+        image: item.image || '',
+        content: item.content || item.desc || '',
+      }));
     } catch { return []; }
-  }, [university?.admissions]);
+  }, [admissionsData]);
 
   const parsedQuick = useMemo(() => {
     try {
-      return typeof university?.quick === 'string' ? JSON.parse(university.quick) : university?.quick || {};
+      const q = quickData?.data;
+      const raw = typeof q === 'string' ? JSON.parse(q) : q || {};
+      return raw?.data ?? raw;
     } catch { return {}; }
-  }, [university?.quick]);
+  }, [quickData]);
 
   const parsedOverview = useMemo(() => {
     try {
-      return typeof university?.overview === 'string' ? JSON.parse(university.overview) : university?.overview || [];
+      const o = overviewData?.data;
+      const raw = typeof o === 'string' ? JSON.parse(o) : o || [];
+      const overview = raw?.data ?? raw;
+      return Array.isArray(overview) ? overview : [];
     } catch { return []; }
-  }, [university?.overview]);
+  }, [overviewData]);
 
   const parsedContact = useMemo(() => {
     try {
-      return typeof university?.contact === 'string' ? JSON.parse(university.contact) : university?.contact || {};
+      const c = contactData?.data;
+      const raw = typeof c === 'string' ? JSON.parse(c) : c || {};
+      return raw?.data ?? raw;
     } catch { return {}; }
-  }, [university?.contact]);
+  }, [contactData]);
 
   const parsedLeadership = useMemo(() => {
     try {
-      return typeof university?.leadership === 'string' ? JSON.parse(university.leadership) : university?.leadership || [];
+      const l = leadershipData?.data;
+      const raw = typeof l === 'string' ? JSON.parse(l) : l || [];
+      const leadership = raw?.data ?? raw;
+      return Array.isArray(leadership) ? leadership : [];
     } catch { return []; }
-  }, [university?.leadership]);
+  }, [leadershipData]);
 
   const toggleDropdown = (key: string) => {
     setOpenDropdowns((prev) => ({ ...prev, [key]: !prev[key] }));
@@ -344,7 +514,10 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
             
             {/* About Tab */}
             {activeTab === "about" && (
-              <div className="space-y-10">
+              isLoadingAbout ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="space-y-10">
                 {/* Media Intro */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 md:gap-8">
                   <div className="relative w-full h-[240px] md:h-[300px] rounded-[24px] overflow-hidden group cursor-pointer shadow-sm">
@@ -487,11 +660,15 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                   <div><h4 className="text-[15px] font-bold text-gray-900">Accreditations</h4><p className="text-[14px] text-gray-600 mt-1">Fully accredited and recognized as a center of higher learning excellence.</p></div>
                 </div>
               </div>
+            )
             )}
 
             {/* Courses Tab */}
             {activeTab === "courses" && (
-              <div className="border border-gray-100 bg-white rounded-[20px] overflow-hidden shadow-sm">
+              isLoadingCourses ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="border border-gray-100 bg-white rounded-[20px] overflow-hidden shadow-sm">
                 <div className="bg-[#f4f8fc] px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
                   <p className="text-blue-600 text-[14px] font-semibold tracking-wide">Courses & fees – filter by level</p>
                   <div className="flex gap-2 text-xs font-medium">
@@ -543,11 +720,15 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                   </div>
                 </div>
               </div>
+            )
             )}
 
             {/* Institutes Tab */}
             {activeTab === "institutes" && (
-              <div className="space-y-10">
+              isLoadingFaculties ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="space-y-10">
                 <div>
                   <div className="flex items-center gap-3 mb-6 border-b border-gray-100 pb-3">
                     <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center shrink-0"><Building2 className="w-5 h-5 text-blue-600" /></div>
@@ -571,18 +752,38 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                               <thead>
                                 <tr className="bg-gray-50/50">
                                   <th className="p-2 border-b text-left font-bold text-gray-800">SN</th>
-                                  <th className="p-2 border-b text-left font-bold text-gray-800">Program / Department</th>
+                                  <th className="p-2 border-b text-left font-bold text-gray-800">Institute / Faculty</th>
+                                  <th className="p-2 border-b text-left font-bold text-gray-800">Address</th>
+                                  <th className="p-2 border-b text-left font-bold text-gray-800">Programs</th>
                                   <th className="p-2 border-b text-left font-bold text-gray-800">Level</th>
                                 </tr>
                               </thead>
                               <tbody>
-                                {f.items?.map((item: string, i: number) => (
-                                  <tr key={i}>
-                                    <td className="p-2 border-b text-gray-600">{i + 1}</td>
-                                    <td className="p-2 border-b text-gray-700 font-medium">{item}</td>
-                                    <td className="p-2 border-b text-gray-600">Standard</td>
-                                  </tr>
-                                ))}
+                                {f.items?.map((item: any, i: number) => {
+                                  if (!item || typeof item === 'string') {
+                                    return (
+                                      <tr key={i}>
+                                        <td className="p-2 border-b text-gray-600">{i + 1}</td>
+                                        <td className="p-2 border-b text-gray-700 font-medium" colSpan={4}>{item || 'N/A'}</td>
+                                      </tr>
+                                    );
+                                  }
+
+                                  const facultyName = item.college || item.name || item.title || item.department || 'N/A';
+                                  const facultyAddress = item.address || item.location || '-';
+                                  const facultyPrograms = item.programs || item.program || item.department || '-';
+                                  const facultyLevel = item.level || item.status || 'Standard';
+
+                                  return (
+                                    <tr key={i}>
+                                      <td className="p-2 border-b text-gray-600">{i + 1}</td>
+                                      <td className="p-2 border-b text-gray-700 font-medium">{facultyName}</td>
+                                      <td className="p-2 border-b text-gray-600">{facultyAddress}</td>
+                                      <td className="p-2 border-b text-gray-600">{facultyPrograms}</td>
+                                      <td className="p-2 border-b text-gray-600">{facultyLevel}</td>
+                                    </tr>
+                                  );
+                                })}
                               </tbody>
                             </table>
                           </div>
@@ -594,11 +795,15 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                   </div>
                 </div>
               </div>
+            )
             )}
 
             {/* Offered Tab */}
             {activeTab === "offered" && (
-              <div className="border border-gray-100 rounded-[20px] overflow-hidden shadow-sm bg-white">
+              isLoadingPrograms ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="border border-gray-100 rounded-[20px] overflow-hidden shadow-sm bg-white">
                 <div className="bg-[#f4f8fc] px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
                   <p className="text-blue-600 text-[14px] font-semibold tracking-wide">Programs offered – filter by level</p>
                   <div className="flex gap-2 text-xs font-medium">
@@ -644,11 +849,15 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                   </div>
                 </div>
               </div>
+            )
             )}
 
             {/* Scholarship Tab */}
             {activeTab === "scholarship" && (
-              <div className="border border-gray-100 rounded-[20px] overflow-hidden shadow-sm bg-white">
+              isLoadingScholarship ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="border border-gray-100 rounded-[20px] overflow-hidden shadow-sm bg-white">
                 <div className="bg-[#f4f8fc] px-6 py-4 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4">
                   <p className="text-blue-600 text-[14px] font-semibold tracking-wide">Scholarship opportunities – filter by level</p>
                   <div className="flex gap-2 text-xs font-medium">
@@ -690,11 +899,15 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                   </div>
                 </div>
               </div>
+            )
             )}
 
             {/* Events Tab */}
             {activeTab === "events" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              isLoadingEvents ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {parsedEvents.length > 0 ? parsedEvents.map((evt, idx) => (
                   <div key={idx} className="bg-white border border-gray-100 rounded-2xl p-5 shadow-sm hover:shadow-md transition-shadow">
                     <div className="flex items-start gap-4">
@@ -715,11 +928,15 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                   <div className="col-span-full py-10 text-center bg-white border border-dashed rounded-2xl text-gray-400">No events scheduled.</div>
                 )}
               </div>
+            )
             )}
 
             {/* News Tab */}
             {activeTab === "news" && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              isLoadingNews ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {parsedNews.length > 0 ? parsedNews.map((card, idx) => (
                   <div key={idx} className="border border-gray-100 rounded-2xl bg-white shadow-sm flex flex-col hover:shadow-md transition-shadow overflow-hidden">
                     <div className="p-5 flex-1 flex flex-col">
@@ -755,11 +972,15 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                   <div className="col-span-full py-10 text-center bg-white border border-dashed rounded-2xl text-gray-400">No news updates available.</div>
                 )}
               </div>
+            )
             )}
 
             {/* Download Tab */}
             {activeTab === "download" && (
-              <div className="space-y-6">
+              isLoadingDownload ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="space-y-6">
                 <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
                   <h3 className="font-bold text-gray-900 text-[20px] mb-5 flex items-center gap-3 border-b border-gray-100 pb-3">
                     <Download className="w-6 h-6 text-blue-600" /> Brochures & Forms
@@ -794,6 +1015,7 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                   </div>
                 </div>
               </div>
+            )
             )}
 
             {/* Gallery Tab */}
@@ -924,6 +1146,48 @@ const UniversityDetailsPage: React.FC<UniversityDetailsPageProps> = ({ id, onNav
                 </div>
               </div>
             )}
+            
+            {/* Admissions Tab */}
+            {activeTab === "admissions" && (
+              isLoadingAdmissions ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="space-y-6">
+                  {parsedAdmissions.length > 0 ? parsedAdmissions.map((adm: any, idx: number) => (
+                    <div key={idx} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                      <h4 className="font-bold text-gray-900 text-[18px] mb-4">{adm.title}</h4>
+                      <div className="prose prose-slate max-w-none text-gray-600 text-[14.5px] leading-relaxed" dangerouslySetInnerHTML={{ __html: adm.content }} />
+                    </div>
+                  )) : (
+                    <div className="py-20 text-center bg-white border border-dashed rounded-2xl text-gray-400">No admission information available.</div>
+                  )}
+                </div>
+              )
+            )}
+
+            {/* Review Tab */}
+            {activeTab === "review" && (
+              isLoadingReview ? (
+                <div className="flex justify-center items-center py-20"><LoadingSpinner /></div>
+              ) : (
+                <div className="space-y-6">
+                  {parsedReviews.length > 0 ? parsedReviews.map((rev: any, idx: number) => (
+                    <div key={idx} className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center font-bold text-blue-600">{rev.user?.[0] || 'U'}</div>
+                        <div>
+                          <h4 className="font-bold text-gray-900 text-[15px]">{rev.user}</h4>
+                          <div className="flex items-center gap-1 text-amber-400"><Star className="w-3 h-3 fill-amber-400" /><span className="text-xs text-gray-500 font-medium">{rev.rating}/5</span></div>
+                        </div>
+                      </div>
+                      <p className="text-gray-600 text-[14px]">{rev.content}</p>
+                    </div>
+                  )) : (
+                    <div className="py-20 text-center bg-white border border-dashed rounded-2xl text-gray-400">No reviews yet.</div>
+                  )}
+                </div>
+              )
+            )}
           </div>
 
           {/* Sidebar */}
@@ -1001,6 +1265,12 @@ const StatusState: React.FC<{ text: string; tone: "default" | "error" }> = ({ te
       <p className="text-lg font-bold text-gray-900">{text}</p>
       <p className="mt-2 text-sm text-gray-500 font-medium">Please check back later or refresh the page.</p>
     </div>
+  </div>
+);
+
+const LoadingSpinner: React.FC = () => (
+  <div className="flex items-center justify-center p-8 w-full">
+    <div className="w-10 h-10 border-4 border-[#1a65f5] border-t-transparent rounded-full animate-spin shadow-sm scale-110"></div>
   </div>
 );
 

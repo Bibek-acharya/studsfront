@@ -711,6 +711,13 @@ class ApiService {
     });
   }
 
+  async getUniversityTab(id: number, tab: string): Promise<{ success: boolean; data: any }> {
+    return this.request<{ success: boolean; data: any }>({
+      method: "GET",
+      url: `/universities/${id}/${tab}`,
+    });
+  }
+
   async getEducationRankings(): Promise<{
     success: boolean;
     message: string;
