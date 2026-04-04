@@ -1190,6 +1190,14 @@ class ApiService {
     return user ? JSON.parse(user) : null;
   }
 
+  async scholarshipProviderRegister(data: { provider_name: string; registration_number: string; email: string; password: string }): Promise<any> {
+    return this.request<any>({
+      method: "POST",
+      url: "/scholarship-providers/auth/register",
+      data,
+    });
+  }
+
   async scholarshipProviderLogin(data: any): Promise<any> {
     return this.request<any>({
       method: "POST",

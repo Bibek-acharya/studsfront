@@ -1,49 +1,86 @@
-import React, { useState } from 'react';
-
-interface Application {
-  id: string;
-  name: string;
-  email: string;
-  img: string;
-  gender: string;
-  province: string;
-  program: string;
-  gpa: string;
-  date: string;
-  status: string;
-  scholarship: string;
-}
+import React, { useEffect, useState } from 'react';
+import { scholarshipProviderApi, ProviderApplication } from '@/services/scholarshipProviderApi';
 
 interface ApplicationsDirectoryProps {
   onReviewStudent: (id: string) => void;
 }
 
-const ApplicationsDirectory = ({ onReviewStudent }: ApplicationsDirectoryProps) => {
+export default function ApplicationsDirectory({ onReviewStudent }: ApplicationsDirectoryProps) {
+  const [applications, setApplications] = useState<ProviderApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('All');
-  const [currentPage, setCurrentPage] = useState(1);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 10;
 
-  // Mock Data
-  const applications: Application[] = [
-    { id: 'APP-1154', name: 'Aarav Sharma', email: 'aarav.sharma@example.com', img: '1', gender: 'Male', province: 'Bagmati', program: 'Computer Science', gpa: '3.85', date: '2026-03-21', status: 'Pending Review', scholarship: 'Women in STEM Excellence' },
-    { id: 'APP-1153', name: 'Sita Thapa', email: 'sita.thapa@example.com', img: '2', gender: 'Female', province: 'Gandaki', program: 'Nursing', gpa: '3.92', date: '2026-03-20', status: 'Under Review', scholarship: 'Rural Development Fund' },
-    { id: 'APP-1152', name: 'David Rai', email: 'david.rai@example.com', img: '3', gender: 'Male', province: 'Lumbini', program: 'Software Engineering', gpa: '3.70', date: '2026-03-20', status: 'Shortlisted', scholarship: 'Women in STEM Excellence' },
-    { id: 'APP-1151', name: 'Fatima Ali', email: 'fatima.ali@example.com', img: '4', gender: 'Female', province: 'Koshi', program: 'Medicine', gpa: '3.95', date: '2026-03-19', status: 'Interview Scheduled', scholarship: 'Merit Undergrad' },
-    { id: 'APP-1150', name: 'Ramesh Gurung', email: 'ramesh.gurung@example.com', img: '5', gender: 'Male', province: 'Madhesh', program: 'Civil Eng.', gpa: '3.45', date: '2026-03-18', status: 'Selected', scholarship: 'Rural Development Fund' },
-    { id: 'APP-1149', name: 'Priya Shrestha', email: 'priya.sh@example.com', img: '6', gender: 'Female', province: 'Bagmati', program: 'Business Admin', gpa: '3.65', date: '2026-03-17', status: 'Rejected', scholarship: 'Global IT Innovators' },
-  ];
+  useEffect(() => {
+    loadApplications();
+  }, [page, statusFilter]);
 
-  const getStatusClass = (status: string) => {
+  async function loadApplications() {
+    setLoading(true);
+    setError('');
+    try {
+      const params: { page: number; limit: number; status?: string } = { page, limit };
+      if (statusFilter !== 'All') {
+        params.status = statusFilter.toLowerCase().replace(' ', '_');
+      }
+      const res = await scholarshipProviderApi.getApplications(params);
+      setApplications(res.applications);
+      setTotal(res.meta.total);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load applications');
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleStatusChange(id: number, newStatus: string) {
+    try {
+      await scholarshipProviderApi.updateApplicationStatus(id, newStatus);
+      setApplications(prev =>
+        prev.map(app => app.id === id ? { ...app, status: newStatus } : app)
+      );
+    } catch (err) {
+      alert(err instanceof Error ? err.message : 'Failed to update status');
+    }
+  }
+
+  function getStatusClass(status: string): string {
     switch (status) {
-      case 'Pending Review': return 'bg-slate-100 text-slate-600';
-      case 'Under Review': return 'bg-blue-100 text-blue-700';
-      case 'Shortlisted': return 'bg-yellow-100 text-yellow-700';
-      case 'Interview Scheduled': return 'bg-purple-100 text-purple-700';
-      case 'Selected': return 'bg-green-100 text-green-700';
-      case 'Rejected': return 'bg-red-100 text-red-700';
+      case 'pending': return 'bg-slate-100 text-slate-600';
+      case 'under_review': return 'bg-blue-100 text-blue-700';
+      case 'shortlisted': return 'bg-yellow-100 text-yellow-700';
+      case 'approved': return 'bg-green-100 text-green-700';
+      case 'rejected': return 'bg-red-100 text-red-700';
       default: return 'bg-slate-100 text-slate-600';
     }
-  };
+  }
+
+  function getStatusLabel(status: string): string {
+    return status.replace('_', ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function formatDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    return d.toISOString().split('T')[0];
+  }
+
+  const filtered = applications.filter(app => {
+    const fullName = `${app.first_name} ${app.last_name}`.toLowerCase();
+    const email = app.email.toLowerCase();
+    const id = `APP-${app.id}`;
+    return (
+      fullName.includes(searchTerm.toLowerCase()) ||
+      email.includes(searchTerm.toLowerCase()) ||
+      id.includes(searchTerm.toLowerCase())
+    );
+  });
+
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <section className="fade-in h-full flex flex-col">
@@ -63,7 +100,6 @@ const ApplicationsDirectory = ({ onReviewStudent }: ApplicationsDirectoryProps) 
       </div>
 
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col flex-1 overflow-hidden min-h-[500px]">
-        {/* Toolbar Filters */}
         <div className="p-5 border-b border-slate-200 bg-slate-50/50 flex flex-wrap gap-4 items-center justify-between">
           <div className="flex flex-wrap gap-3 w-full lg:w-auto">
             <div className="relative w-full lg:w-64">
@@ -72,7 +108,7 @@ const ApplicationsDirectory = ({ onReviewStudent }: ApplicationsDirectoryProps) 
                 type="text"
                 placeholder="Search by name, ID, email..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={e => setSearchTerm(e.target.value)}
                 className="w-full pl-9 pr-4 py-2 bg-white border border-slate-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent shadow-sm"
               />
             </div>
@@ -83,97 +119,136 @@ const ApplicationsDirectory = ({ onReviewStudent }: ApplicationsDirectoryProps) 
             </select>
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={e => { setStatusFilter(e.target.value); setPage(1); }}
               className="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white outline-none focus:ring-2 focus:ring-primary-500 shadow-sm flex-1 lg:flex-none"
             >
               <option value="All">All Statuses</option>
-              <option value="Pending Review">Pending Review</option>
+              <option value="Pending">Pending Review</option>
               <option value="Under Review">Under Review</option>
               <option value="Shortlisted">Shortlisted</option>
-              <option value="Interview Scheduled">Interview Scheduled</option>
-              <option value="Selected">Selected</option>
+              <option value="Approved">Approved</option>
               <option value="Rejected">Rejected</option>
             </select>
           </div>
         </div>
 
-        {/* The Table */}
+        {error && (
+          <div className="p-4 bg-red-50 border-b border-red-200 text-red-700 text-sm font-bold">
+            {error}
+          </div>
+        )}
+
         <div className="flex-1 overflow-auto relative">
-          <table className="w-full text-left border-collapse whitespace-nowrap">
-            <thead className="bg-slate-100 text-slate-500 text-xs uppercase font-extrabold sticky top-0 z-10 tracking-wider">
-              <tr>
-                <th className="py-4 px-5 w-10 border-b border-slate-200">
-                  <input type="checkbox" className="rounded border-slate-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer" />
-                </th>
-                <th className="py-4 px-5 border-b border-slate-200">Applicant ID & Name</th>
-                <th className="py-4 px-5 border-b border-slate-200">Demographics</th>
-                <th className="py-4 px-5 border-b border-slate-200">Intended Program</th>
-                <th className="py-4 px-5 border-b border-slate-200 text-center">Academic (GPA)</th>
-                <th className="py-4 px-5 border-b border-slate-200">Applied On</th>
-                <th className="py-4 px-5 border-b border-slate-200">Current Status</th>
-                <th className="py-4 px-5 border-b border-slate-200 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100 text-sm bg-white">
-              {applications.map((app) => (
-                <tr key={app.id} className="hover:bg-slate-50 transition border-b border-slate-100 group">
-                  <td className="py-4 px-5"><input type="checkbox" className="rounded border-slate-300 w-4 h-4 cursor-pointer" /></td>
-                  <td className="py-4 px-5">
-                    <div className="flex items-center gap-3">
-                      <img src={`https://i.pravatar.cc/150?img=${app.img}`} className="w-10 h-10 rounded-full shadow-sm" alt="Student" />
-                      <div>
-                        <p className="font-extrabold text-slate-800 leading-tight">{app.name}</p>
-                        <p className="text-[10px] font-bold text-slate-400 tracking-tighter uppercase">{app.id} • {app.email}</p>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="py-4 px-5">
-                    <p className="font-bold text-slate-700">{app.province}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{app.gender}</p>
-                  </td>
-                  <td className="py-4 px-5">
-                    <p className="font-bold text-slate-700">{app.program}</p>
-                    <p className="text-[10px] font-bold text-primary-600 uppercase tracking-tighter truncate max-w-[150px]">{app.scholarship}</p>
-                  </td>
-                  <td className="py-4 px-5 text-center">
-                    <span className="bg-primary-50 text-primary-700 px-3 py-1.5 rounded-lg font-black text-xs border border-primary-100 shadow-sm">{app.gpa}</span>
-                  </td>
-                  <td className="py-4 px-5 text-slate-600 font-bold">{app.date}</td>
-                  <td className="py-4 px-5">
-                    <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter ${getStatusClass(app.status)}`}>
-                      {app.status}
-                    </span>
-                  </td>
-                  <td className="py-4 px-5 text-right">
-                    <button
-                      onClick={() => onReviewStudent(app.id)}
-                      className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-primary-600 hover:text-white transition-all font-bold text-xs shadow-sm border border-slate-200"
-                    >
-                      Review File
-                    </button>
-                  </td>
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <i className="fa-solid fa-spinner fa-spin text-3xl text-primary-600"></i>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-20 text-slate-400">
+              <i className="fa-solid fa-inbox text-4xl mb-3"></i>
+              <p className="font-bold">No applications found</p>
+            </div>
+          ) : (
+            <table className="w-full text-left border-collapse whitespace-nowrap">
+              <thead className="bg-slate-100 text-slate-500 text-xs uppercase font-extrabold sticky top-0 z-10 tracking-wider">
+                <tr>
+                  <th className="py-4 px-5 w-10 border-b border-slate-200">
+                    <input type="checkbox" className="rounded border-slate-300 text-primary-600 focus:ring-primary-500 w-4 h-4 cursor-pointer" />
+                  </th>
+                  <th className="py-4 px-5 border-b border-slate-200">Applicant ID & Name</th>
+                  <th className="py-4 px-5 border-b border-slate-200">Email</th>
+                  <th className="py-4 px-5 border-b border-slate-200">Phone</th>
+                  <th className="py-4 px-5 border-b border-slate-200">Applied On</th>
+                  <th className="py-4 px-5 border-b border-slate-200">Current Status</th>
+                  <th className="py-4 px-5 border-b border-slate-200 text-right">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-sm bg-white">
+                {filtered.map(app => (
+                  <tr key={app.id} className="hover:bg-slate-50 transition border-b border-slate-100 group">
+                    <td className="py-4 px-5"><input type="checkbox" className="rounded border-slate-300 w-4 h-4 cursor-pointer" /></td>
+                    <td className="py-4 px-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-primary-100 text-primary-600 flex items-center justify-center font-black text-sm shadow-sm">
+                          {app.first_name?.[0]}{app.last_name?.[0]}
+                        </div>
+                        <div>
+                          <p className="font-extrabold text-slate-800 leading-tight">{app.first_name} {app.last_name}</p>
+                          <p className="text-[10px] font-bold text-slate-400 tracking-tighter uppercase">APP-{app.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="py-4 px-5 text-slate-600 font-medium">{app.email}</td>
+                    <td className="py-4 px-5 text-slate-600 font-medium">{app.phone_number}</td>
+                    <td className="py-4 px-5 text-slate-600 font-bold">{formatDate(app.created_at)}</td>
+                    <td className="py-4 px-5">
+                      <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tighter ${getStatusClass(app.status)}`}>
+                        {getStatusLabel(app.status)}
+                      </span>
+                    </td>
+                    <td className="py-4 px-5 text-right">
+                      <div className="flex gap-2 justify-end">
+                        <button
+                          onClick={() => onReviewStudent(String(app.id))}
+                          className="px-4 py-2 bg-slate-100 text-slate-700 rounded-lg hover:bg-primary-600 hover:text-white transition-all font-bold text-xs shadow-sm border border-slate-200"
+                        >
+                          Review File
+                        </button>
+                        <select
+                          value={app.status}
+                          onChange={e => handleStatusChange(app.id, e.target.value)}
+                          className="border border-slate-200 rounded-lg px-2 py-2 text-xs font-bold bg-white shadow-sm cursor-pointer focus:border-primary-500"
+                        >
+                          <option value="pending">Pending</option>
+                          <option value="under_review">Under Review</option>
+                          <option value="shortlisted">Shortlisted</option>
+                          <option value="approved">Approved</option>
+                          <option value="rejected">Rejected</option>
+                        </select>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
-        {/* Table Footer / Pagination */}
-        <div className="p-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center text-sm gap-4">
-          <div className="text-slate-500 font-medium">
-            Showing <span className="text-slate-800 font-bold">1</span> to <span className="text-slate-800 font-bold">6</span> of <span className="text-slate-800 font-bold">150</span> entries
+        {totalPages > 1 && (
+          <div className="p-4 border-t border-slate-200 bg-slate-50 flex flex-col sm:flex-row justify-between items-center text-sm gap-4">
+            <div className="text-slate-500 font-medium">
+              Showing <span className="text-slate-800 font-bold">{(page - 1) * limit + 1}</span> to <span className="text-slate-800 font-bold">{Math.min(page * limit, total)}</span> of <span className="text-slate-800 font-bold">{total}</span> entries
+            </div>
+            <div className="flex gap-1">
+              <button
+                disabled={page <= 1}
+                onClick={() => setPage(p => p - 1)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <i className="fa-solid fa-chevron-left"></i>
+              </button>
+              {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => i + 1).map(p => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg font-bold text-xs ${
+                    p === page ? 'bg-primary-600 text-white' : 'border border-slate-200 bg-white text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => p + 1)}
+                className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <i className="fa-solid fa-chevron-right"></i>
+              </button>
+            </div>
           </div>
-          <div className="flex gap-1">
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50"><i className="fa-solid fa-chevron-left"></i></button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-primary-600 text-white font-bold">1</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">2</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-600 hover:bg-slate-50">3</button>
-            <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:bg-slate-50"><i className="fa-solid fa-chevron-right"></i></button>
-          </div>
-        </div>
+        )}
       </div>
     </section>
   );
-};
-
-export default ApplicationsDirectory;
+}

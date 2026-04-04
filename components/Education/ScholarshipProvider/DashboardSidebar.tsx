@@ -7,9 +7,10 @@ interface SidebarProps {
   onNavigate: (section: string) => void;
   handleLogout: () => void;
   providerUser: any;
+  unreadMessages: number;
 }
 
-const DashboardSidebar = ({ isMobileOpen, toggleSidebar, activeTab, onNavigate, handleLogout, providerUser }: SidebarProps) => {
+const DashboardSidebar = ({ isMobileOpen, toggleSidebar, activeTab, onNavigate, handleLogout, providerUser, unreadMessages }: SidebarProps) => {
   const menuItems = [
     { menu: 'main', id: 'sec-dashboard', icon: 'fa-chart-pie', label: 'Overview' },
     { menu: 'main', id: 'sec-applications', icon: 'fa-users', label: 'Applications Directory' },
@@ -44,8 +45,8 @@ const DashboardSidebar = ({ isMobileOpen, toggleSidebar, activeTab, onNavigate, 
                 <i className={`fa-solid ${item.icon}`}></i>
               </div>
               {item.label}
-              {item.id === 'sec-messages' && (
-                 <span className="ml-auto bg-danger text-white text-[10px] font-bold px-2 py-0.5 rounded-full">3</span>
+              {item.id === 'sec-messages' && unreadMessages > 0 && (
+                 <span className="ml-auto bg-danger text-white text-[10px] font-bold px-2 py-0.5 rounded-full">{unreadMessages}</span>
               )}
             </button>
           ))}
