@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { apiService } from "../../../services/api";
+import { apiService } from "@/services/api";
 
 interface CompareCollegesPageProps {
     onNavigate: (view: any, data?: any) => void;

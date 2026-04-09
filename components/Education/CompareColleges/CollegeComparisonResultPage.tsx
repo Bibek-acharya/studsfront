@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 
 interface CollegeComparisonResultPageProps {
@@ -41,24 +41,6 @@ const tabs: Array<{ key: TabKey; label: string }> = [
   { key: "career", label: "Career & Placement" },
   { key: "reviews", label: "Reviews & Reputation" },
   { key: "photos", label: "Photos & Video" },
-];
-
-const leftCourseOptions = [
-  "BSc. CSIT",
-  "BCA",
-  "BBA",
-  "BIM",
-  "BBS",
-  "BIT",
-];
-
-const rightCourseOptions = [
-  "All Courses",
-  "BSc. CSIT",
-  "BCA",
-  "BBA",
-  "BBS",
-  "BA",
 ];
 
 const renderComparisonRows = (rows: CompareRow[]) => (
@@ -123,53 +105,6 @@ const CollegeComparisonResultPage: React.FC<CollegeComparisonResultPageProps> = 
   const c2Name = college2Obj.name || "GoldenGate Int'l";
 
   const [activeTab, setActiveTab] = useState<TabKey>("overview");
-  const [leftCourse, setLeftCourse] = useState("BSc. CSIT");
-  const [rightCourse, setRightCourse] = useState("All Courses");
-  const [leftSearch, setLeftSearch] = useState("");
-  const [rightSearch, setRightSearch] = useState("");
-  const [leftDropdownOpen, setLeftDropdownOpen] = useState(false);
-  const [rightDropdownOpen, setRightDropdownOpen] = useState(false);
-
-  const leftDropdownRef = useRef<HTMLDivElement>(null);
-  const rightDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const onOutsideClick = (event: MouseEvent) => {
-      if (
-        leftDropdownRef.current &&
-        !leftDropdownRef.current.contains(event.target as Node)
-      ) {
-        setLeftDropdownOpen(false);
-      }
-
-      if (
-        rightDropdownRef.current &&
-        !rightDropdownRef.current.contains(event.target as Node)
-      ) {
-        setRightDropdownOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", onOutsideClick);
-    return () => document.removeEventListener("mousedown", onOutsideClick);
-  }, []);
-
-  const filteredLeftCourses = useMemo(
-    () =>
-      leftCourseOptions.filter((option) =>
-        option.toLowerCase().includes(leftSearch.toLowerCase()),
-      ),
-    [leftSearch],
-  );
-
-  const filteredRightCourses = useMemo(
-    () =>
-      rightCourseOptions.filter((option) =>
-        option.toLowerCase().includes(rightSearch.toLowerCase()),
-      ),
-    [rightSearch],
-  );
-
   const overviewRows: CompareRow[] = [
     { label: "Year Established", left: "1995", right: "2007" },
     {
