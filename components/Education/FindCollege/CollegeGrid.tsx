@@ -365,7 +365,7 @@ const CollegeGrid: React.FC<CollegeGridProps> = ({ filters, setFilters, onNaviga
 
       {/* Bottom Action Bar */}
       <div className={`fixed bottom-0 left-0 z-40 flex w-full transform justify-center border-t border-slate-200 bg-white px-4 py-4 shadow-[0_-4px_15px_rgb(0,0,0,0.05)] transition-transform duration-300 sm:px-6 ${selectedForInquiry.length > 0 ? "translate-y-0" : "translate-y-full"}`}>
-        <div className="flex w-full max-w-[1400px] items-center justify-end gap-4 sm:gap-6">
+        <div className="flex w-full max-w-350 items-center justify-end gap-4 sm:gap-6">
           <button onClick={() => setSelectedForInquiry([])} className="cursor-pointer border-none bg-transparent text-[14px] font-semibold text-[#2563eb] hover:underline sm:text-[15px]">
             Clear Selection
           </button>

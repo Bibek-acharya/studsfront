@@ -66,7 +66,7 @@ const EventsPage: React.FC<EventsPageProps> = ({ onNavigate }) => {
   }, [activeFilter, allEvents, sortBy]);
 
   return (
-    <div className="bg-white text-gray-900 antialiased min-h-screen max-w-[1400px] mx-auto py-8">
+    <div className="bg-white text-gray-900 antialiased min-h-screen max-w-350 mx-auto py-8">
       <div className=" mx-auto py-8">
         <section className="mb-10">
           <h2 className="text-xl font-bold mb-4">Browse by category</h2>

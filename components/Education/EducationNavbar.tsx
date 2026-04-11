@@ -73,7 +73,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
         }`}
     >
       <div className="w-full px-4 sm:px-6 lg:px-8 py-3">
-        <div className="mx-auto flex w-full max-w-[1400px] items-center justify-between gap-4">
+        <div className="mx-auto flex w-full max-w-350 items-center justify-between gap-4">
           <Link
             to="/"
             className="flex items-center gap-2.5 cursor-pointer shrink-0"
@@ -258,7 +258,7 @@ const EducationNavbar: React.FC<EducationNavbarProps> = ({
       </div>
 
       <div className="relative w-full border-b border-gray-200 px-4 sm:px-6 lg:px-8">
-        <div className="mx-auto flex h-[46px] w-full max-w-[1400px] items-center gap-4">
+        <div className="mx-auto flex h-[46px] w-full max-w-350 items-center gap-4">
           <nav className="no-scrollbar flex h-full min-w-0 flex-1 items-center gap-x-5 overflow-x-auto whitespace-nowrap pr-2 text-[14px] font-medium text-[#212529] md:overflow-visible md:gap-x-7 lg:gap-x-8 lg:text-[15px]">
             <NavItem onClick={() => onNavigate("findCollege")}>Find College</NavItem>
 

@@ -50,7 +50,7 @@ const HeroSection = ({ onNavigate }: any) => {
 
   return (
     <div className="w-full px-4 sm:px-6 lg:px-8">
-    <main className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] bg-gray-900 rounded-[12px] overflow-hidden flex items-center mb-6 max-w-[1400px] mx-auto group mt-8">
+    <main className="relative w-full h-[300px] sm:h-[400px] md:h-[500px] bg-gray-900 rounded-[12px] overflow-hidden flex items-center mb-6 max-w-350 mx-auto group mt-8">
       <div
         id="hero-slider"
         className="absolute inset-0 flex w-[500%] h-full transition-transform duration-700 ease-in-out"

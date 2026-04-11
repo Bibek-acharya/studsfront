@@ -34,7 +34,7 @@ const FinancialAidSection = ({ onNavigate }: any) => {
 
   return (
     <section className="mt-24 w-full">
-      <div className="max-w-[1400px] mx-auto w-full">
+      <div className="max-w-350 mx-auto w-full">
       {/* Header Section */}
       <div className="text-center mb-12">
         <h2 className="text-4xl font-extrabold text-[#0f172a] mb-4 tracking-tight">Featured Financial Aid</h2>

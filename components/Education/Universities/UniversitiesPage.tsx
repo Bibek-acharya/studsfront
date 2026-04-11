@@ -209,7 +209,7 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
 
     return (
       <div className="bg-white pb-12 text-gray-900 antialiased">
-        <main className="mx-auto max-w-[1400px] p-4 md:p-6 lg:p-8">
+        <main className="mx-auto max-w-350 p-4 md:p-6 lg:p-8">
           <h1 className="text-[22px] font-bold tracking-tight text-gray-900">
             Affiliated Colleges
           </h1>
@@ -355,7 +355,7 @@ const UniversitiesPage: React.FC<UniversitiesPageProps> = ({ onNavigate }) => {
 
   return (
     <div className="min-h-screen w-full bg-[#f9fafb] text-gray-800 antialiased p-4 md:p-8 font-sans">
-      <div className="max-w-[1400px] mx-auto flex flex-col lg:flex-row gap-8 items-start">
+      <div className="max-w-350 mx-auto flex flex-col lg:flex-row gap-8 items-start">
         <Sidebar
           affiliationFilters={filters.affiliation}
           onFilterChange={handleAffiliationToggle}

@@ -316,7 +316,7 @@ const ScholarshipFinderToolPage: React.FC<ScholarshipFinderToolPageProps> = ({
 
     return (
       <div className="min-h-screen bg-stone-50 px-6 pb-32 pt-10 text-gray-900 antialiased lg:px-12">
-        <div className="mx-auto max-w-[1400px]">
+        <div className="mx-auto max-w-350">
           <div className="mb-8">
             <div className="mb-4 flex items-center text-sm font-medium text-gray-500">
               <button className="transition-colors hover:text-blue-600" onClick={() => setStep(5)}>

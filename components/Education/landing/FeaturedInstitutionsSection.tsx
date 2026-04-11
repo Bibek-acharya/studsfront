@@ -81,7 +81,7 @@ const FeaturedInstitutionsSection = ({ onNavigate }: any) => {
 
   return (
     <section className="mt-4 w-full">
-      <div className="max-w-[1400px] mx-auto w-full">
+      <div className="max-w-350 mx-auto w-full">
       {/* Header Section */}
       <div className="text-center mb-12">
         <h2 className="text-[32px] md:text-[40px] font-bold text-[#111827] mb-3 tracking-tight">

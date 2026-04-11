@@ -66,7 +66,7 @@ const AdmissionsDiscoveryPage: React.FC<AdmissionsDiscoveryPageProps> = ({ onNav
         </button>
       </div>
 
-      <div className="mx-auto flex max-w-[1400px] flex-col gap-8 lg:flex-row lg:flex-nowrap lg:gap-8">
+      <div className="mx-auto flex max-w-350 flex-col gap-8 lg:flex-row lg:flex-nowrap lg:gap-8">
         
         {/* Sidebar Drawer - Increased z-index and padding-top to avoid overlap */}
         <aside className={`

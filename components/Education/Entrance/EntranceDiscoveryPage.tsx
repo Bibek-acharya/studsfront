@@ -316,7 +316,7 @@ const EntranceDiscoveryPage: React.FC<EntranceDiscoveryPageProps> = ({
 
   return (
     <div className="bg-slate-50 text-slate-800 antialiased min-h-screen">
-      <div className="max-w-[1400px] mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
+      <div className="max-w-350 mx-auto p-4 md:p-6 flex flex-col md:flex-row gap-6">
         <EntranceSidebar
           onReset={resetAllFilters}
           selectedFilters={selectedFilters}

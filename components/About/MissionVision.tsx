@@ -2,7 +2,7 @@ import React from "react";
 
 const MissionVision: React.FC = () => {
   return (
-    <section className="w-full max-w-[1400px] mb-20 md:mb-24 px-2">
+    <section className="w-full max-w-350 mb-20 md:mb-24 px-2">
       <h2 className="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-8 md:mb-12 scroll-fade-in">
         Our Story, Mission & Vision
       </h2>

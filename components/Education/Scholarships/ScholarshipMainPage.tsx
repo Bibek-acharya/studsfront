@@ -384,7 +384,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
     <div className="w-full text-slate-600 bg-slate-50 font-inter min-h-screen pt-10">
       {/* Hero Section */}
       <div className="w-full flex justify-center p-4 sm:p-8">
-        <div className="relative w-full max-w-[1400px] aspect-[16/10] sm:aspect-[16/8] min-h-[500px] bg-slate-800 rounded-2xl shadow-2xl flex flex-col justify-center items-center text-center overflow-hidden group">
+        <div className="relative w-full max-w-350 aspect-[16/10] sm:aspect-[16/8] min-h-[500px] bg-slate-800 rounded-2xl shadow-2xl flex flex-col justify-center items-center text-center overflow-hidden group">
           {/* Slider Track */}
           <div className="absolute inset-0 z-0">
             <div
@@ -480,7 +480,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
       </div>
 
       {/* Partners Section */}
-      <div className="w-full mb-12 overflow-hidden py-12 relative max-w-[1400px] mx-auto">
+      <div className="w-full mb-12 overflow-hidden py-12 relative max-w-350 mx-auto">
         <div className="absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-slate-50 to-transparent z-10 pointer-events-none" />
         <div className="absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-slate-50 to-transparent z-10 pointer-events-none" />
 
@@ -534,7 +534,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
 
       {/* Categories Section */}
       <section className="w-full bg-white py-16 px-4 md:px-8 lg:px-16 font-inter relative z-10 border-y border-slate-100">
-        <div className="max-w-[1400px] w-full mx-auto">
+        <div className="max-w-350 w-full mx-auto">
           <div className="text-center mb-14">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4 tracking-tight">
               Scholarship Categories
@@ -578,7 +578,7 @@ const ScholarshipMainPage: React.FC<ScholarshipMainPageProps> = ({
 
       {/* Featured Scholarships */}
       <main
-        className="max-w-[1400px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-20"
+        className="max-w-350 w-full mx-auto px-4 sm:px-6 lg:px-8 py-20"
         id="scholarship-grid"
       >
         <div className="mb-14 text-center">

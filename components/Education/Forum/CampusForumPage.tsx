@@ -826,7 +826,7 @@ const CampusForumPage: React.FC<CampusForumPageProps> = ({ onNavigate }) => {
         />
       )}
 
-      <div className={`mx-auto w-full gap-8 px-4 ${selectedCommunity ? "max-w-[1200px] grid grid-cols-1 lg:grid-cols-3 py-4" : "max-w-[1400px] flex justify-center py-6"}`}>
+      <div className={`mx-auto w-full gap-8 px-4 ${selectedCommunity ? "max-w-[1200px] grid grid-cols-1 lg:grid-cols-3 py-4" : "max-w-350 flex justify-center py-6"}`}>
         
         {/* Left Sidebar - Hidden in Community View to match prototype exactly */}
         {!selectedCommunity && (

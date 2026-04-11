@@ -370,7 +370,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-50 pt-24 px-6">
-        <div className="max-w-[1400px] mx-auto bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-500 font-medium">
+        <div className="max-w-350 mx-auto bg-white border border-gray-200 rounded-lg p-10 text-center text-gray-500 font-medium">
           Loading courses...
         </div>
       </div>
@@ -388,7 +388,7 @@ const CourseFinderPage: React.FC<CourseFinderPageProps> = ({ onNavigate }) => {
         }
       `}</style>
 
-      <main className="max-w-[1400px] mx-auto w-full flex flex-col lg:flex-row gap-8 items-start">
+      <main className="max-w-350 mx-auto w-full flex flex-col lg:flex-row gap-8 items-start">
         <aside className="w-full lg:w-[300px] flex-shrink-0 bg-white rounded-lg border border-gray-200 h-fit sticky top-24">
           <div className="p-5 border-b border-gray-100 flex justify-between items-center bg-white rounded-t-lg z-10">
             <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">

@@ -63,7 +63,7 @@ const EventShowcaseSection = ({ onNavigate }: any) => {
 
   return (
     <section className="w-full py-10 md:py-14 my-4 relative">
-      <div className="max-w-[1400px] mx-auto w-full">
+      <div className="max-w-350 mx-auto w-full">
       <div className="relative w-full mx-auto">
         <div className="overflow-hidden w-full relative">
           <div

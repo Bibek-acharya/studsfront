@@ -1,6 +1,6 @@
 const SmarterToolsSection = ({ onNavigate }: any) => (
 <section className="w-full py-12 md:py-16">
-  <div className="max-w-[1400px] mx-auto">
+  <div className="max-w-350 mx-auto">
   <div className="text-center mb-10 md:mb-16">
     <h2 className="text-[28px] md:text-[40px] font-bold text-[#0f172a] mb-4 tracking-tight">
       Smarter Tools, Greater Success
@@ -36,7 +36,7 @@ const SmarterToolsSection = ({ onNavigate }: any) => (
         <i className="fa-solid fa-scale-balanced text-[#4a86fc] text-2xl"></i>
       </div>
       <h3 className="text-xl font-bold text-[#0f172a] mb-3">Compare College</h3>
-      <p className="text-gray-500 text-[15px] leading-relaxed mb-8 flex-grow">
+      <p className="text-gray-500 text-[15px] leading-relaxed mb-8 grow">
         Filter thousands of institutions by location, major, tuition, and ranking to find your perfect match.
       </p>
       <button className="w-full bg-[#4f8aff] hover:bg-[#3f7aef] text-white font-semibold py-3.5 px-4 rounded-xl transition-colors duration-200">
